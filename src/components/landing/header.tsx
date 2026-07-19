@@ -1,3 +1,5 @@
+import { ThemePicker } from "@/components/theme-picker";
+
 export function Header() {
   return (
     <header className="w-full border-b border-border bg-background">
@@ -13,6 +15,7 @@ export function Header() {
           <a href="#authors" className="text-sm text-muted-foreground hover:text-foreground">
             Authors
           </a>
+          <ThemePicker />
         </nav>
       </div>
     </header>
