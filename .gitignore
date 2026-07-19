@@ -41,5 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # local agent files (not for repo)
-AGENTS.md
 .megamemory/
