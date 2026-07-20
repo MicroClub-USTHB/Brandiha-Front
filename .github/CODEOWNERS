@@ -1,0 +1,3 @@
+# Default owner for the whole repo — auto-requested as reviewer on every PR
+# (except PRs they open themselves).
+* @0xHouss
