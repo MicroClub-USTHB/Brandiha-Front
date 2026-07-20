@@ -21,7 +21,7 @@ const svgs = {
     src: "/Vector.svg",
     width: 100,
     height: 100,
-    className: "absolute left-[86.11%] top-[17%]",
+    className: "absolute left-[86.11%] top-[21%]",
   },
   design: {
     src: "/Design.svg",
