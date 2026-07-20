@@ -9,7 +9,7 @@ const svgs = {
     src: "/CompoundPath%2017.svg",
     width: 500,
     height: 500,
-    className: "absolute top-[5%] left-4",
+    className: "absolute top-[5%] -left-[3%]",
   },
   "compound-path-18": {
     src: "/CompoundPath%2018.svg",
@@ -51,7 +51,7 @@ const svgs = {
     src: "/bshhhhh.svg",
     width: 516,
     height: 516,
-    className: "absolute left-[5.50%] top-[46%] z-0 w-[35.84%]",
+    className: "absolute left-[5.50%] top-[42%] z-0 w-[35.84%]",
   },
 } as const;
 

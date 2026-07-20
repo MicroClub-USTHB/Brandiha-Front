@@ -27,7 +27,7 @@ export function Hero() {
         name="wall-background"
         className="absolute inset-0 bg-cover bg-center bg-repeat"
       />
-      <div className="relative z-10 mt-[30%] flex flex-col items-center gap-6">
+      <div className="relative z-10 mt-[25%] flex flex-col items-center gap-6">
         <Image
           src="/primary-logo.png"
           alt="Brandiha"
@@ -35,7 +35,7 @@ export function Hero() {
           height={220}
           priority
         />
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center gap-4">
           <p className="font-mono text-2xl font-semibold tracking-wide text-white uppercase">
             Brand ur way out!
           </p>
@@ -47,6 +47,16 @@ export function Hero() {
           </a>
         </div>
         <CountdownTimer targetDate={targetDate} />
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-white/70">Location TBD</span>
+            <Image src="/map-pin.svg" alt="" width={20} height={20} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-white/70">Date TBD</span>
+            <Image src="/clock.svg" alt="" width={20} height={20} />
+          </div>
+        </div>
       </div>
       {heroDecorations.map((name) => (
         <DecorativeSvg key={name} name={name} />
