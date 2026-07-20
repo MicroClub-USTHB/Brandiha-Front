@@ -9,7 +9,9 @@ export function useRegistrationForm() {
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
-    mode: "onTouched",
+    // Validate only when a step is submitted (Next/Submit), not on blur — so a
+    // field never turns red just because focus moved away from it.
+    mode: "onSubmit",
     defaultValues: {
       FullName: "",
       Email: "",

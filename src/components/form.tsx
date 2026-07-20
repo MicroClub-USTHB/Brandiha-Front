@@ -49,6 +49,7 @@ type FormBaseProps<
 > = FormControlProps<TFieldValues, TName, TTransformedValues> & {
   horizontal?: boolean;
   controlFirst?: boolean;
+  hideLabel?: boolean;
   children: (
     field: Parameters<
       ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
@@ -82,6 +83,7 @@ function FormField<
   required,
   controlFirst,
   horizontal,
+  hideLabel,
 }: FormBaseProps<TFieldValues, TName, TTransformedValues>) {
   return (
     <Controller
@@ -89,7 +91,7 @@ function FormField<
       name={name}
       render={({ field, fieldState }) => {
         const labelElement = (
-          <FieldLabel htmlFor={field.name}>
+          <FieldLabel htmlFor={field.name} className={hideLabel ? "sr-only" : undefined}>
             <span>
               {label}
               {required && (
@@ -133,7 +135,11 @@ function FormField<
               </>
             ) : (
               <>
-                <FieldContent>{labelElement}</FieldContent>
+                {hideLabel ? (
+                  labelElement
+                ) : (
+                  <FieldContent>{labelElement}</FieldContent>
+                )}
                 {control}
                 {descriptionElement}
                 {errorElem}
@@ -150,15 +156,27 @@ export const FormInput: FormControlFunction<{
   type?: HTMLInputTypeAttribute;
   placeholder?: string;
   className?: string;
+  icon?: ReactNode;
   step?: number | string;
   disabled?: boolean;
   onChangeCapture?: ChangeEventHandler<HTMLInputElement>;
-}> = ({ type, placeholder, className, disabled, onChangeCapture, ...props }) => (
-  <FormField {...props}>
+}> = ({
+  type,
+  placeholder,
+  className,
+  icon,
+  disabled,
+  onChangeCapture,
+  ...props
+}) => (
+  <FormField {...props} hideLabel>
     {(field) => (
       <Input
         type={type}
-        placeholder={placeholder}
+        placeholder={
+          placeholder ?? (typeof props.label === "string" ? props.label : undefined)
+        }
+        icon={icon}
         className={className}
         disabled={disabled}
         onChangeCapture={onChangeCapture}

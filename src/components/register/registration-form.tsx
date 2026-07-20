@@ -1,5 +1,6 @@
 "use client";
 
+import { CSSProperties } from "react";
 import { FieldPath } from "react-hook-form";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
 import {
@@ -7,15 +8,35 @@ import {
   RegistrationFormData,
 } from "@/lib/validators/registration-schema";
 import { FormCheckbox, FormInput, FormSelect, FormTextarea } from "@/components/form";
+import { FIELD_ICONS } from "@/components/register/field-icons";
 import { RegistrationStepper } from "@/components/register/registration-stepper";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
 
 type FieldConfig = { label: string; type?: string; options?: readonly string[] };
 
+/** One brand hue per step (orange → blue → pink → teal), matching the stepper. */
+const STEP_HUES = [
+  "var(--brand-marketing)",
+  "var(--brand-communication)",
+  "var(--brand-multimedia)",
+  "var(--brand-design)",
+];
+
 export default function RegistrationForm() {
   const { form, step, steps, visibleFields, next, previous } = useRegistrationForm();
   const currentFields = steps[step].fields as Record<string, FieldConfig>;
+
+  // Drive the primary Button and the inputs' focus ring/border off the current
+  // step's hue by scoping the --primary and --ring tokens to this form. The
+  // default theme paints a 4-stop brand gradient over every .bg-primary, so we
+  // also clear --primary-gradient here to let the solid step hue show through.
+  const hue = STEP_HUES[step % STEP_HUES.length];
+  const stepStyle = {
+    "--primary": hue,
+    "--ring": hue,
+    "--primary-gradient": "none",
+  } as CSSProperties;
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
@@ -23,6 +44,7 @@ export default function RegistrationForm() {
 
       <form
         onSubmit={form.handleSubmit(console.log)}
+        style={stepStyle}
         className="flex w-full flex-col gap-6 rounded-xl border bg-card p-6 text-card-foreground"
       >
         <div className="flex flex-col gap-1">
@@ -61,7 +83,15 @@ export default function RegistrationForm() {
               );
             }
 
-            return <FormInput key={name} {...common} type={type} required={required} />;
+            return (
+              <FormInput
+                key={name}
+                {...common}
+                type={type}
+                icon={FIELD_ICONS[name]}
+                required={required}
+              />
+            );
           })}
         </div>
 
