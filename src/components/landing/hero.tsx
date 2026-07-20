@@ -1,30 +1,48 @@
+import Image from "next/image";
 import { Section } from "@/components/landing/section";
+import { DecorativeSvg, BackgroundDecoration } from "@/components/landing/decorative-svg";
+import { CountdownTimer } from "@/components/landing/countdown-timer";
+
+const heroDecorations = [
+  "compound-path-17",
+  "compound-path-18",
+  "vector",
+  "design",
+  "marketing",
+  "multi",
+  "comm",
+  "bshhhhh",
+] as const;
+
+const targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
 export function Hero() {
   return (
-    <Section as="section" className="flex flex-col items-center text-center py-24">
-      <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-        Lorem ipsum dolor sit amet
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-        Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
-        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </p>
-      <div className="mt-8 flex gap-4">
-        <a
-          href="#about"
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-        >
-          Learn More
-        </a>
-        <a
-          href="#agenda"
-          className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-6 text-sm font-medium text-foreground hover:bg-muted"
-        >
-          View Agenda
-        </a>
+    <Section
+      as="section"
+      className="relative flex flex-col items-center justify-start bg-cover bg-center bg-repeat w-full max-w-none px-0 -translate-y-[20%]"
+      style={{ height: 1024 }}
+    >
+      <BackgroundDecoration
+        name="wall-background"
+        className="absolute inset-0 bg-cover bg-center bg-repeat"
+      />
+      <div className="relative z-10 mt-[30%] flex flex-col items-center gap-6">
+        <Image
+          src="/primary-logo.png"
+          alt="Brandiha"
+          width={893}
+          height={220}
+          priority
+        />
+        <p className="font-mono text-2xl font-semibold tracking-wide text-white uppercase">
+          Brand ur way out!
+        </p>
+        <CountdownTimer targetDate={targetDate} />
       </div>
+      {heroDecorations.map((name) => (
+        <DecorativeSvg key={name} name={name} />
+      ))}
     </Section>
   );
 }
