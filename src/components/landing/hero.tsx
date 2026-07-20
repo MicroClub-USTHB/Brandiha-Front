@@ -3,7 +3,7 @@ import { Section } from "@/components/landing/section";
 export function Hero() {
   return (
     <Section as="section" className="flex flex-col items-center text-center py-24">
-      <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+      <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
         Lorem ipsum dolor sit amet
       </h1>
       <p className="mt-6 max-w-2xl text-lg text-muted-foreground">

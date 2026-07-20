@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Montserrat, Patrick_Hand } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+
+const seekuw = localFont({
+  src: "./fonts/SEEKUW.otf",
+  variable: "--font-heading",
+  display: "swap",
+});
 import { ThemeProvider } from "@/components/theme-provider";
 import { DEFAULT_THEME, THEME_VALUES } from "@/lib/themes";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "600"],
+});
+
+const patrickHand = Patrick_Hand({
+  variable: "--font-hand",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 const geistMono = Geist_Mono({
@@ -28,7 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${patrickHand.variable} ${seekuw.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider
