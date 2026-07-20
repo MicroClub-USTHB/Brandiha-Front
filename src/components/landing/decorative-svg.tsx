@@ -15,7 +15,7 @@ const svgs = {
     src: "/CompoundPath%2018.svg",
     width: 500,
     height: 500,
-    className: "absolute bottom-4 right-4",
+    className: "absolute bottom-0 right-4",
   },
   vector: {
     src: "/Vector.svg",
