@@ -2,6 +2,12 @@
 
 import { useEffect, useRef } from "react";
 
+interface GraffitiTrailProps {
+  /** When true (pointer over an interactive element), stop laying down new
+   *  trail; existing trail keeps fading out. */
+  paused: boolean;
+}
+
 /** How long (ms) a stretch of trail lingers before it has fully faded. */
 const TRAIL_MS = 1000;
 /** Stroke width (px) of a fresh trail; tapers as it fades. */
@@ -11,6 +17,8 @@ interface Point {
   x: number;
   y: number;
   t: number;
+  /** Start of a new stroke — don't draw a segment connecting to the prior point. */
+  break?: boolean;
 }
 
 /** Gradient stop positions, matching --primary-gradient in globals.css. */
@@ -45,8 +53,14 @@ function trailStroke(
  * ~1s, so the trail reads as one continuous stroke that trails behind the
  * cursor. Canvas (not DOM nodes) so a fast-moving pointer can't bloat the DOM.
  */
-export function GraffitiTrail() {
+export function GraffitiTrail({ paused }: GraffitiTrailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Read the latest `paused` inside the (mount-once) listener without resubscribing.
+  const pausedRef = useRef(paused);
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -67,7 +81,12 @@ export function GraffitiTrail() {
     resize();
 
     const onMove = (e: MouseEvent) => {
-      points.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (pausedRef.current) return;
+      const now = performance.now();
+      const last = points[points.length - 1];
+      // A gap (paused, or mouse left/re-entered) starts a fresh, disconnected stroke.
+      const isBreak = !last || now - last.t > 60;
+      points.push({ x: e.clientX, y: e.clientY, t: now, break: isBreak });
     };
 
     let raf = 0;
@@ -89,6 +108,7 @@ export function GraffitiTrail() {
       for (let i = 1; i < points.length; i++) {
         const a = points[i - 1];
         const b = points[i];
+        if (b.break) continue;
         const alpha = Math.max(0, 1 - (now - b.t) / TRAIL_MS);
         if (alpha <= 0) continue;
         ctx.globalAlpha = alpha;

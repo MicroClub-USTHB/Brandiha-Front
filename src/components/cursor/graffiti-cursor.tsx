@@ -2,7 +2,6 @@
 
 import { createPortal } from "react-dom";
 import { useGraffitiCursor } from "@/hooks/use-graffiti-cursor";
-import { CursorSplash } from "./cursor-splash";
 import { GraffitiTrail } from "./graffiti-trail";
 import { SpraySplatter } from "./spray-splatter";
 
@@ -21,8 +20,9 @@ export function GraffitiCursor() {
 
   return createPortal(
     <>
-      {/* Continuous paint trail that fades over ~1s, painted under the cursor. */}
-      <GraffitiTrail />
+      {/* Continuous paint trail that fades over ~1s; paused over interactive
+          elements so the pointer state leaves no trail. */}
+      <GraffitiTrail paused={hovering} />
 
       {/* Hidden until the first real mouse move so it never flashes at (0,0). */}
       <div
@@ -31,9 +31,7 @@ export function GraffitiCursor() {
         data-hover={hovering}
         style={{ opacity: 0 }}
       >
-        <div className="graffiti-cursor__splash">
-          <CursorSplash />
-        </div>
+        <div className="graffiti-cursor__can" aria-hidden="true" />
       </div>
 
       {splatters.map((splatter) => (
