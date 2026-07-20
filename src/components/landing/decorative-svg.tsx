@@ -27,19 +27,19 @@ const svgs = {
     src: "/Design.svg",
     width: 255,
     height: 269,
-    className: "absolute left-[28.48125%] top-[8%] z-20",
+    className: "absolute left-[28.48125%] top-[13%] z-20",
   },
   marketing: {
     src: "/Markting.svg",
     width: 239,
     height: 253,
-    className: "absolute left-[54.23%] top-[12%] z-20 opacity-47",
+    className: "absolute left-[54.23%] top-[17%] z-20 opacity-47",
   },
   multi: {
     src: "/multi.svg",
     width: 283,
     height: 283,
-    className: "absolute left-[27.85%] top-[75%] z-20 w-[19.66%] opacity-47",
+    className: "absolute left-[27.85%] top-[85%] z-20 w-[19.66%] opacity-47",
   },
   comm: {
     src: "/comm.svg",
@@ -51,7 +51,7 @@ const svgs = {
     src: "/bshhhhh.svg",
     width: 516,
     height: 516,
-    className: "absolute left-[5.50%] top-[65%] z-0 w-[35.84%]",
+    className: "absolute left-[5.50%] top-[46%] z-0 w-[35.84%]",
   },
 } as const;
 
