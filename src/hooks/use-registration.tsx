@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registrationSchema, RegistrationFormData } from "@/lib/validators/registrationSchema";
-import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registrationFields";
+import { registrationSchema, RegistrationFormData } from "@/lib/validators/registration-schema";
+import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registration-fields";
 
 export function useRegistrationForm() {
   const [step, setStep] = useState(0);

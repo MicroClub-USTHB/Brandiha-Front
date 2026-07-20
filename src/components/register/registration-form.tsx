@@ -1,11 +1,11 @@
 "use client";
 
 import { FieldPath } from "react-hook-form";
-import { useRegistrationForm } from "@/hooks/useRegistration";
+import { useRegistrationForm } from "@/hooks/use-registration";
 import {
   registrationSchema,
   RegistrationFormData,
-} from "@/lib/validators/registrationSchema";
+} from "@/lib/validators/registration-schema";
 import { FormCheckbox, FormInput, FormSelect, FormTextarea } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
