@@ -60,12 +60,18 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
 
             {index < count - 1 && (
               <span
-                className={cn(
-                  "h-0.5 flex-1 rounded-full",
-                  isComplete ? "bg-foreground/50" : "bg-foreground/20"
-                )}
+                className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-foreground/20"
                 aria-hidden
-              />
+              >
+                {/* fills left→right in the left step's hue: full once done, half while current */}
+                <span
+                  className={cn(
+                    "absolute inset-y-0 left-0 rounded-full transition-[width] duration-300",
+                    color,
+                    isComplete ? "w-full" : index === current ? "w-1/2" : "w-0"
+                  )}
+                />
+              </span>
             )}
           </li>
         );
