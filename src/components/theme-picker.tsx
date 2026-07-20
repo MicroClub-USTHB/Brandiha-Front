@@ -41,13 +41,11 @@ export function ThemePicker() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="icon" aria-label="Select theme">
-            <PaletteIcon />
-          </Button>
-        }
-      />
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon" aria-label="Select theme">
+          <PaletteIcon />
+        </Button>
+      </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-40">
         <DropdownMenuRadioGroup
           value={active?.value}

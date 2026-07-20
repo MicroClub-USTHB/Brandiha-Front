@@ -1,17 +1,27 @@
 "use client";
 
-import { HTMLInputTypeAttribute, ReactNode } from "react";
 import {
-  Control,
+  ChangeEventHandler,
+  ComponentPropsWithoutRef,
+  HTMLInputTypeAttribute,
+  ReactNode,
+} from "react";
+import {
   Controller,
-  ControllerRenderProps,
+  ControllerProps,
   FieldPath,
   FieldValues,
 } from "react-hook-form";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,169 +31,178 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 type FormControlProps<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues
 > = {
-  control: Control<TFieldValues>;
   name: TName;
   label: ReactNode;
   description?: ReactNode;
   required?: boolean;
+  control: ControllerProps<TFieldValues, TName, TTransformedValues>["control"];
 };
 
-type FieldRenderProps<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
-> = ControllerRenderProps<TFieldValues, TName> & {
-  id: string;
-  "aria-invalid": boolean;
+type FormBaseProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues
+> = FormControlProps<TFieldValues, TName, TTransformedValues> & {
+  horizontal?: boolean;
+  controlFirst?: boolean;
+  children: (
+    field: Parameters<
+      ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
+    >[0]["field"] & {
+      "aria-invalid": boolean;
+      id: string;
+    }
+  ) => ReactNode;
 };
+
+type FormControlFunction<
+  ExtraProps extends Record<string, unknown> = Record<never, never>
+> = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues
+>(
+  props: FormControlProps<TFieldValues, TName, TTransformedValues> & ExtraProps
+) => ReactNode;
 
 function FormField<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TTransformedValues = TFieldValues
 >({
+  children,
   control,
-  name,
   label,
+  name,
   description,
   required,
+  controlFirst,
   horizontal,
-  children,
-}: FormControlProps<TFieldValues, TName> & {
-  horizontal?: boolean;
-  children: (field: FieldRenderProps<TFieldValues, TName>) => ReactNode;
-}) {
+}: FormBaseProps<TFieldValues, TName, TTransformedValues>) {
   return (
     <Controller
       control={control}
       name={name}
       render={({ field, fieldState }) => {
+        const labelElement = (
+          <FieldLabel htmlFor={field.name}>
+            <span>
+              {label}
+              {required && (
+                <span
+                  className="ml-0.5 inline-block translate-y-[0.15em] text-lg font-bold leading-none text-primary"
+                  aria-hidden="true"
+                >
+                  *
+                </span>
+              )}
+            </span>
+          </FieldLabel>
+        );
+
+        const descriptionElement = description && (
+          <FieldDescription>{description}</FieldDescription>
+        );
+
         const control = children({
           ...field,
           id: field.name,
           "aria-invalid": fieldState.invalid,
         });
 
-        const labelElement = (
-          <Label htmlFor={field.name}>
-            {label}
-            {required && (
-              <span aria-hidden className="text-destructive">
-                *
-              </span>
-            )}
-          </Label>
+        const errorElem = fieldState.invalid && (
+          <FieldError errors={[fieldState.error]} />
         );
 
         return (
-          <div className="flex flex-col gap-1.5">
-            {horizontal ? (
-              <div className="flex items-center gap-2">
+          <Field
+            data-invalid={fieldState.invalid}
+            orientation={horizontal ? "horizontal" : undefined}
+          >
+            {controlFirst ? (
+              <>
                 {control}
-                {labelElement}
-              </div>
+                <FieldContent>
+                  {labelElement}
+                  {errorElem}
+                </FieldContent>
+              </>
             ) : (
               <>
-                {labelElement}
+                <FieldContent>{labelElement}</FieldContent>
                 {control}
+                {descriptionElement}
+                {errorElem}
               </>
             )}
-            {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
-            )}
-            {fieldState.error?.message && (
-              <p className="text-sm text-destructive">{fieldState.error.message}</p>
-            )}
-          </div>
+          </Field>
         );
       }}
     />
   );
 }
 
-export function FormInput<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
-  type,
-  placeholder,
-  ...props
-}: FormControlProps<TFieldValues, TName> & {
+export const FormInput: FormControlFunction<{
   type?: HTMLInputTypeAttribute;
   placeholder?: string;
-}) {
-  return (
-    <FormField {...props}>
-      {({ value, ...field }) => (
-        <Input {...field} value={value ?? ""} type={type} placeholder={placeholder} />
-      )}
-    </FormField>
-  );
-}
+  className?: string;
+  step?: number | string;
+  disabled?: boolean;
+  onChangeCapture?: ChangeEventHandler<HTMLInputElement>;
+}> = ({ type, placeholder, className, disabled, onChangeCapture, ...props }) => (
+  <FormField {...props}>
+    {(field) => (
+      <Input
+        type={type}
+        placeholder={placeholder}
+        className={className}
+        disabled={disabled}
+        onChangeCapture={onChangeCapture}
+        {...field}
+      />
+    )}
+  </FormField>
+);
 
-export function FormTextarea<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
-  placeholder,
-  ...props
-}: FormControlProps<TFieldValues, TName> & { placeholder?: string }) {
-  return (
-    <FormField {...props}>
-      {({ value, ...field }) => (
-        <Textarea {...field} value={value ?? ""} placeholder={placeholder} />
-      )}
-    </FormField>
-  );
-}
+export const FormTextarea: FormControlFunction<
+  ComponentPropsWithoutRef<typeof Textarea>
+> = ({ placeholder, className, ...props }) => (
+  <FormField {...props}>
+    {(field) => (
+      <Textarea placeholder={placeholder} className={className} {...field} />
+    )}
+  </FormField>
+);
 
-export function FormSelect<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->({
-  children,
-  placeholder = "Select",
-  ...props
-}: FormControlProps<TFieldValues, TName> & {
+export const FormSelect: FormControlFunction<{
   children: ReactNode;
   placeholder?: string;
-}) {
-  return (
-    <FormField {...props}>
-      {({ value, onChange, onBlur, name, id, "aria-invalid": ariaInvalid }) => (
-        <Select value={value} onValueChange={(next) => onChange(next)} name={name}>
-          <SelectTrigger
-            id={id}
-            aria-invalid={ariaInvalid}
-            onBlur={onBlur}
-            className="w-full"
-          >
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent>{children}</SelectContent>
-        </Select>
-      )}
-    </FormField>
-  );
-}
-
-export function FormCheckbox<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
->(props: FormControlProps<TFieldValues, TName>) {
-  return (
-    <FormField {...props} horizontal>
-      {({ value, onChange, onBlur, name, id, "aria-invalid": ariaInvalid }) => (
-        <Checkbox
-          checked={!!value}
-          onCheckedChange={(checked) => onChange(checked)}
+  disabled?: boolean;
+}> = ({ children, placeholder = "Select", disabled, ...props }) => (
+  <FormField {...props}>
+    {({ onChange, onBlur, ...field }) => (
+      <Select {...field} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger
+          aria-invalid={field["aria-invalid"]}
+          id={field.id}
           onBlur={onBlur}
-          name={name}
-          id={id}
-          aria-invalid={ariaInvalid}
-        />
-      )}
-    </FormField>
-  );
-}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>{children}</SelectContent>
+      </Select>
+    )}
+  </FormField>
+);
+
+export const FormCheckbox: FormControlFunction = (props) => (
+  <FormField {...props} horizontal controlFirst>
+    {({ onChange, value, ...field }) => (
+      <Checkbox {...field} checked={value} onCheckedChange={onChange} />
+    )}
+  </FormField>
+);

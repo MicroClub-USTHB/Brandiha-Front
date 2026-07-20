@@ -10,7 +10,7 @@ easy to get wrong.
 - **Next.js 16** (App Router, Turbopack) · **React 19**
 - **TypeScript** (strict)
 - **Tailwind CSS v4** (CSS-first config in `globals.css`, no `tailwind.config`)
-- **shadcn/ui** on **base-ui** (`@base-ui/react`), style `base-nova` — see `components.json`
+- **shadcn/ui** on **Radix** (`radix-ui`), style `radix-vega` — see `components.json`
 - **next-themes** for theming
 - **lucide-react** for icons
 - **pnpm** (Node 24). Use pnpm only; do not introduce npm/yarn lockfiles.
@@ -43,7 +43,7 @@ src/
 - **Imports use the `@/…` alias** (maps to `src/`). Never `../../`.
 - **UI primitives come from `src/components/ui/`.** Add new ones with the shadcn
   CLI (`pnpm dlx shadcn@latest add <component>`) — do not hand-roll them or add a
-  competing UI library. They're base-ui under the hood.
+  competing UI library. They're Radix under the hood.
 - **Colors are semantic tokens only** — `bg-background`, `text-foreground`,
   `bg-primary`, etc., which resolve to CSS variables in `globals.css`. No raw
   Tailwind palette (`bg-red-500`), hex, or inline `oklch(...)` in components.
