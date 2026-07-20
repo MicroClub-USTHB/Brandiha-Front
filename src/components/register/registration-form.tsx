@@ -1,7 +1,7 @@
 "use client";
 
 import { FieldPath } from "react-hook-form";
-import { useRegistrationForm } from "@/hooks/use-registration";
+import { useRegistrationForm } from "@/hooks/use-registration-form";
 import {
   registrationSchema,
   RegistrationFormData,
