@@ -73,5 +73,10 @@ src/
 - Branch off `dev`; all PRs target `dev`. `main` is production.
 - Conventional Commits (`feat`, `fix`, `refactor`, `docs`, `chore`), one concern
   per commit.
+- **Link the issue in the PR body** with a closing keyword — `Closes #42`
+  (or `Fixes`/`Resolves`). Repeat the line per issue; a comma-separated list
+  does not work. The `.github/pull_request_template.md` has a `Closes #` line for
+  this. Note: because PRs target `dev`, GitHub only auto-closes the issue once the
+  change reaches the default branch `main` (i.e. on the next dev→main promotion).
 - **Never add attribution trailers** — no `Co-Authored-By`, no "Generated with
   Claude Code" — in commits or PR descriptions.
