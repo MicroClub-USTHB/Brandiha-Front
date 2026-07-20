@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 function getTimeLeft(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -14,9 +15,10 @@ function getTimeLeft(target: Date) {
 
 interface CountdownTimerProps {
   targetDate: Date;
+  className?: string;
 }
 
-export function CountdownTimer({ targetDate }: CountdownTimerProps) {
+export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   const [time, setTime] = useState(() => getTimeLeft(targetDate));
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
   ];
 
   return (
-    <div className="relative z-10 flex gap-4">
+    <div className={cn("relative z-10 flex gap-4", className)}>
       {units.map((unit) => (
         <div
           key={unit.label}

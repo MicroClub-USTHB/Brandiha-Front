@@ -27,7 +27,7 @@ const svgs = {
     src: "/Design.svg",
     width: 255,
     height: 269,
-    className: "absolute left-[28.48125%] top-[13%] z-20",
+    className: "absolute left-[16%] top-[2%] z-20",
   },
   marketing: {
     src: "/Markting.svg",
