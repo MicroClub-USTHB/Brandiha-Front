@@ -20,7 +20,7 @@ function Swatch({ color }: { color: string }) {
   return (
     <span
       aria-hidden
-      className="size-3.5 rounded-full border border-border"
+      className="size-3.5 shrink-0 rounded-full border border-border"
       style={{ backgroundColor: color }}
     />
   );
