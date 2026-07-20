@@ -7,6 +7,7 @@ import {
   RegistrationFormData,
 } from "@/lib/validators/registration-schema";
 import { FormCheckbox, FormInput, FormSelect, FormTextarea } from "@/components/form";
+import { RegistrationStepper } from "@/components/register/registration-stepper";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
 
@@ -17,69 +18,73 @@ export default function RegistrationForm() {
   const currentFields = steps[step].fields as Record<string, FieldConfig>;
 
   return (
-    <form
-      onSubmit={form.handleSubmit(console.log)}
-      className="mx-auto flex w-full max-w-lg flex-col gap-6 rounded-xl border bg-card p-6 text-card-foreground"
-    >
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">Registration</h2>
-        <p className="text-sm text-muted-foreground">
-          Step {step + 1} of {steps.length}
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
+      <RegistrationStepper count={steps.length} current={step} />
 
-      <div className="flex flex-col gap-4">
-        {visibleFields.map((name) => {
-          const { label, type, options } = currentFields[name];
-          const fieldName = name as FieldPath<RegistrationFormData>;
-          const required = !registrationSchema.shape[
-            name as keyof typeof registrationSchema.shape
-          ].isOptional();
-          const common = { control: form.control, name: fieldName, label };
+      <form
+        onSubmit={form.handleSubmit(console.log)}
+        className="flex w-full flex-col gap-6 rounded-xl border bg-card p-6 text-card-foreground"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Registration</h2>
+          <p className="text-sm text-muted-foreground">
+            Step {step + 1} of {steps.length}
+          </p>
+        </div>
 
-          if (type === "textarea") {
-            return <FormTextarea key={name} {...common} required={required} />;
-          }
+        <div className="flex flex-col gap-4">
+          {visibleFields.map((name) => {
+            const { label, type, options } = currentFields[name];
+            const fieldName = name as FieldPath<RegistrationFormData>;
+            const required = !registrationSchema.shape[
+              name as keyof typeof registrationSchema.shape
+            ].isOptional();
+            const common = { control: form.control, name: fieldName, label };
 
-          if (type === "boolean") {
-            return <FormCheckbox key={name} {...common} />;
-          }
+            if (type === "textarea") {
+              return <FormTextarea key={name} {...common} required={required} />;
+            }
 
-          if (type === "select") {
-            return (
-              <FormSelect key={name} {...common} required={required}>
-                {options?.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </FormSelect>
-            );
-          }
+            if (type === "boolean") {
+              return <FormCheckbox key={name} {...common} />;
+            }
 
-          return <FormInput key={name} {...common} type={type} required={required} />;
-        })}
-      </div>
+            if (type === "select") {
+              return (
+                <FormSelect key={name} {...common} required={required}>
+                  {options?.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </FormSelect>
+              );
+            }
 
-      <div className="flex justify-between gap-2">
-        <Button type="button" variant="outline" onClick={previous} disabled={step === 0}>
-          Previous
-        </Button>
+            return <FormInput key={name} {...common} type={type} required={required} />;
+          })}
+        </div>
 
-        {step < steps.length - 1 ? (
-          <Button type="button" onClick={next} className="ml-auto">
-            Next
+        <div className="flex justify-between gap-2">
+          <Button type="button" variant="outline" onClick={previous} disabled={step === 0}>
+            Previous
           </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={form.handleSubmit(console.log)}
-            className="ml-auto"
-          >
-            Submit
-          </Button>
-        )}
-      </div>
-    </form>
+
+          {step < steps.length - 1 ? (
+            <Button type="button" onClick={next} className="ml-auto">
+              Next
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={form.handleSubmit(console.log)}
+              className="ml-auto"
+            >
+              Submit
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

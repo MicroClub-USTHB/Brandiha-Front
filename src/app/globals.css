@@ -40,6 +40,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-brand-marketing: var(--brand-marketing);
+  --color-brand-communication: var(--brand-communication);
+  --color-brand-multimedia: var(--brand-multimedia);
+  --color-brand-design: var(--brand-design);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -56,6 +60,12 @@
   /* #FFFFF0 */
   --black: oklch(0.1776 0 0);
   /* #111111 */
+
+  /* Fixed brand hues — one per pillar, theme-independent (used by the stepper) */
+  --brand-marketing: oklch(0.6734 0.1841 45.03); /* #EE6818 */
+  --brand-communication: oklch(0.6747 0.1787 250.27); /* #249AFF */
+  --brand-multimedia: oklch(0.6298 0.2193 3.49); /* #EB367B */
+  --brand-design: oklch(0.8971 0.1605 180.46); /* #15FFE2 */
 
   --background: var(--white);
   --foreground: var(--black);
@@ -408,4 +418,9 @@
   .graffiti-trail {
     display: none;
   }
+}
+
+@utility splash-mask {
+  -webkit-mask: url("/stepper-splash.svg") center / contain no-repeat;
+  mask: url("/stepper-splash.svg") center / contain no-repeat;
 }
