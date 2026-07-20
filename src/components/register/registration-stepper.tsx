@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,13 @@ const STEP_COLORS = [
   "bg-brand-communication",
   "bg-brand-multimedia",
   "bg-brand-design",
+];
+
+/** The side-view mascot that walks each connector, matching the left step's pillar. */
+const STEP_MASCOTS = [
+  "/mascot-marketing-side.png",
+  "/mascot-communication-side.png",
+  "/mascot-multimedia-side.png",
 ];
 
 export function RegistrationStepper({ count, current }: RegistrationStepperProps) {
@@ -59,18 +67,30 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
             </div>
 
             {index < count - 1 && (
-              <span
-                className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-foreground/20"
-                aria-hidden
-              >
-                {/* fills left→right in the left step's hue: full once done, half while current */}
-                <span
-                  className={cn(
-                    "absolute inset-y-0 left-0 rounded-full transition-[width] duration-300",
-                    color,
-                    isComplete ? "w-full" : index === current ? "w-1/2" : "w-0"
-                  )}
-                />
+              <span className="relative flex-1 self-center" aria-hidden>
+                {/* track + fill: left→right in the left step's hue (full once done, half while current) */}
+                <span className="block h-0.5 overflow-hidden rounded-full bg-foreground/20">
+                  <span
+                    className={cn(
+                      "block h-full rounded-full transition-[width] duration-300",
+                      color,
+                      isComplete ? "w-full" : index === current ? "w-1/2" : "w-0"
+                    )}
+                  />
+                </span>
+
+                {/* mascot walks at the head of the fill toward the next step */}
+                {index <= current && (
+                  <Image
+                    src={STEP_MASCOTS[index % STEP_MASCOTS.length]}
+                    alt=""
+                    width={68}
+                    height={60}
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 h-9 w-auto -translate-x-full -translate-y-full transition-[left] duration-300"
+                    style={{ left: isComplete ? "100%" : "50%" }}
+                  />
+                )}
               </span>
             )}
           </li>
