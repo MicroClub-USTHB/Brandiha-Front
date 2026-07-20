@@ -31,12 +31,12 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-3">
           <ThemePicker />
-          <a
-            href="#register"
+          <Link
+            href="/register"
             className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/80"
           >
             Register
-          </a>
+          </Link>
         </div>
       </div>
     </header>
