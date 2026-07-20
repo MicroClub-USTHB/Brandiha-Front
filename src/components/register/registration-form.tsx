@@ -71,7 +71,11 @@ export default function RegistrationForm() {
             Next
           </Button>
         ) : (
-          <Button type="submit" className="ml-auto">
+          <Button
+            type="button"
+            onClick={form.handleSubmit(console.log)}
+            className="ml-auto"
+          >
             Submit
           </Button>
         )}
