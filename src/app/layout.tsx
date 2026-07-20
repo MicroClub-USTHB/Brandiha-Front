@@ -9,6 +9,7 @@ const seekuw = localFont({
   display: "swap",
 });
 import { ThemeProvider } from "@/components/theme-provider";
+import { GraffitiCursor } from "@/components/cursor/graffiti-cursor";
 import { DEFAULT_THEME, THEME_VALUES } from "@/lib/themes";
 
 const montserrat = Montserrat({
@@ -53,6 +54,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <GraffitiCursor />
         </ThemeProvider>
       </body>
     </html>

@@ -52,8 +52,10 @@
 :root,
 [data-theme="default"] {
   /* Shared ink + paper used across every theme */
-  --white: oklch(0.996 0.0196 106.75); /* #FFFFF0 */
-  --black: oklch(0.1776 0 0); /* #111111 */
+  --white: oklch(0.996 0.0196 106.75);
+  /* #FFFFF0 */
+  --black: oklch(0.1776 0 0);
+  /* #111111 */
 
   --background: var(--white);
   --foreground: var(--black);
@@ -61,7 +63,9 @@
   --card-foreground: var(--black);
   --popover: var(--white);
   --popover-foreground: var(--black);
-  --primary: oklch(0.205 0 0);
+  /* Solid fallback (first gradient stop, #EE6818) for text/border/ring uses;
+     `bg-primary` backgrounds are overpainted with --primary-gradient below. */
+  --primary: oklch(0.6734 0.1841 45.03);
   --primary-foreground: var(--white);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -87,6 +91,31 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Default theme only: the primary "colour" is a 4-stop brand gradient. Authored
+   in sRGB hex to preserve the exact stops. The graffiti splash/trail read these
+   stops directly; other themes never define them, so those fall back to the
+   theme's solid --primary. */
+[data-theme="default"] {
+  --grad-1: #ee6818;
+  --grad-2: #eb367b;
+  --grad-3: #249aff;
+  --grad-4: #15ffe2;
+  --primary-gradient: linear-gradient(
+    93.57deg,
+    var(--grad-1) 11.07%,
+    var(--grad-2) 31.47%,
+    var(--grad-3) 68.11%,
+    var(--grad-4) 84.94%
+  );
+}
+
+/* Paint the gradient over any primary background (buttons, badges, …). The
+   solid --primary stays underneath, so hover:bg-primary/xx and non-background
+   primary uses still resolve to a colour. */
+[data-theme="default"] .bg-primary {
+  background-image: var(--primary-gradient);
 }
 
 .dark {
@@ -267,10 +296,95 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
+  }
+}
+
+/* ── Graffiti spray-can cursor ─────────────────────────────────────────────
+   Cosmetic layer only. Mounted client-side by <GraffitiCursor>, which also
+   toggles `.graffiti-cursor-active` on <html>. The native cursor is only
+   hidden while the custom cursor is actually rendering. */
+
+@media (hover: hover) and (pointer: fine) {
+  html.graffiti-cursor-active,
+  html.graffiti-cursor-active * {
+    cursor: none;
+  }
+}
+
+.graffiti-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Centre the splash on the pointer (size-agnostic) and pop it on hover. */
+.graffiti-cursor__splash {
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+  transition: transform 150ms ease-out;
+}
+
+.graffiti-cursor[data-hover="true"] .graffiti-cursor__splash {
+  transform: translate(-50%, -50%) scale(1.3) rotate(-12deg);
+}
+
+.graffiti-splatter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;
+  pointer-events: none;
+  animation: graffiti-burst 500ms ease-out forwards;
+}
+
+/* Full-viewport canvas the continuous paint trail is drawn onto. Sits above
+   page content but below the cursor + click bursts. */
+.graffiti-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+}
+
+/* Splatter colour variants, tied to theme tokens so each look stays on-brand. */
+.graffiti-var-0 {
+  color: var(--primary);
+}
+.graffiti-var-1 {
+  color: var(--chart-2);
+}
+.graffiti-var-2 {
+  color: var(--chart-4);
+}
+
+@keyframes graffiti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.3) rotate(14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graffiti-cursor,
+  .graffiti-splatter,
+  .graffiti-trail {
+    display: none;
   }
 }
