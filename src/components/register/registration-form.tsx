@@ -1,6 +1,7 @@
 "use client";
 
 import { CSSProperties } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { FieldPath } from "react-hook-form";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
 import {
@@ -96,23 +97,35 @@ export default function RegistrationForm() {
         </div>
 
         <div className="flex justify-between gap-2">
-          <Button type="button" variant="outline" onClick={previous} disabled={step === 0}>
-            Previous
+          <Button
+            type="button"
+            onClick={previous}
+            disabled={step === 0}
+            className="h-12 -rotate-2 gap-2 rounded-2xl border-0 bg-foreground px-7 text-base font-bold text-background uppercase hover:bg-foreground/90 disabled:opacity-100"
+          >
+            <ArrowLeft className="size-5 stroke-[3]" />
+            Back
           </Button>
 
-          {step < steps.length - 1 ? (
-            <Button type="button" onClick={next} className="ml-auto">
-              Next
-            </Button>
-          ) : (
+          <div className="relative isolate ml-auto -rotate-3">
+            {/* Step-hue paint splash bleeding out behind the pill. Offset so the
+               dense blob (centroid ~6px left / 17px above the art's center, the
+               rest being drips) sits over the label rather than the drips. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 left-1/2 -z-10 size-40 translate-x-[calc(-50%+5px)] translate-y-[calc(-50%+15px)] bg-primary next-splash-mask"
+            />
             <Button
               type="button"
-              onClick={form.handleSubmit(console.log)}
-              className="ml-auto"
+              onClick={
+                step < steps.length - 1 ? next : form.handleSubmit(console.log)
+              }
+              className="h-12 gap-2 rounded-2xl border-0 bg-primary px-6 text-base font-bold text-foreground uppercase hover:bg-primary/90"
             >
-              Submit
+              {step < steps.length - 1 ? "Next" : "Submit"}
+              <ArrowRight className="size-5 stroke-[2.5]" />
             </Button>
-          )}
+          </div>
         </div>
       </form>
     </div>

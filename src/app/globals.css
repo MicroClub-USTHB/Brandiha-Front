@@ -424,3 +424,8 @@
   -webkit-mask: url("/stepper-splash.svg") center / contain no-repeat;
   mask: url("/stepper-splash.svg") center / contain no-repeat;
 }
+
+@utility next-splash-mask {
+  -webkit-mask: url("/next-button-splash.svg") center / contain no-repeat;
+  mask: url("/next-button-splash.svg") center / contain no-repeat;
+}

@@ -6,6 +6,7 @@ function Input({
   className,
   type,
   icon,
+  required,
   wrapperClassName,
   ...props
 }: React.ComponentProps<"input"> & {
@@ -29,6 +30,14 @@ function Input({
         aria-hidden
         className="pointer-events-none absolute -top-[3px] left-5 h-[3px] w-3.5 bg-card"
       />
+      {required && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-1.5 right-3 text-lg leading-none font-bold text-primary"
+        >
+          *
+        </span>
+      )}
       {icon && (
         <span className="flex shrink-0 items-center text-muted-foreground [&>svg]:size-[18px]">
           {icon}

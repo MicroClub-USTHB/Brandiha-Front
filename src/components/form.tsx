@@ -177,6 +177,7 @@ export const FormInput: FormControlFunction<{
           placeholder ?? (typeof props.label === "string" ? props.label : undefined)
         }
         icon={icon}
+        required={props.required}
         className={className}
         disabled={disabled}
         onChangeCapture={onChangeCapture}
@@ -189,9 +190,16 @@ export const FormInput: FormControlFunction<{
 export const FormTextarea: FormControlFunction<
   ComponentPropsWithoutRef<typeof Textarea>
 > = ({ placeholder, className, ...props }) => (
-  <FormField {...props}>
+  <FormField {...props} hideLabel>
     {(field) => (
-      <Textarea placeholder={placeholder} className={className} {...field} />
+      <Textarea
+        placeholder={
+          placeholder ?? (typeof props.label === "string" ? props.label : undefined)
+        }
+        required={props.required}
+        className={className}
+        {...field}
+      />
     )}
   </FormField>
 );
