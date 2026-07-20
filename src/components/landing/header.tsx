@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ThemePicker } from "@/components/theme-picker";
+import { NavBar } from "@/components/landing/nav-bar";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-[#000000]">
+      <div className="mx-auto flex h-[135px] max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
             src="/primary-logo.png"
@@ -15,20 +16,7 @@ export function Header() {
             priority
           />
         </Link>
-        <nav className="flex items-center gap-6">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            Home
-          </Link>
-          <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">
-            About
-          </a>
-          <a href="#agenda" className="text-sm text-muted-foreground hover:text-foreground">
-            Agenda
-          </a>
-          <a href="#authors" className="text-sm text-muted-foreground hover:text-foreground">
-            Authors
-          </a>
-        </nav>
+        <NavBar />
         <div className="flex items-center gap-3">
           <ThemePicker />
           <Link
