@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registrationSchema, RegistrationSchema } from "@/lib/validators/registrationSchema";
+import { registrationSchema, RegistrationFormData } from "@/lib/validators/registrationSchema";
 import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registrationFields";
 
 export function useRegistrationForm() {
   const [step, setStep] = useState(0);
 
-  const form = useForm<RegistrationSchema>({
+  const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     mode: "onTouched",
     defaultValues: {
@@ -28,7 +28,7 @@ export function useRegistrationForm() {
   );
 
   const next = async () => {
-    const valid = await form.trigger(stepFieldNames as Path<RegistrationSchema>[]);
+    const valid = await form.trigger(stepFieldNames as Path<RegistrationFormData>[]);
     if (valid) setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
