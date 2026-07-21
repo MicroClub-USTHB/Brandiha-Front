@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
 
 function getTimeLeft(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -19,12 +21,37 @@ interface CountdownTimerProps {
 }
 
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const [time, setTime] = useState(() => getTimeLeft(targetDate));
 
   useEffect(() => {
     const id = setInterval(() => setTime(getTimeLeft(targetDate)), 1000);
     return () => clearInterval(id);
   }, [targetDate]);
+
+  if (!mounted) {
+    return (
+      <div className={cn("relative z-10 flex gap-4", className)}>
+        {["Days", "Hours", "Min", "Sec"].map((label) => (
+          <div
+            key={label}
+            className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-6 py-4"
+          >
+            <span className="text-5xl font-bold tabular-nums text-white">
+              --
+            </span>
+            <span className="mt-1 text-sm font-medium text-white/80 uppercase tracking-wider">
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const units = [
     { label: "Days", value: time.days },
