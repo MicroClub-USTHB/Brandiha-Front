@@ -21,7 +21,6 @@ export function useRegistrationForm() {
       Phone: "",
       DiscordId: "",
       TeamName: "",
-      Role: "",
       Knowledge: "",
       HackathonExperience: false,
       PreviousHackathons: "",

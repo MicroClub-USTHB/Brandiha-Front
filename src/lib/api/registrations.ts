@@ -16,7 +16,7 @@ interface RegistrationPayload {
   phone_number: string;
   discord_id: string;
   team_name: string;
-  role_in_team: string;
+  department: "marketing" | "communication" | "design" | "multimedia";
   knowledge_about_brandiha: string;
   participated_before: boolean;
   previous_competitions: string | null;
@@ -29,6 +29,7 @@ interface RegistrationPayload {
   available_during_event: "yes" | "no" | "other";
   availability_note: string | null;
   okay_with_photos: boolean;
+  t_shirt_size: "S" | "M" | "L" | "XL" | "XXL";
   additional_notes: string | null;
 }
 
@@ -46,10 +47,7 @@ function nullable(value: string | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-/**
- * Map the multi-step form state onto the backend contract. Note: `TShirtSize`
- * is collected in the form but has no field on the backend, so it is dropped.
- */
+/** Map the multi-step form state onto the backend contract. */
 function toPayload(data: RegistrationFormData): RegistrationPayload {
   return {
     full_name: data.FullName.trim(),
@@ -57,7 +55,8 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     phone_number: data.Phone.trim(),
     discord_id: data.DiscordId.trim(),
     team_name: data.TeamName.trim(),
-    role_in_team: data.Role.trim(),
+    // "Your Role" is the department track (lowercased to match the backend enum).
+    department: data.Role.toLowerCase() as RegistrationPayload["department"],
     knowledge_about_brandiha: data.Knowledge.trim(),
     participated_before: data.HackathonExperience,
     previous_competitions: nullable(data.PreviousHackathons),
@@ -73,6 +72,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
       | "other",
     availability_note: nullable(data.AvailabilityMessage),
     okay_with_photos: data.PhotoConsent,
+    t_shirt_size: data.TShirtSize,
     additional_notes: nullable(data.AdditionalInfo),
   };
 }
