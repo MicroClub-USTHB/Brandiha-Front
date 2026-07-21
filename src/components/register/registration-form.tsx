@@ -63,7 +63,7 @@ export default function RegistrationForm() {
         <div className={cn("flex flex-col items-center")}>
           {isThirdStep ? (
             <h2 className={cn("text-center text-6xl font-extrabold uppercase tracking-wide font-heading")}>
-              <span className={cn("text-foreground tracking-[0.1em]")}>
+              <span className={cn("text-foreground tracking-widest")}>
                 Portfolio{" "}
               </span>
               <span 
@@ -75,13 +75,13 @@ export default function RegistrationForm() {
               >
                 &{" "}
               </span>
-              <span className={cn("text-foreground tracking-[0.1em]")}>
+              <span className={cn("text-foreground tracking-widest")}>
                 Motivation
               </span>
             </h2>
           ) : isFourthStep ? (
             <h2 className={cn("text-center text-6xl font-extrabold uppercase tracking-wide font-heading text-foreground")}>
-              <span className={cn("tracking-[0.1em]")}>
+              <span className={cn("tracking-widest")}>
                 Availability
               </span>
             </h2>
@@ -96,7 +96,7 @@ export default function RegistrationForm() {
               >
                 Brandiha{" "}
               </span>
-              <span className={cn("text-foreground tracking-[0.1em] ml-2")}>
+              <span className={cn("text-foreground tracking-widest ml-2")}>
                 Registrations
               </span>
             </h2>
@@ -213,7 +213,7 @@ export default function RegistrationForm() {
                 className={cn("absolute inset-0 w-full h-full pointer-events-none object-fill scale-110")} 
               />
               <span className={cn("relative z-10 flex items-center gap-2 text-white font-sans")}>
-                <ArrowLeft className={cn("size-5 stroke-[3] text-white")} />
+                <ArrowLeft className={cn("size-5 stroke-3 text-white")} />
                 Back
               </span>
             </Button>
