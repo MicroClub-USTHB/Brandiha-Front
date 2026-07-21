@@ -47,7 +47,7 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
                 />
               ) : (
                 <span
-                  className="absolute inset-2.5 rounded-full border-2 border-foreground/70"
+                  className="absolute inset-2.5 rounded-full border-2 border-white/80"
                   aria-hidden
                 />
               )}
@@ -55,7 +55,7 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
               <span
                 className={cn(
                   "relative font-hand text-xl leading-none",
-                  reached ? "text-white" : "text-foreground/70"
+                  reached ? "text-white" : "text-white/80"
                 )}
               >
                 {isComplete ? (
@@ -69,7 +69,7 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
             {index < count - 1 && (
               <span className="relative flex-1 self-center" aria-hidden>
                 {/* track + fill: left→right in the left step's hue (full once done, half while current) */}
-                <span className="block h-0.5 overflow-hidden rounded-full bg-foreground/20">
+                <span className="block h-0.5 overflow-hidden rounded-full bg-white/30">
                   <span
                     className={cn(
                       "block h-full rounded-full transition-[width] duration-300",
