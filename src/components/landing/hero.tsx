@@ -24,7 +24,7 @@ export function Hero() {
           </p>
           <a
             href="#register"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+            className="inline-flex h-10 items-center my-6 justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/80"
           >
             Register
           </a>
