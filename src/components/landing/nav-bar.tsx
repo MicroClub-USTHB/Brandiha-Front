@@ -53,7 +53,7 @@ export function NavBar({ onNavigate }: NavBarProps) {
   };
 
   return (
-    <nav className="flex flex-col md:flex-row md:h-[59px] md:w-[677px] items-center justify-around gap-4 md:gap-0 py-4 md:py-0">
+    <nav className="flex flex-col md:flex-row md:h-[59px] md:w-[677px] items-center justify-around gap-4 border-0 md:gap-0 py-4 md:py-0">
       {links.map(({ href, label }) => {
         const isActive = active === href;
         return (

@@ -1,6 +1,18 @@
 import Image from "next/image";
 import { Section } from "@/components/landing/section";
+import { DecorativeSvg, BackgroundDecoration } from "@/components/landing/decorative-svg";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
+
+const heroDecorations = [
+  "compound-path-17",
+  "compound-path-18",
+  "vector",
+  "design",
+  "marketing",
+  "multi",
+  "comm",
+  "bshhhhh",
+] as const;
 
 const targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
@@ -8,8 +20,12 @@ export function Hero() {
   return (
     <Section
       as="section"
-      className="relative flex flex-col items-center justify-center w-full max-w-none px-0 py-16 md:py-24 min-h-[95svh] gap-8 md:gap-12"
+      className="relative flex flex-col items-center justify-center w-full max-w-none px-0 py-16 md:py-24 min-h-[95svh] gap-8 md:gap-12 overflow-visible"
     >
+      <BackgroundDecoration
+        name="wall-background"
+        className="absolute inset-0 bg-cover bg-center bg-repeat"
+      />
       <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6 px-4">
         <Image
           src="/primary-logo.png"
@@ -70,6 +86,9 @@ export function Hero() {
           </div>
         </div>
       </div>
+      {heroDecorations.map((name) => (
+        <DecorativeSvg key={name} name={name} />
+      ))}
     </Section>
   );
 }

@@ -10,7 +10,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 relative w-full border-b border-border bg-[#000000]">
+    <header className="sticky top-0 z-50 relative w-full bg-[#000000]">
       <div className="mx-auto flex h-auto min-h-[80px] md:h-[135px] max-w-6xl items-center justify-between gap-4 md:gap-[100px] px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
@@ -66,7 +66,7 @@ export function Header() {
         alt=""
         width={337}
         height={125}
-        className="absolute top-[99%] left-0 hidden md:block"
+        className="absolute top-[99%] left-0"
       />
     </header>
   );
