@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useState, useRef } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { FieldPath } from "react-hook-form";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { useRegistrationForm } from "@/hooks/use-registration-form";
 import {
   registrationSchema,
@@ -14,6 +16,7 @@ import { FIELD_ICONS } from "@/components/register/field-icons";
 import { RegistrationStepper } from "@/components/register/registration-stepper";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
+import { Popup, usePopupStore } from "@/components/ui/pop-up";
 import { cn } from "@/lib/utils";
 
 type FieldConfig = { label: string; type?: string; options?: readonly string[] };
@@ -25,9 +28,75 @@ const STEP_HUES = [
   "var(--brand-design)",
 ];
 
+export const useFormPersistStore = create<{
+  savedStep: number;
+  setSavedStep: (step: number) => void;
+  savedValues: Partial<RegistrationFormData>;
+  setSavedValues: (values: Partial<RegistrationFormData>) => void;
+}>()(
+  persist(
+    (set) => ({
+      savedStep: 0,
+      setSavedStep: (savedStep) => set({ savedStep }),
+      savedValues: {},
+      setSavedValues: (savedValues) => set({ savedValues }),
+    }),
+    {
+      name: "registration-form-storage",
+    }
+  )
+);
+
 export default function RegistrationForm() {
-  const { form, step, steps, visibleFields, next, previous } = useRegistrationForm();
+  const [isMounted, setIsMounted] = useState(false);
+  const { form, step, steps, visibleFields, next, previous, goToStep } = useRegistrationForm();
   const currentFields = steps[step].fields as Record<string, FieldConfig>;
+
+  const { savedStep, setSavedStep, savedValues, setSavedValues } = useFormPersistStore();
+  const isHydratedRef = useRef(false);
+  const { openPopup } = usePopupStore();
+
+  useEffect(() => {
+    setIsMounted(true);
+    const state = useFormPersistStore.getState();
+
+    if (state.savedValues && Object.keys(state.savedValues).length > 0) {
+      for (const [key, value] of Object.entries(state.savedValues)) {
+        if (value !== undefined) {
+          form.setValue(key as FieldPath<RegistrationFormData>, value as any, {
+            shouldValidate: false,
+            shouldDirty: false,
+          });
+        }
+      }
+    }
+
+    if (state.savedStep > 0 && state.savedStep < steps.length) {
+      goToStep(state.savedStep);
+    }
+
+    isHydratedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isHydratedRef.current && step !== savedStep) {
+      setSavedStep(step);
+    }
+  }, [step, savedStep, setSavedStep]);
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (isHydratedRef.current) {
+        setSavedValues(value);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setSavedValues]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   const hue = STEP_HUES[step % STEP_HUES.length];
   const stepStyle = {
@@ -36,13 +105,20 @@ export default function RegistrationForm() {
     "--primary-gradient": "none",
   } as CSSProperties;
 
+  const isFirstStep = step === 0;
+  const isSecondStep = step === 1;
   const isThirdStep = step === 2;
   const isFourthStep = step === 3;
-  const hideStroke = isThirdStep || isFourthStep;
+  const hideStroke = isSecondStep || isThirdStep || isFourthStep;
+
+  const handleFormSubmit = (data: RegistrationFormData) => {
+    console.log(data);
+    openPopup("success");
+  };
 
   return (
     <div className={cn("relative mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4")}>
-      <div className={cn("fixed left-6 top-6 z-50")}>
+      <div className={cn("absolute left-0 top-0")}>
         <Image src="/primary-logo.png" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
       </div>
 
@@ -51,7 +127,7 @@ export default function RegistrationForm() {
       </div>
       
       <form
-        onSubmit={form.handleSubmit(console.log)}
+        onSubmit={form.handleSubmit(handleFormSubmit)}
         style={{
           ...stepStyle,
           backgroundImage: "url('/frame.png')",
@@ -61,7 +137,27 @@ export default function RegistrationForm() {
         className={cn("flex w-full flex-col gap-10 border-0 bg-transparent px-32 pt-28 pb-36 text-card-foreground font-sans")}
       >
         <div className={cn("flex flex-col items-center")}>
-          {isThirdStep ? (
+          {isSecondStep ? (
+            <div className={cn("flex flex-col items-center")}>
+              <h2 className={cn("text-center text-6xl font-extrabold uppercase tracking-wide font-heading flex gap-2")}>
+                <span className={cn("text-foreground")}>
+                  Pick Your
+                </span>
+                <span 
+                  style={{
+                    backgroundImage: "linear-gradient(to right, var(--grad-1), var(--grad-2))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Department
+                </span>
+              </h2>
+              <p className={cn("text-center font-hand text-xl font-bold text-foreground mt-2 tracking-wide")}>
+                choose the field where you want to shine
+              </p>
+            </div>
+          ) : isThirdStep ? (
             <h2 className={cn("text-center text-6xl font-extrabold uppercase tracking-wide font-heading")}>
               <span className={cn("text-foreground tracking-[0.1em]")}>
                 Portfolio{" "}
@@ -116,29 +212,36 @@ export default function RegistrationForm() {
 
         <div className={cn("flex flex-col gap-8")}>
           <div className={cn("grid grid-cols-1 lg:grid-cols-12 gap-8 items-center")}>
-            <div className={cn("lg:col-span-4 flex justify-center items-center")}>
-              <div className={cn("relative w-56 h-56 lg:w-64 lg:h-64 flex items-center justify-center")}>
-                <Image 
-                  src="/frog-icon.png" 
-                  alt="Frog Mascot" 
-                  width={256}
-                  height={256}
-                  className={cn("w-full h-full object-contain pointer-events-none scale-125")}
-                />
+            {isFirstStep && (
+              <div className={cn("lg:col-span-4 flex justify-center items-center")}>
+                <div className={cn("relative w-56 h-56 lg:w-64 lg:h-64 flex items-center justify-center")}>
+                  <Image 
+                    src="/frog-icon.png" 
+                    alt="Frog Mascot" 
+                    width={256}
+                    height={256}
+                    className={cn("w-full h-full object-contain pointer-events-none scale-125")}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className={cn("lg:col-span-8 flex flex-col justify-center gap-4")}>
+            <div className={cn(isFirstStep ? "lg:col-span-8" : "lg:col-span-12 w-full max-w-2xl mx-auto", "flex flex-col justify-center gap-4")}>
               <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 items-start")}>
                 {visibleFields.map((name) => {
-                  const { label, type, options } = currentFields[name];
+                  const fieldConfig = currentFields[name];
+                  const label = fieldConfig?.label ?? name;
+                  const type = fieldConfig?.type;
+                  const options = name === "Role" ? ["Marketing", "Communication", "Multimedia", "Design"] : fieldConfig?.options;
                   const fieldName = name as FieldPath<RegistrationFormData>;
                   const required = !registrationSchema.shape[
                     name as keyof typeof registrationSchema.shape
                   ].isOptional();
                   const common = { control: form.control, name: fieldName, label };
 
-                  const isFullWidth = type === "textarea" || type === "boolean" || name === "discordId" || name === "discord" || name === "portfolio" || name === "portfolioLink" || name === "motivation" || name === "tools" || name === "allergies" || name === "foodAllergies" || name === "availability" || name === "tshirt" || name === "tShirtSize";
+                  const isFullWidth = isFirstStep 
+                    ? (type === "textarea" || type === "boolean" || name === "discordId" || name === "discord" || name === "portfolio" || name === "portfolioLink" || name === "motivation" || name === "tools" || name === "allergies" || name === "foodAllergies" || name === "availability" || name === "tshirt" || name === "tShirtSize")
+                    : true;
 
                   return (
                     <div 
@@ -172,7 +275,7 @@ export default function RegistrationForm() {
                         <FormCheckbox 
                           {...common} 
                         />
-                      ) : type === "select" ? (
+                      ) : type === "select" || name === "Role" ? (
                         <FormSelect 
                           {...common} 
                           required={required}
@@ -226,7 +329,7 @@ export default function RegistrationForm() {
               <Button
                 type="button"
                 onClick={
-                  step < steps.length - 1 ? next : form.handleSubmit(console.log)
+                  step < steps.length - 1 ? next : form.handleSubmit(handleFormSubmit)
                 }
                 className={cn("relative h-14 gap-2 rounded-2xl border-0 bg-transparent px-8 text-base font-bold text-foreground uppercase hover:bg-transparent overflow-visible font-sans")}
               >
@@ -250,6 +353,8 @@ export default function RegistrationForm() {
           </div>
         </div>
       </form>
+
+      <Popup />
     </div>
   );
 }

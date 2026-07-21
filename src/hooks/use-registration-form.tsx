@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registrationSchema, RegistrationFormData } from "@/lib/validators/registration-schema";
@@ -9,8 +9,6 @@ export function useRegistrationForm() {
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
-    // Validate only when a step is submitted (Next/Submit), not on blur — so a
-    // field never turns red just because focus moved away from it.
     mode: "onSubmit",
     defaultValues: {
       FullName: "",
@@ -18,7 +16,7 @@ export function useRegistrationForm() {
       Phone: "",
       DiscordId: "",
       TeamName: "",
-      Role: "",
+      Role: undefined,
       Knowledge: "",
       HackathonExperience: false,
       PreviousHackathons: "",
@@ -43,12 +41,21 @@ export function useRegistrationForm() {
     (name) => name !== "AvailabilityMessage" || availability === "Other"
   );
 
-  const next = async () => {
+  const next = useCallback(async () => {
     const valid = await form.trigger(stepFieldNames as Path<RegistrationFormData>[]);
     if (valid) setStep((s) => Math.min(s + 1, steps.length - 1));
-  };
+  }, [form, stepFieldNames, steps.length]);
 
-  const previous = () => setStep((s) => Math.max(s - 1, 0));
+  const previous = useCallback(() => {
+    setStep((s) => Math.max(s - 1, 0));
+  }, []);
 
-  return { form, step, steps, visibleFields, next, previous };
+  const goToStep = useCallback(
+    (target: number) => {
+      setStep(Math.max(0, Math.min(target, steps.length - 1)));
+    },
+    [steps.length]
+  );
+
+  return { form, step, steps, visibleFields, next, previous, goToStep };
 }
