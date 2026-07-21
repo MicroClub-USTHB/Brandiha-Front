@@ -9,6 +9,7 @@ const seekuw = localFont({
   display: "swap",
 });
 import { ThemeProvider } from "@/components/theme-provider";
+import { SiteBackground } from "@/components/site-background";
 import { GraffitiCursor } from "@/components/cursor/graffiti-cursor";
 import { DEFAULT_THEME, THEME_VALUES } from "@/lib/themes";
 
@@ -45,7 +46,8 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${montserrat.variable} ${patrickHand.variable} ${seekuw.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="relative min-h-full flex flex-col">
+        <SiteBackground />
         <ThemeProvider
           attribute="data-theme"
           defaultTheme={DEFAULT_THEME}
