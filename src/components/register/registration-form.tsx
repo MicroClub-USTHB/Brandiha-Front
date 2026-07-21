@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { CSSProperties } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -55,7 +56,9 @@ export default function RegistrationForm() {
   return (
     <div className={cn("relative mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4")}>
       <div className={cn("fixed left-6 top-6 z-50")}>
-        <Image src="/primary-logo.png" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
+        <Link href="/">
+          <Image src="/primary-logo.png" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
+        </Link>
       </div>
 
       <div className={cn("w-full max-w-3xl flex justify-center mt-12")}>
