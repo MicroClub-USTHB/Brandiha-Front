@@ -7,15 +7,15 @@ const backgrounds = {
 const svgs = {
   "compound-path-17": {
     src: "/CompoundPath%2017.svg",
-    width: 500,
-    height: 500,
+    width: 400,
+    height: 400,
     className: "absolute top-[5svh] -left-[3%]",
   },
   "compound-path-18": {
     src: "/CompoundPath%2018.svg",
-    width: 500,
-    height: 500,
-    className: "absolute top-[60svh] right-0",
+    width: 450,
+    height: 450,
+    className: "absolute bottom-0 right-0",
   },
   vector: {
     src: "/Vector.svg",
@@ -33,25 +33,25 @@ const svgs = {
     src: "/Markting.svg",
     width: 239,
     height: 253,
-    className: "absolute left-[54.23%] top-[17svh] z-20 opacity-47",
+    className: "absolute left-[64.23%] top-[13svh] z-20 opacity-47",
   },
   multi: {
     src: "/multi.svg",
     width: 283,
     height: 283,
-    className: "absolute left-[27.85%] top-[85svh] z-20 w-[19.66%] opacity-47",
+    className: "absolute left-[27.85%] top-[70svh] z-20 w-[19.66%] opacity-47",
   },
   comm: {
     src: "/comm.svg",
     width: 283,
     height: 283,
-    className: "absolute right-[27.8472%] top-[75svh] z-20 w-[19.6582%] opacity-47",
+    className: "absolute right-[27.8472%] top-[60svh] z-20 w-[19.6582%] opacity-47",
   },
   bshhhhh: {
     src: "/bshhhhh.svg",
     width: 516,
     height: 516,
-    className: "absolute left-[5.50%] top-[42svh] z-0 w-[35.84%]",
+    className: "absolute left-[5.50%] top-[23svh] z-0 w-[35.84%]",
   },
 } as const;
 

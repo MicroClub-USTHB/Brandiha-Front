@@ -8,7 +8,7 @@ export function Hero() {
   return (
     <Section
       as="section"
-      className="relative flex flex-col items-center justify-between w-full max-w-none px-0 pt-48 pb-32 min-h-[95svh]"
+      className="relative flex flex-col items-center justify-center w-full max-w-none px-0 pt-48 pb-32 min-h-screen"
     >
       <div className="relative z-10 flex flex-col items-center gap-6">
         <Image
@@ -19,18 +19,18 @@ export function Hero() {
           priority
         />
         <div className="flex flex-col items-center gap-4">
-          <p className="font-heading text-5xl font-semibold tracking-wide text-white uppercase">
-            Brand ur way out!
+          <p className="font-heading text-3xl font-semibold tracking-wide text-brand-design uppercase">
+            one virage away from your brand
           </p>
-          <a
+          {/* <a
             href="#register"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/80"
           >
             Register
-          </a>
+          </a> */}
         </div>
       </div>
-      <div className="relative z-10 flex flex-col items-center gap-6">
+      {/* <div className="relative z-10 flex flex-col items-center gap-6">
         <CountdownTimer targetDate={targetDate} />
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export function Hero() {
             <span className="font-hand text-lg text-white/70">Date TBD</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </Section>
   );
 }

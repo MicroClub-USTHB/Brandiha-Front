@@ -46,7 +46,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${montserrat.variable} ${patrickHand.variable} ${seekuw.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="relative min-h-full flex flex-col">
+      <body className="relative min-h-full flex flex-col overflow-x-hidden">
         <SiteBackground />
         <ThemeProvider
           attribute="data-theme"

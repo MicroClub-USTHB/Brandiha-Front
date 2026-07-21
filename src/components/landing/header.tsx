@@ -4,8 +4,8 @@ import { NavBar } from "@/components/landing/nav-bar";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 relative w-full border-b border-border bg-[#000000]">
-      <div className="mx-auto flex h-[135px] max-w-6xl items-center gap-[100px] px-4 sm:px-6 lg:px-8">
+    <header className="absolute top-0 left-0 right-0 z-50 w-full  bg-[#000000]">
+      <div className="mx-auto flex h-23.75 max-w-6xl items-center gap-25 px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
             src="/nav-logo.svg"
