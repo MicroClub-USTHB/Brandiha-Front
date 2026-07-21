@@ -26,8 +26,20 @@ const STEP_HUES = [
 ];
 
 export default function RegistrationForm() {
-  const { form, step, steps, visibleFields, next, previous } = useRegistrationForm();
+  const {
+    form,
+    step,
+    steps,
+    visibleFields,
+    next,
+    previous,
+    submit,
+    isSubmitting,
+    submitError,
+    isSubmitted,
+  } = useRegistrationForm();
   const currentFields = steps[step].fields as Record<string, FieldConfig>;
+  const isLastStep = step === steps.length - 1;
 
   const hue = STEP_HUES[step % STEP_HUES.length];
   const stepStyle = {
@@ -51,7 +63,7 @@ export default function RegistrationForm() {
       </div>
       
       <form
-        onSubmit={form.handleSubmit(console.log)}
+        onSubmit={submit}
         style={{
           ...stepStyle,
           backgroundImage: "url('/frame.png')",
@@ -198,11 +210,28 @@ export default function RegistrationForm() {
             </div>
           </div>
 
+          {submitError && (
+            <p
+              role="alert"
+              className={cn("text-center text-base font-semibold text-destructive font-sans")}
+            >
+              {submitError}
+            </p>
+          )}
+          {isSubmitted && (
+            <p
+              role="status"
+              className={cn("text-center text-base font-semibold text-green-600 font-sans")}
+            >
+              You&apos;re registered! We&apos;ll be in touch soon.
+            </p>
+          )}
+
           <div className={cn("flex justify-between items-center gap-4 px-6 mt-6")}>
             <Button
               type="button"
               onClick={previous}
-              disabled={step === 0}
+              disabled={step === 0 || isSubmitting || isSubmitted}
               className={cn("relative h-14 -rotate-2 gap-3 rounded-2xl border-0 bg-transparent px-8 text-base font-bold text-white uppercase hover:bg-transparent disabled:opacity-100 overflow-visible font-sans")}
             >
               <Image 
@@ -224,11 +253,10 @@ export default function RegistrationForm() {
                 className={cn("pointer-events-none absolute top-1/2 left-1/2 -z-10 size-40 translate-x-[calc(-50%+5px)] translate-y-[calc(-50%+15px)] bg-primary next-splash-mask")}
               />
               <Button
-                type="button"
-                onClick={
-                  step < steps.length - 1 ? next : form.handleSubmit(console.log)
-                }
-                className={cn("relative h-14 gap-2 rounded-2xl border-0 bg-transparent px-8 text-base font-bold text-foreground uppercase hover:bg-transparent overflow-visible font-sans")}
+                type={isLastStep ? "submit" : "button"}
+                onClick={isLastStep ? undefined : next}
+                disabled={isSubmitting || isSubmitted}
+                className={cn("relative h-14 gap-2 rounded-2xl border-0 bg-transparent px-8 text-base font-bold text-foreground uppercase hover:bg-transparent overflow-visible font-sans disabled:opacity-70")}
               >
                 <div 
                   className={cn("absolute inset-0 w-full h-full pointer-events-none scale-110 rounded-2xl bg-primary")}
@@ -242,7 +270,7 @@ export default function RegistrationForm() {
                   }}
                 />
                 <span className={cn("relative z-10 flex items-center gap-2 text-foreground font-sans")}>
-                  {step < steps.length - 1 ? "Next" : "Submit"}
+                  {!isLastStep ? "Next" : isSubmitting ? "Submitting…" : "Submit"}
                   <ArrowRight className={cn("size-5 stroke-[2.5]")} />
                 </span>
               </Button>
