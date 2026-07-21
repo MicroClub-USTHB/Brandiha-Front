@@ -43,7 +43,7 @@ export default function RegistrationForm() {
   return (
     <div className={cn("relative mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4")}>
       <div className={cn("fixed left-6 top-6 z-50")}>
-        <Image src="/primary-logo.png" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
+        <Image src="/primary-logo.svg" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
       </div>
 
       <div className={cn("w-full max-w-3xl flex justify-center mt-12")}>
