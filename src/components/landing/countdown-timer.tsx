@@ -35,16 +35,16 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
 
   if (!mounted) {
     return (
-      <div className={cn("relative z-10 flex gap-4", className)}>
+      <div className={cn("relative z-10 flex gap-2 sm:gap-4", className)}>
         {["Days", "Hours", "Min", "Sec"].map((label) => (
           <div
             key={label}
-            className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-6 py-4"
+            className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-3 py-3 sm:px-6 sm:py-4"
           >
-            <span className="text-5xl font-bold tabular-nums text-white">
+            <span className="text-3xl sm:text-5xl font-bold tabular-nums text-white">
               --
             </span>
-            <span className="mt-1 text-sm font-medium text-white/80 uppercase tracking-wider">
+            <span className="mt-1 text-xs sm:text-sm font-medium text-white/80 uppercase tracking-wider">
               {label}
             </span>
           </div>
@@ -61,16 +61,16 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   ];
 
   return (
-    <div className={cn("relative z-10 flex gap-4", className)}>
+    <div className={cn("relative z-10 flex gap-2 sm:gap-4", className)}>
       {units.map((unit) => (
         <div
           key={unit.label}
-          className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-6 py-4"
+          className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-3 py-3 sm:px-6 sm:py-4"
         >
-          <span className="text-5xl font-bold tabular-nums text-white">
+          <span className="text-3xl sm:text-5xl font-bold tabular-nums text-white">
             {String(unit.value).padStart(2, "0")}
           </span>
-          <span className="mt-1 text-sm font-medium text-white/80 uppercase tracking-wider">
+          <span className="mt-1 text-xs sm:text-sm font-medium text-white/80 uppercase tracking-wider">
             {unit.label}
           </span>
         </div>

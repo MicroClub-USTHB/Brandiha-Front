@@ -11,7 +11,11 @@ const links = [
   { href: "#authors", label: "Authors" },
 ];
 
-export function NavBar() {
+interface NavBarProps {
+  onNavigate?: () => void;
+}
+
+export function NavBar({ onNavigate }: NavBarProps) {
   const [active, setActive] = useState("/");
   const scrollingRef = useRef(false);
 
@@ -42,13 +46,14 @@ export function NavBar() {
   const handleClick = (href: string) => {
     scrollingRef.current = true;
     setActive(href);
+    onNavigate?.();
     setTimeout(() => {
       scrollingRef.current = false;
     }, 800);
   };
 
   return (
-    <nav className="flex h-[59px] w-[677px] items-center justify-around">
+    <nav className="flex flex-col md:flex-row md:h-[59px] md:w-[677px] items-center justify-around gap-4 md:gap-0 py-4 md:py-0">
       {links.map(({ href, label }) => {
         const isActive = active === href;
         return (
@@ -56,7 +61,7 @@ export function NavBar() {
             key={href}
             href={href}
             onClick={() => handleClick(href)}
-            className={`relative font-[family-name:var(--font-hand)] text-[28px] text-white/70 hover:text-white ${
+            className={`relative font-[family-name:var(--font-hand)] text-xl md:text-[28px] text-white/70 hover:text-white ${
               isActive ? "text-white" : ""
             }`}
           >
