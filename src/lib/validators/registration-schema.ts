@@ -11,7 +11,9 @@ export const registrationSchema = z.object({
   DiscordId: z.string().trim().min(1, "Please enter your Discord ID."),
 
   TeamName: z.string().trim().min(1, "Please enter your team name."),
-  Role: z.string().trim().min(1, "Please tell us your role on the team."),
+  Role: z.enum(["Marketing", "Communication", "Design", "Multimedia"], {
+    error: "Please select your department.",
+  }),
   Knowledge: z.string().trim().min(1, "Please tell us what you know about Brandiha."),
   HackathonExperience: z.boolean(),
   PreviousHackathons: z.string().trim().optional(),

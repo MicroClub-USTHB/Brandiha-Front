@@ -10,7 +10,11 @@ export const REGISTRATION_STEPS = [
   {
     fields: {
       TeamName: { label: "Team Name" },
-      Role: { label: "Your Role" },
+      Role: {
+        label: "Your Role",
+        type: "select",
+        options: ["Marketing", "Communication", "Design", "Multimedia"],
+      },
       Knowledge: { label: "What do you know about Brandiha?", type: "textarea" },
       HackathonExperience: {
         label: "Have you ever participated in similar competitions before?",
