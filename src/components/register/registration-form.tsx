@@ -216,9 +216,12 @@ export default function RegistrationForm() {
             disabled={step === 0 || isSubmitting}
             className={cn("h-14")}
           />
+          {/* Always type="button" so advancing to the last step can't let the
+              same click fall through to a native form submit. On the last step
+              we invoke the submit handler explicitly instead. */}
           <NextNavButton
-            type={isLastStep ? "submit" : "button"}
-            onClick={isLastStep ? undefined : next}
+            type="button"
+            onClick={isLastStep ? submit : next}
             disabled={isSubmitting}
             className={cn("h-14")}
           />
