@@ -17,11 +17,11 @@ function getActiveEffectButton(theme?: string) {
       return "/activeButton-Communication.svg";
 
     case "marketing":
-      return "/join-button.svg";
+      return "/activeButton-Marketing.svg";
 
     case "default":
     default:
-      return "/join-button.svg";
+      return "/activeButton-Default.svg";
   }
 }
 function getActiveEffectLogo(theme?: string) {

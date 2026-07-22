@@ -24,11 +24,11 @@ function getActiveEffectImage(theme?: string) {
       return "/activeLink-Comm.svg";
 
     case "marketing":
-      return "/active-effect.svg";
+      return "/activeLink-Marketing.svg";
 
     case "default":
     default:
-      return "/active-effect.svg";
+      return "/activeLink-Default.svg";
   }
 } 
 

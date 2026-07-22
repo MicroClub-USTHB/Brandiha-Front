@@ -59,12 +59,12 @@ export function ThemePicker() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="relative h-17 w-30  rounded-full  outline-none "
+          className="relative p-2  h-15 w-25  rounded-full  outline-none "
         >
           <img
             src={activeEffectHand}
             alt="Profile"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
           />
         </button>
       </DropdownMenuTrigger>

@@ -41,7 +41,7 @@ const svgs = {
     Component: Gekko,
     width: 200,
     height: 214,
-    className: "absolute left-[86.11%] top-[21svh]",
+    className: "absolute left-[80.11%] top-[17svh]",
   },
   design: {
     src: "/Design.svg",
