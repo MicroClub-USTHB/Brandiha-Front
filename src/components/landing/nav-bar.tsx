@@ -26,7 +26,7 @@ function getActiveEffectImage(theme?: string) {
     case "marketing":
       return "/activeLink-Marketing.svg";
 
-    case "default":
+    case "chameleon":
     default:
       return "/activeLink-Default.svg";
   }

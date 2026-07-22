@@ -19,7 +19,7 @@ function getActiveEffectButton(theme?: string) {
     case "marketing":
       return "/activeButton-Marketing.svg";
 
-    case "default":
+    case "chameleon":
     default:
       return "/activeButton-Default.svg";
   }
@@ -38,7 +38,7 @@ function getActiveEffectLogo(theme?: string) {
     case "marketing":
       return "/activeLogo-Marketing.svg";
 
-    case "default":
+    case "chameleon":
     default:
       return "/nav-logo.svg";
   }

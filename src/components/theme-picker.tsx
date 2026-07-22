@@ -24,7 +24,7 @@ function getThemeHand(theme: string) {
       return "/hand-comm.svg";
     case "marketing":
       return "/hand-marketing.svg";
-    case "default":
+    case "chameleon":
     default:
       return "/hand-default.svg";
   }
@@ -32,7 +32,7 @@ function getThemeHand(theme: string) {
 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
-  const activeEffectHand = getThemeHand(theme ?? "default");
+  const activeEffectHand = getThemeHand(theme ?? "chameleon");
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,

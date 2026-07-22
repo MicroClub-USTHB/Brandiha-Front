@@ -28,7 +28,7 @@ const STOPS = [0.1107, 0.3147, 0.6811, 0.8494] as const;
  * Stroke style for the trail: the theme's 4-stop brand gradient laid out along
  * the trail itself (tail -> head), so the whole stroke shows the full gradient.
  * Falls back to the theme's solid --primary when the --grad-* stops aren't
- * defined (non-default themes) or the trail is too short to span a gradient.
+ * defined (non-chameleon themes) or the trail is too short to span a gradient.
  */
 function trailStroke(
   ctx: CanvasRenderingContext2D,

@@ -30,7 +30,7 @@ function getTimerBackground(theme?: string) {
       return "/timer-Communication.svg";
     case "marketing":
       return "/timer-Marketing.svg";
-    case "default":
+    case "chameleon":
     default:
       return "/timer-Default.svg";
   }
