@@ -1,8 +1,3 @@
-/**
- * The available standalone themes. `swatch` is an oklch color used only to
- * preview the theme in the picker — the real tokens live in `globals.css`
- * under the matching `[data-theme="…"]` block.
- */
 export const THEMES = [
   { value: "default", label: "Default", swatch: "oklch(0.205 0 0)" },
   { value: "marketing", label: "Marketing", swatch: "oklch(0.6734 0.1841 45.03)" },
