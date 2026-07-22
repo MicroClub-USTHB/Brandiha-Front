@@ -32,7 +32,10 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
         const color = STEP_COLORS[index % STEP_COLORS.length];
 
         return (
-          <li key={index} className="flex flex-1 items-center">
+          <li
+            key={index}
+            className={cn("flex items-center", index < count - 1 && "flex-1")}
+          >
             <div
               className="relative flex size-16 shrink-0 items-center justify-center"
               aria-current={index === current ? "step" : undefined}
@@ -46,9 +49,13 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
                   aria-hidden
                 />
               ) : (
-                <span
-                  className="absolute inset-2.5 rounded-full border-2 border-white/80"
+                <Image
+                  src="/step-circle.svg"
+                  alt=""
+                  width={62}
+                  height={62}
                   aria-hidden
+                  className="pointer-events-none absolute inset-0 m-auto size-11 object-contain"
                 />
               )}
 
