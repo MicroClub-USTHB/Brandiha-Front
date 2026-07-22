@@ -36,7 +36,7 @@ export function RegistrationsTitle() {
         Registrations
         {/* Anchored to the word: tweak alignment via the absolute offsets below. */}
         <Image
-          src="/underline-stroke.png"
+          src="/underline-stroke.svg"
           alt=""
           width={300}
           height={50}
