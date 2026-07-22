@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   title: "Brandiha",
   description: "one virage away from your brand !",
   icons: {
-    icon: "/primary-logo.svg",
-    shortcut: "/primary-logo.svg",
-    apple: "/primary-logo.svg",
+    icon: "/hand-default.svg",
+    shortcut: "/hand-default.svg",
+    apple: "/hand-default.svg",
   },
   openGraph: {
     type: "website",
