@@ -112,10 +112,10 @@ export function CustomCard({ card }: CustomCardProps) {
           </DialogClose>
         </DialogHeader>
 
-        <div className="relative max-h-[60vh] overflow-y-auto pr-4 pl-4">
-          <div className="absolute left-[28px] top-4 bottom-4 w-1 bg-orange-500" />
-
+        <div className="relative max-h-[60vh] overflow-y-auto pr-4 pl-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="space-y-8 relative">
+            <div className="absolute left-[13px] top-3.5 bottom-3.5 w-1 bg-orange-500" />
+
             {schedule.map((item, index) => (
               <div key={index} className="flex items-start relative pl-10">
                 <Circle className="absolute left-0 top-1.5 h-7 w-7 fill-[#0d131a] text-orange-500 stroke-[3]" />
