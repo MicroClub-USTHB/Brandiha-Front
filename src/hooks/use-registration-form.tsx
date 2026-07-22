@@ -1,9 +1,36 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm, Path, SubmitHandler, SubmitErrorHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { registrationSchema, RegistrationFormData } from "@/lib/validators/registration-schema";
 import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registration-fields";
 import { submitRegistration } from "@/lib/api/registrations";
+import { usePopupStore } from "@/components/ui/pop-up";
+
+/**
+ * Persists the in-progress form (values + current step) to localStorage so a
+ * page reload doesn't wipe the applicant's answers. Restored on mount by
+ * `RegistrationForm`, and cleared once a submission succeeds.
+ */
+export const useRegistrationPersist = create<{
+  savedStep: number;
+  setSavedStep: (step: number) => void;
+  savedValues: Partial<RegistrationFormData>;
+  setSavedValues: (values: Partial<RegistrationFormData>) => void;
+  reset: () => void;
+}>()(
+  persist(
+    (set) => ({
+      savedStep: 0,
+      setSavedStep: (savedStep) => set({ savedStep }),
+      savedValues: {},
+      setSavedValues: (savedValues) => set({ savedValues }),
+      reset: () => set({ savedStep: 0, savedValues: {} }),
+    }),
+    { name: "registration-form-storage" }
+  )
+);
 
 export function useRegistrationForm() {
   const [step, setStep] = useState(0);
@@ -45,26 +72,36 @@ export function useRegistrationForm() {
     (name) => name !== "AvailabilityMessage" || availability === "Other"
   );
 
-  const next = async () => {
+  const next = useCallback(async () => {
     const valid = await form.trigger(stepFieldNames as Path<RegistrationFormData>[]);
     if (valid) {
       setSubmitError(null);
       setStep((s) => Math.min(s + 1, steps.length - 1));
     }
-  };
+  }, [form, stepFieldNames, steps.length]);
 
-  const previous = () => {
+  const previous = useCallback(() => {
     setSubmitError(null);
     setStep((s) => Math.max(s - 1, 0));
-  };
+  }, []);
+
+  const goToStep = useCallback(
+    (target: number) => {
+      setStep(Math.max(0, Math.min(target, steps.length - 1)));
+    },
+    [steps.length]
+  );
 
   const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
     setSubmitError(null);
     const result = await submitRegistration(data);
     if (result.ok) {
       setIsSubmitted(true);
+      // Don't restore a form the user already submitted.
+      useRegistrationPersist.getState().reset();
+      usePopupStore.getState().openPopup("success");
     } else {
-      setSubmitError(result.error);
+      usePopupStore.getState().openPopup("error", undefined, result.error);
     }
   };
 
@@ -88,6 +125,7 @@ export function useRegistrationForm() {
     visibleFields,
     next,
     previous,
+    goToStep,
     submit,
     isSubmitting: form.formState.isSubmitting,
     submitError,

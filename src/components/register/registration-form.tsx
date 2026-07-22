@@ -1,9 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useRef } from "react";
 import { FieldPath } from "react-hook-form";
-import { useRegistrationForm } from "@/hooks/use-registration-form";
+import {
+  useRegistrationForm,
+  useRegistrationPersist,
+} from "@/hooks/use-registration-form";
 import {
   registrationSchema,
   RegistrationFormData,
@@ -16,6 +19,7 @@ import {
   PortfolioMotivationTitle,
   RegistrationsTitle,
 } from "@/components/register/step-title";
+import { Popup } from "@/components/ui/pop-up";
 import { cn } from "@/lib/utils";
 
 type FieldConfig = {
@@ -49,13 +53,55 @@ export default function RegistrationForm() {
     visibleFields,
     next,
     previous,
+    goToStep,
     submit,
     isSubmitting,
     submitError,
-    isSubmitted,
   } = useRegistrationForm();
   const currentFields = steps[step].fields as Record<string, FieldConfig>;
   const isLastStep = step === steps.length - 1;
+
+  // Restore persisted answers after hydration. The first render always uses the
+  // form defaults (matching SSR), and values are set here — post-mount — so there
+  // is no hydration mismatch to guard against.
+  const { setSavedStep, setSavedValues } = useRegistrationPersist();
+  const isHydratedRef = useRef(false);
+
+  useEffect(() => {
+    const { savedStep, savedValues } = useRegistrationPersist.getState();
+
+    for (const [key, value] of Object.entries(savedValues)) {
+      if (value !== undefined) {
+        form.setValue(key as FieldPath<RegistrationFormData>, value as never, {
+          shouldValidate: false,
+          shouldDirty: false,
+        });
+      }
+    }
+
+    if (savedStep > 0 && savedStep < steps.length) {
+      goToStep(savedStep);
+    }
+
+    isHydratedRef.current = true;
+    // Restore once, on mount only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Mirror step changes into storage (skip the initial restore).
+  useEffect(() => {
+    if (isHydratedRef.current) setSavedStep(step);
+  }, [step, setSavedStep]);
+
+  // Mirror field edits into storage (skip the initial restore).
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (isHydratedRef.current) {
+        setSavedValues(value as Partial<RegistrationFormData>);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setSavedValues]);
 
   const hue = STEP_HUES[step % STEP_HUES.length];
   const stepStyle = {
@@ -71,7 +117,7 @@ export default function RegistrationForm() {
       <div className={cn("w-[90%] sm:w-[70%] lg:w-[55%] flex justify-center mt-[clamp(0.75rem,3vh,3rem)]")}>
         <RegistrationStepper count={steps.length} current={step} />
       </div>
-      
+
       <form
         onSubmit={submit}
         style={{
@@ -157,30 +203,24 @@ export default function RegistrationForm() {
               {submitError}
             </p>
           )}
-          {isSubmitted && (
-            <p
-              role="status"
-              className={cn("text-center text-base font-semibold text-green-600 font-sans")}
-            >
-              You&apos;re registered! We&apos;ll be in touch soon.
-            </p>
-          )}
         </div>
 
         <div className={cn("flex justify-between items-center gap-4 px-6")}>
           <BackNavButton
             onClick={previous}
-            disabled={step === 0 || isSubmitting || isSubmitted}
+            disabled={step === 0 || isSubmitting}
             className={cn("h-14")}
           />
           <NextNavButton
             type={isLastStep ? "submit" : "button"}
             onClick={isLastStep ? undefined : next}
-            disabled={isSubmitting || isSubmitted}
+            disabled={isSubmitting}
             className={cn("h-14")}
           />
         </div>
       </form>
+
+      <Popup />
     </div>
   );
 }
