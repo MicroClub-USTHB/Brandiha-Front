@@ -126,7 +126,7 @@ export default function RegistrationForm() {
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
         }}
-        className={cn("reg-form grid w-full grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-transparent px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans")}
+        className={cn("reg-form grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-transparent px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans")}
       >
         {/* Scoped to `.reg-form` so these overrides don't leak to labels/inputs
             elsewhere in the app. Rendered once, not per field. */}
@@ -155,11 +155,11 @@ export default function RegistrationForm() {
 
         <div className={cn("flex flex-col justify-center gap-[clamp(1rem,3vh,2rem)]")}>
           <div className={cn("grid grid-cols-1 lg:grid-cols-12 gap-[clamp(0.75rem,2vw,1.5rem)] items-center")}>
-            <div className={cn("lg:col-span-4 flex justify-center items-center")}>
+            <div className={cn("hidden lg:flex lg:col-span-4 justify-center items-center")}>
               <div className={cn("relative w-[clamp(13rem,30vh,26rem)] h-[clamp(13rem,30vh,26rem)] flex items-center justify-center")}>
                 <Image
-                  src="/frog-icon.png"
-                  alt="Frog Mascot"
+                  src="/chameleon-logo.png"
+                  alt="Chameleon logo"
                   width={256}
                   height={256}
                   className={cn("w-full h-full object-contain pointer-events-none")}
@@ -168,7 +168,7 @@ export default function RegistrationForm() {
             </div>
 
             <div className={cn("lg:col-span-8 flex flex-col justify-center gap-4")}>
-              <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-[clamp(0.75rem,2.5vh,1.25rem)] items-start")}>
+              <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-[clamp(0.75rem,2.5vh,1.25rem)] items-start w-[80%] mx-auto sm:w-full sm:mx-0")}>
                 {visibleFields.map((name) => {
                   const { label, type, options, fullWidth } = currentFields[name];
                   const required = !registrationSchema.shape[
