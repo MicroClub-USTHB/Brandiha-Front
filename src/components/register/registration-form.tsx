@@ -123,7 +123,7 @@ export default function RegistrationForm() {
         onSubmit={submit}
         style={{
           ...stepStyle,
-          backgroundImage: "url('/frame.svg')",
+          backgroundImage: "url('/paper.svg')",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
         }}

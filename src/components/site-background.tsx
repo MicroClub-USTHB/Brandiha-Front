@@ -1,15 +1,15 @@
 import { DecorativeSvg } from "@/components/landing/decorative-svg";
 
 const decorations = [
-  "compound-path-17",
-  "compound-path-18",
-  "vector",
-  "design",
-  "marketing",
-  "multi",
-  "dev",
-  "comm",
-  "bshhhhh",
+  "pink-splash",
+  "blue-splash",
+  "gekko",
+  "design-tag",
+  "marketing-tag",
+  "multimedia-tag",
+  "dev-tag",
+  "communication-tag",
+  "spray-bomb",
 ] as const;
 
 /**
