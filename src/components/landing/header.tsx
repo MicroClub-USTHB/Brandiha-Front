@@ -24,6 +24,7 @@ function getActiveEffectButton(theme?: string) {
       return "/activeButton-Default.svg";
   }
 }
+
 function getActiveEffectLogo(theme?: string) {
   switch (theme) {
     case "design":
@@ -50,13 +51,14 @@ export function Header() {
   const activeLogo = getActiveEffectLogo(theme);
   return (
     <header className="absolute top-0 left-0 right-0 z-50 w-full  bg-[#000000]">
-      <div className="mx-auto flex h-23.75  items-center px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-24 items-center px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
             src={activeLogo}
             alt="Brandiha"
             width={253}
             height={62}
+            className="h-12"
             priority
           />
         </Link>
@@ -68,6 +70,7 @@ export function Header() {
               alt="Join"
               width={211}
               height={69}
+              className="h-15"
               priority
             />
           </Link>

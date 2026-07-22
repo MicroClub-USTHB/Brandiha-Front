@@ -57,33 +57,29 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   return (
     <div
       className={cn(
-        "relative z-10 w-full max-w-[min(100%,38rem)] overflow-hidden rounded-[1.5rem] lg:max-w-[min(100%,40rem)] xl:max-w-[min(100%,30rem)] 2xl:max-w-[min(100%,44rem)]",
+        "relative z-10 overflow-hidden min-w-[30svw] max-w-[80svw] px-8 py-3 grid grid-cols-4 text-white gap-5",
         className,
       )}
+
+      style={{
+        backgroundImage: `url('${timerBackground}')`,
+        backgroundSize: "100%",
+        backgroundRepeat: "no-repeat",
+      }}
     >
-      <Image
-        src={timerBackground}
-        alt=""
-        fill
-        priority
-        sizes="(max-width: 768px) 92vw, 704px"
-        className="object-cover"
-      />
-      <div className="relative z-10 grid grid-cols-2 gap-1.5 p-1.5 sm:gap-2 sm:p-2 md:grid-cols-4 lg:p-2.5 xl:gap-0 xl:p-0 2xl:p-3.5">
-        {units.map((unit) => (
-          <div
-            key={unit.label}
-            className="flex min-w-0 flex-col items-center justify-center rounded-[1rem] bg-transparent px-1.5 py-2 text-center sm:px-2 sm:py-2.5 lg:px-2.5 lg:py-3 xl:px-3 xl:py-3.25"
-          >
-            <span className="font-heading text-[1.7rem] leading-none text-white tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)] sm:text-[1.85rem] lg:text-[2.2rem] xl:text-[2.55rem] 2xl:text-[2.9rem]">
-              {String(unit.value).padStart(2, "0")}
-            </span>
-            <span className="mt-0.5 font-heading text-[0.5rem] uppercase tracking-[0.18em] text-white sm:text-[0.55rem] lg:text-[0.6rem] xl:text-[0.65rem]">
-              {unit.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
+      {units.map((unit) =>
+        <div
+          key={unit.label}
+          className="flex min-w-0 flex-col items-center justify-center text-center"
+        >
+          <span className="font-heading drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)] text-3xl font-bold sm:text-4xl">
+            {String(unit.value).padStart(2, "0")}
+          </span>
+          <span className="font-heading uppercase text-white">
+            {unit.label}
+          </span>
+        </div>
+      )}
+    </div >
   );
 }
