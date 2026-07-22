@@ -11,15 +11,16 @@ import {
   registrationSchema,
   RegistrationFormData,
 } from "@/lib/validators/registration-schema";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { RegistrationField } from "@/components/register/registration-field";
 import { RegistrationStepper } from "@/components/register/registration-stepper";
-import { BackNavButton, NextNavButton } from "@/components/register/nav-buttons";
+import { ActionButton } from "@/components/action-button";
 import {
   AvailabilityTitle,
   PortfolioMotivationTitle,
   RegistrationsTitle,
 } from "@/components/register/step-title";
-import { Popup } from "@/components/ui/pop-up";
+import { Popup } from "@/components/pop-up";
 import { cn } from "@/lib/utils";
 
 type FieldConfig = {
@@ -211,20 +212,30 @@ export default function RegistrationForm() {
         </div>
 
         <div className={cn("flex justify-between items-center gap-4 px-6")}>
-          <BackNavButton
+          <ActionButton
+            variant="secondary"
+            type="button"
             onClick={previous}
             disabled={step === 0 || isSubmitting}
             className={cn("h-14")}
-          />
+          >
+            <ArrowLeft className={cn("size-5 stroke-[2.5]")} />
+            Back
+          </ActionButton>
           {/* Always type="button" so advancing to the last step can't let the
               same click fall through to a native form submit. On the last step
               we invoke the submit handler explicitly instead. */}
-          <NextNavButton
+          <ActionButton
+            variant="primary"
+            splash
             type="button"
             onClick={isLastStep ? submit : next}
             disabled={isSubmitting}
             className={cn("h-14")}
-          />
+          >
+            {isLastStep ? "Submit" : "Next"}
+            <ArrowRight className={cn("size-5 stroke-[2.5]")} />
+          </ActionButton>
         </div>
       </form>
 

@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 import { registrationSchema, RegistrationFormData } from "@/lib/validators/registration-schema";
 import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registration-fields";
 import { submitRegistration } from "@/lib/api/registrations";
-import { usePopupStore } from "@/components/ui/pop-up";
+import { usePopupStore } from "@/components/pop-up";
 
 /**
  * Persists the in-progress form (values + current step) to localStorage so a
