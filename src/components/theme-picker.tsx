@@ -24,9 +24,28 @@ function Swatch({ color }: { color: string }) {
     />
   );
 }
+function getActiveEffectHand(theme?: string) {
+  switch (theme) {
+    case "design":
+      return "/hand-design.svg";
 
+    case "multimedia":
+      return "/hand-multi.svg";
+
+    case "communication":
+      return "/hand-comm.svg";
+
+    case "marketing":
+      return "/hand-marketing.svg";
+
+    case "default":
+    default:
+      return "/hand-default.svg";
+  }
+} 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
+  const activeEffectHand = getActiveEffectHand(theme);
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -38,9 +57,16 @@ export function ThemePicker() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" aria-label="Select theme">
-          <PaletteIcon />
-        </Button>
+        <button
+          type="button"
+          className="relative h-17 w-30  rounded-full  outline-none "
+        >
+          <img
+            src={activeEffectHand}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-40">
         <DropdownMenuRadioGroup
