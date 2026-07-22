@@ -17,7 +17,7 @@ export function Hero() {
           width={620}
           height={153}
           priority
-          className="h-auto w-[85%] max-w-[50rem]"
+          className="h-auto w-full lg:w-[55%] 2xl:w-[85%] max-w-200"
         />
         <CountdownTimer targetDate={targetDate} />
         <div className="flex w-full flex-col items-center gap-[2vh] text-center">
