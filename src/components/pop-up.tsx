@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, Check, AlertTriangle, XCircle } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
@@ -94,63 +93,64 @@ export function Popup() {
       onClick={closePopup}
     >
       <div
-        className={cn("relative w-full max-w-3xl flex items-center justify-center")}
+        className={cn("relative w-full max-w-md sm:max-w-3xl")}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={cn("relative w-full flex items-center justify-center")}>
-          <Image
-            src={config.imageSrc}
-            alt="Popup Frame"
-            width={950}
-            height={650}
-            priority
-            className={cn("w-full h-auto object-contain drop-shadow-2xl pointer-events-none")}
-          />
+        {/* The frame is a background stretched to the content box, so it grows
+            with the content instead of being scaled by width (which left it far
+            too short for the text on mobile). */}
+        <div
+          className={cn(
+            "relative flex flex-col items-center justify-center gap-4 sm:gap-5 px-[13%] py-12 sm:py-16 text-center drop-shadow-2xl",
+          )}
+          style={{
+            backgroundImage: `url('${config.imageSrc}')`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <button
+            onClick={closePopup}
+            aria-label="Close"
+            className={cn("absolute right-[8%] top-[9%] text-white hover:text-white/80 transition-colors")}
+          >
+            <X className={cn("size-5 sm:size-6 stroke-[3]")} />
+          </button>
 
-          <div className={cn("absolute inset-0 z-10 flex flex-col items-center justify-between py-12 px-20 text-center")}>
-            <button
-              onClick={closePopup}
-              aria-label="Close"
-              className={cn("absolute right-14 top-10 text-white hover:text-white/80 transition-colors")}
-            >
-              <X className={cn("size-6 stroke-[3]")} />
-            </button>
+          {/* Perfect circle icon with glow and thin vector inside */}
+          <div className={cn("flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full shrink-0", config.iconBg, config.glowColor)}>
+            <Icon className={cn("w-7 h-7 sm:w-8 sm:h-8 stroke-[1.25] text-black")} />
+          </div>
 
-            {/* Perfect circle icon with glow and thin vector inside */}
-            <div className={cn("flex items-center justify-center w-16 h-16 rounded-full shrink-0 mt-2", config.iconBg, config.glowColor)}>
-              <Icon className={cn("w-8 h-8 stroke-[1.25] text-black")} />
-            </div>
+          <div className={cn("flex flex-col items-center gap-2 w-full")}>
+            <h2 className={cn("font-heading text-xl sm:text-3xl font-extrabold uppercase tracking-wide text-[#38bdf8] drop-shadow-sm")}>
+              {title || config.defaultTitle}
+            </h2>
+            <p className={cn("font-hand text-xs sm:text-base font-bold tracking-wider uppercase text-white/90")}>
+              {description || config.defaultDesc}
+            </p>
+          </div>
 
-            <div className={cn("flex flex-col items-center gap-2 w-full my-auto")}>
-              <h2 className={cn("font-heading text-2xl sm:text-3xl font-extrabold uppercase tracking-wide text-[#38bdf8] drop-shadow-sm")}>
-                {title || config.defaultTitle}
-              </h2>
-              <p className={cn("font-hand text-sm sm:text-base font-bold tracking-wider uppercase text-white/90")}>
-                {description || config.defaultDesc}
-              </p>
-            </div>
-
-            <div className={cn("flex items-center justify-center gap-12 w-full mt-8 mb-2")}>
-              {config.showSecondary && (
-                <ActionButton
-                  variant="secondary"
-                  type="button"
-                  onClick={closePopup}
-                  className={cn("h-12 -rotate-1 px-7 text-sm")}
-                >
-                  {config.secondaryBtnText}
-                </ActionButton>
-              )}
-
+          <div className={cn("flex items-center justify-center gap-4 sm:gap-12 w-full mt-2 sm:mt-6")}>
+            {config.showSecondary && (
               <ActionButton
-                variant="primary"
+                variant="secondary"
                 type="button"
-                onClick={handleHomeClick}
-                className={cn("h-12 -rotate-1 px-10 text-sm tracking-wider")}
+                onClick={closePopup}
+                className={cn("h-10 sm:h-12 -rotate-1 px-5 sm:px-7 text-xs sm:text-sm")}
               >
-                {config.primaryBtnText}
+                {config.secondaryBtnText}
               </ActionButton>
-            </div>
+            )}
+
+            <ActionButton
+              variant="primary"
+              type="button"
+              onClick={handleHomeClick}
+              className={cn("h-10 sm:h-12 -rotate-1 px-6 sm:px-10 text-xs sm:text-sm tracking-wider")}
+            >
+              {config.primaryBtnText}
+            </ActionButton>
           </div>
         </div>
       </div>
