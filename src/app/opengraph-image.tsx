@@ -23,8 +23,12 @@ export default async function Image() {
   const logoPng = await sharp(Buffer.from(logoSvg)).resize(800).png().toBuffer();
   const logoBase64 = logoPng.toString("base64");
 
-  const fontData = readFileSync(
+  const fontBuf = readFileSync(
     join(process.cwd(), "src", "app", "fonts", "SEEKUW.otf"),
+  );
+  const fontArrayBuffer = fontBuf.buffer.slice(
+    fontBuf.byteOffset,
+    fontBuf.byteOffset + fontBuf.byteLength,
   );
 
   return new ImageResponse(
@@ -70,7 +74,7 @@ export default async function Image() {
       fonts: [
         {
           name: "SEEKUW",
-          data: fontData.buffer as ArrayBuffer,
+          data: fontArrayBuffer,
           weight: 400,
           style: "normal",
         },
