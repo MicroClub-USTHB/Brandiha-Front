@@ -80,8 +80,9 @@ export function Header() {
         alt=""
         width={337}
         height={125}
-        className="absolute top-full left-0 h-[10svw] aspect-auto"
+        className="absolute top-[99%] left-0"
       />
     </header>
   );
 }
+
