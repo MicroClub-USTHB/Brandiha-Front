@@ -3,7 +3,6 @@
 import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { PaletteIcon } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,9 +27,6 @@ function Swatch({ color }: { color: string }) {
 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
-
-  // The active theme is only known on the client, so avoid reflecting the
-  // selection until mounted to prevent a hydration mismatch.
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,

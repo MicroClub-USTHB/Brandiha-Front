@@ -41,7 +41,7 @@ export default function RegistrationForm() {
   const hideStroke = isThirdStep || isFourthStep;
 
   return (
-    <div className={cn("relative mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4")}>
+    <div className={cn("relative mx-auto flex w-full max-w-6xl flex-col items-center  gap-6 px-4")}>
       <div className={cn("fixed left-6 top-6 z-50")}>
         <Image src="/primary-logo.svg" alt="Logo" width={208} height={60} className={cn("w-52 h-auto")} />
       </div>
@@ -54,7 +54,7 @@ export default function RegistrationForm() {
         onSubmit={form.handleSubmit(console.log)}
         style={{
           ...stepStyle,
-          backgroundImage: "url('/frame.png')",
+          backgroundImage: "url('/frame.svg')",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
         }}

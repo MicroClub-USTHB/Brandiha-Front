@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { NavBar } from "@/components/landing/nav-bar";
+import { ThemePicker } from "../theme-picker";
 
 export function Header() {
   return (
@@ -16,6 +17,7 @@ export function Header() {
           />
         </Link>
         <NavBar />
+        <ThemePicker/>
         <Link href="/register">
           <Image
             src="/join-button.svg"
