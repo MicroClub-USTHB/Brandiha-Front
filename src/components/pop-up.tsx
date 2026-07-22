@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, Check, AlertTriangle, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/action-button";
 import { create } from "zustand";
 import { cn } from "@/lib/utils";
 
@@ -130,42 +130,26 @@ export function Popup() {
               </p>
             </div>
 
-            <div className={cn("flex items-center justify-center gap-6 w-full mb-2")}>
+            <div className={cn("flex items-center justify-center gap-12 w-full mt-8 mb-2")}>
               {config.showSecondary && (
-                <Button
+                <ActionButton
+                  variant="secondary"
                   type="button"
                   onClick={closePopup}
-                  className={cn("relative h-12 -rotate-1 rounded-xl border-0 bg-transparent px-7 font-sans text-sm font-bold uppercase hover:bg-transparent")}
+                  className={cn("h-12 -rotate-1 px-7 text-sm")}
                 >
-                  <div className={cn("absolute inset-0 w-full h-full pointer-events-none scale-105 rounded-xl bg-[#333333] border-2 border-orange-500/80")} />
-                  <span className={cn("relative z-10 text-white")}>
-                    {config.secondaryBtnText}
-                  </span>
-                </Button>
+                  {config.secondaryBtnText}
+                </ActionButton>
               )}
 
-              <div className={cn("relative isolate -rotate-1")}>
-                <Button
-                  type="button"
-                  onClick={handleHomeClick}
-                  className={cn("relative h-12 gap-2 rounded-xl border-0 bg-transparent px-10 text-sm font-bold uppercase hover:bg-transparent overflow-visible font-sans")}
-                >
-                  <div 
-                    className={cn("absolute inset-0 w-full h-full pointer-events-none scale-110 rounded-xl shadow-md bg-orange-500")}
-                    style={{
-                      WebkitMaskImage: "url('/orange-button.png')",
-                      maskImage: "url('/orange-button.png')",
-                      WebkitMaskSize: "100% 100%",
-                      maskSize: "100% 100%",
-                      WebkitMaskRepeat: "no-repeat",
-                      maskRepeat: "no-repeat",
-                    }}
-                  />
-                  <span className={cn("relative z-10 font-extrabold text-black font-sans text-sm tracking-wider")}>
-                    {config.primaryBtnText}
-                  </span>
-                </Button>
-              </div>
+              <ActionButton
+                variant="primary"
+                type="button"
+                onClick={handleHomeClick}
+                className={cn("h-12 -rotate-1 px-10 text-sm tracking-wider")}
+              >
+                {config.primaryBtnText}
+              </ActionButton>
             </div>
           </div>
         </div>
