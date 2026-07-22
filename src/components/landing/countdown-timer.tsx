@@ -37,7 +37,7 @@ function getTimerBackground(theme?: string) {
 }
 
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
-  const [time, setTime] = useState(() => getTimeLeft(targetDate));
+  const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const { theme } = useTheme();
 
   useEffect(() => {
