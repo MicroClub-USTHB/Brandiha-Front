@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Section } from "@/components/landing/section";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
 
-const targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+const targetDate = new Date(2026, 6, 25, 22, 30, 0, 0);
 
 export function Hero() {
   return (
