@@ -31,25 +31,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://brandiha.microclub.info";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Brandiha",
-  description: "Brandiha creative agency",
+  description: "one virage away from your brand !",
   icons: {
     icon: "/primary-logo.svg",
     shortcut: "/primary-logo.svg",
     apple: "/primary-logo.svg",
   },
   openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Brandiha",
+    url: siteUrl,
     title: "Brandiha",
-    description: "Brandiha creative agency",
-    images: [
-      {
-        url: "/primary-logo.svg",
-        width: 620,
-        height: 153,
-        alt: "Brandiha",
-      },
-    ],
+    description: "one virage away from your brand !",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Brandiha",
+    description: "one virage away from your brand !",
   },
 };
 
