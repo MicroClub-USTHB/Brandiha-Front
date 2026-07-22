@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { NavBar } from "@/components/landing/nav-bar";
 import { ThemePicker } from "../theme-picker";
 import { useTheme } from "next-themes";
 
@@ -81,7 +80,7 @@ export function Header() {
         alt=""
         width={337}
         height={125}
-        className="absolute top-[99%] left-0"
+        className="absolute top-full left-0 h-[10svw] aspect-auto"
       />
     </header>
   );

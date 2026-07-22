@@ -7,6 +7,7 @@ const decorations = [
   "design",
   "marketing",
   "multi",
+  "dev",
   "comm",
   "bshhhhh",
 ] as const;
