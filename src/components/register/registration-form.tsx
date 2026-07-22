@@ -142,6 +142,11 @@ export default function RegistrationForm() {
           .reg-form :is(input, textarea, select, [data-slot="control"]) {
             font-family: var(--font-hand) !important;
           }
+          /* Checkbox labels sit beside the box, not above an input, so the
+             stacking margin above would throw off vertical centering. */
+          .reg-form [data-orientation="horizontal"] label {
+            margin-bottom: 0 !important;
+          }
         `}</style>
 
         <div className={cn("flex flex-col items-center")}>

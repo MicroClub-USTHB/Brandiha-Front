@@ -50,6 +50,7 @@ type FormBaseProps<
   horizontal?: boolean;
   controlFirst?: boolean;
   hideLabel?: boolean;
+  fieldClassName?: string;
   children: (
     field: Parameters<
       ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
@@ -84,6 +85,7 @@ function FormField<
   controlFirst,
   horizontal,
   hideLabel,
+  fieldClassName,
 }: FormBaseProps<TFieldValues, TName, TTransformedValues>) {
   return (
     <Controller
@@ -124,6 +126,7 @@ function FormField<
           <Field
             data-invalid={fieldState.invalid}
             orientation={horizontal ? "horizontal" : undefined}
+            className={fieldClassName}
           >
             {controlFirst ? (
               <>
@@ -251,7 +254,10 @@ export const FormSelect: FormControlFunction<{
 );
 
 export const FormCheckbox: FormControlFunction = (props) => (
-  <FormField {...props} horizontal controlFirst>
+  // The horizontal Field top-aligns the box with the label block (`items-start`)
+  // for multi-line labels; a single-line checkbox reads better centered. The
+  // matching label bottom-margin reset lives in the `.reg-form` global styles.
+  <FormField {...props} horizontal controlFirst fieldClassName="!items-center">
     {({ onChange, value, ...field }) => (
       <Checkbox {...field} checked={value} onCheckedChange={onChange} />
     )}
