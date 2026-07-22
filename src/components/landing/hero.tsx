@@ -10,7 +10,7 @@ export function Hero() {
       as="section"
       className="relative flex min-h-screen w-full max-w-none flex-col items-center justify-center overflow-hidden px-4 py-28 sm:px-6 sm:py-32"
     >
-      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center gap-5 sm:gap-6 lg:gap-8">
+      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center gap-5 sm:gap-6 lg:gap-4">
         <Image
           src="/primary-logo.svg"
           alt="Brandiha"

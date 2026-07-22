@@ -50,7 +50,7 @@ export function Header() {
   const activeLogo = getActiveEffectLogo(theme);
   return (
     <header className="absolute top-0 left-0 right-0 z-50 w-full  bg-[#000000]">
-      <div className="mx-auto flex h-23.75 max-w-6xl items-center gap-25 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-23.75  items-center px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
             src={activeLogo}
@@ -60,17 +60,18 @@ export function Header() {
             priority
           />
         </Link>
-        <NavBar />
-        <ThemePicker/>
-        <Link href="/register">
-          <Image
-            src={activeButton}
-            alt="Join"
-            width={211}
-            height={69}
-            priority
-          />
-        </Link>
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <ThemePicker />
+          <Link href="/register">
+            <Image
+              src={activeButton}
+              alt="Join"
+              width={211}
+              height={69}
+              priority
+            />
+          </Link>
+        </div>
       </div>
       <Image
         src="/fall-paint.svg"
