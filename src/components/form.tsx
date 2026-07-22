@@ -208,16 +208,41 @@ export const FormSelect: FormControlFunction<{
   children: ReactNode;
   placeholder?: string;
   disabled?: boolean;
-}> = ({ children, placeholder = "Select", disabled, ...props }) => (
-  <FormField {...props}>
+}> = ({ children, placeholder, disabled, ...props }) => (
+  // `hideLabel` + label-as-placeholder so the trigger reads as a pill matching
+  // the text inputs (same height, radius, border-2, and card background).
+  <FormField {...props} hideLabel>
     {({ onChange, onBlur, ...field }) => (
       <Select {...field} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           aria-invalid={field["aria-invalid"]}
           id={field.id}
           onBlur={onBlur}
+          // Inline bg/border tokens so the trigger fill and stroke exactly match
+          // the text-input pill, regardless of the base trigger classes.
+          style={{ backgroundColor: "var(--card)", borderColor: "var(--input)" }}
+          className="relative h-12 w-full rounded-lg border-2 px-4 text-base shadow-xs md:text-sm data-[size=default]:h-12"
         >
-          <SelectValue placeholder={placeholder} />
+          {/* Decorative break in the top-left border, matching the inputs. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-[3px] left-5 h-[3px] w-3.5"
+            style={{ backgroundColor: "var(--card)" }}
+          />
+          {props.required && (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute top-1.5 right-3 text-lg leading-none font-bold text-primary"
+            >
+              *
+            </span>
+          )}
+          <SelectValue
+            placeholder={
+              placeholder ??
+              (typeof props.label === "string" ? props.label : "Select")
+            }
+          />
         </SelectTrigger>
         <SelectContent>{children}</SelectContent>
       </Select>
