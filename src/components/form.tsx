@@ -94,7 +94,7 @@ function FormField<
       render={({ field, fieldState }) => {
         const labelElement = (
           <FieldLabel htmlFor={field.name} className={hideLabel ? "sr-only" : undefined}>
-            <span>
+            <span className="text-md">
               {label}
               {required && (
                 <span
@@ -172,23 +172,23 @@ export const FormInput: FormControlFunction<{
   onChangeCapture,
   ...props
 }) => (
-  <FormField {...props} hideLabel>
-    {(field) => (
-      <Input
-        type={type}
-        placeholder={
-          placeholder ?? (typeof props.label === "string" ? props.label : undefined)
-        }
-        icon={icon}
-        required={props.required}
-        className={className}
-        disabled={disabled}
-        onChangeCapture={onChangeCapture}
-        {...field}
-      />
-    )}
-  </FormField>
-);
+    <FormField {...props} hideLabel>
+      {(field) => (
+        <Input
+          type={type}
+          placeholder={
+            placeholder ?? (typeof props.label === "string" ? props.label : undefined)
+          }
+          icon={icon}
+          required={props.required}
+          className={className}
+          disabled={disabled}
+          onChangeCapture={onChangeCapture}
+          {...field}
+        />
+      )}
+    </FormField>
+  );
 
 export const FormTextarea: FormControlFunction<
   ComponentPropsWithoutRef<typeof Textarea>

@@ -4,7 +4,7 @@ import RegistrationForm from "@/components/register/registration-form";
 
 export default function RegisterPage() {
   return (
-    <main className="relative flex h-screen max-h-screen items-center justify-center overflow-hidden p-4">
+    <main className="relative flex md:h-screen md:max-h-screen items-center justify-center overflow-hidden p-4">
       <Link href="/" className="absolute left-6 top-6 z-50">
         <Image
           src="/brandiha-logo.svg"
