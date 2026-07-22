@@ -9,7 +9,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-hand: var(--font-hand);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +40,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-brand-marketing: var(--brand-marketing);
+  --color-brand-communication: var(--brand-communication);
+  --color-brand-multimedia: var(--brand-multimedia);
+  --color-brand-design: var(--brand-design);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,10 +54,18 @@
 }
 
 :root,
-[data-theme="default"] {
+[data-theme="chameleon"] {
   /* Shared ink + paper used across every theme */
-  --white: oklch(0.996 0.0196 106.75); /* #FFFFF0 */
-  --black: oklch(0.1776 0 0); /* #111111 */
+  --white: oklch(0.996 0.0196 106.75);
+  /* #FFFFF0 */
+  --black: oklch(0.1776 0 0);
+  /* #111111 */
+
+  /* Fixed brand hues — one per pillar, theme-independent (used by the stepper) */
+  --brand-marketing: oklch(0.6734 0.1841 45.03); /* #EE6818 */
+  --brand-communication: oklch(0.6747 0.1787 250.27); /* #249AFF */
+  --brand-multimedia: oklch(0.6298 0.2193 3.49); /* #EB367B */
+  --brand-design: oklch(0.8971 0.1605 180.46); /* #15FFE2 */
 
   --background: var(--white);
   --foreground: var(--black);
@@ -60,7 +73,9 @@
   --card-foreground: var(--black);
   --popover: var(--white);
   --popover-foreground: var(--black);
-  --primary: oklch(0.205 0 0);
+  /* Solid fallback (first gradient stop, #EE6818) for text/border/ring uses;
+     `bg-primary` backgrounds are overpainted with --primary-gradient below. */
+  --primary: oklch(0.6734 0.1841 45.03);
   --primary-foreground: var(--white);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -86,6 +101,39 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Chameleon theme only: the primary "colour" is a 4-stop brand gradient. Authored
+   in sRGB hex to preserve the exact stops. The graffiti splash/trail read these
+   stops directly; other themes never define them, so those fall back to the
+   theme's solid --primary. */
+[data-theme="chameleon"] {
+  --grad-1: #ee6818;
+  --grad-2: #eb367b;
+  --grad-3: #249aff;
+  --grad-4: #15ffe2;
+  --primary-gradient: linear-gradient(
+    93.57deg,
+    var(--grad-1) 11.07%,
+    var(--grad-2) 31.47%,
+    var(--grad-3) 68.11%,
+    var(--grad-4) 84.94%
+  );
+
+  /* Gekko mascot's own gradient stops. Defined for the chameleon theme only, so
+     under any other theme the SVG stops fall back to that theme's solid
+     --primary (see src/components/gekko.tsx). */
+  --gekko-1: #c55715;
+  --gekko-2: #c42e67;
+  --gekko-3: #2684d4;
+  --gekko-4: #19d5be;
+}
+
+/* Paint the gradient over any primary background (buttons, badges, …). The
+   solid --primary stays underneath, so hover:bg-primary/xx and non-background
+   primary uses still resolve to a colour. */
+[data-theme="chameleon"] .bg-primary {
+  background-image: var(--primary-gradient);
 }
 
 .dark {
@@ -266,10 +314,126 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
+}
+
+/* ── Graffiti spray-can cursor ─────────────────────────────────────────────
+   Cosmetic layer only. Mounted client-side by <GraffitiCursor>, which also
+   toggles `.graffiti-cursor-active` on <html>. The native cursor is only
+   hidden while the custom cursor is actually rendering. */
+
+@media (hover: hover) and (pointer: fine) {
+  html.graffiti-cursor-active,
+  html.graffiti-cursor-active * {
+    cursor: none;
+  }
+}
+
+.graffiti-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Animated spray-can sprite (8-frame sheet extracted from the SweezyCursors
+   .ani, ~12fps). Offset so the nozzle hotspot (28,6 in the 128px art) lands on
+   the pointer; that same point is the pivot for the hover pop. */
+.graffiti-cursor__can {
+  width: 40px;
+  height: 40px;
+  background-image: url("/cursor/graffiti-spray-sprite.png");
+  background-repeat: no-repeat;
+  background-size: 320px 40px;
+  transform-origin: 8.75px 1.9px;
+  transform: translate(-8.75px, -1.9px);
+  transition: transform 150ms ease-out;
+  animation: graffiti-spray 667ms steps(8) infinite;
+}
+
+/* Over interactive elements: swap to the static graffiti pointer (its own
+   hotspot is 10,6), drop the spray animation, and pop slightly. */
+.graffiti-cursor[data-hover="true"] .graffiti-cursor__can {
+  background-image: url("/cursor/graffiti-pointer.png");
+  background-size: 40px 40px;
+  background-position: 0 0;
+  animation: none;
+  transform-origin: 3.125px 1.9px;
+  transform: translate(-3.125px, -1.9px) scale(1.15);
+}
+
+@keyframes graffiti-spray {
+  to {
+    background-position-x: -320px;
+  }
+}
+
+.graffiti-splatter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;
+  pointer-events: none;
+  animation: graffiti-burst 500ms ease-out forwards;
+}
+
+/* Full-viewport canvas the continuous paint trail is drawn onto. Sits above
+   page content but below the cursor + click bursts. */
+.graffiti-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+}
+
+/* Splatter colour variants, tied to theme tokens so each look stays on-brand. */
+.graffiti-var-0 {
+  color: var(--primary);
+}
+.graffiti-var-1 {
+  color: var(--chart-2);
+}
+.graffiti-var-2 {
+  color: var(--chart-4);
+}
+
+@keyframes graffiti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.3) rotate(14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graffiti-cursor,
+  .graffiti-splatter,
+  .graffiti-trail {
+    display: none;
+  }
+}
+
+@utility splash-mask {
+  -webkit-mask: url("/stepper-splash.svg") center / contain no-repeat;
+  mask: url("/stepper-splash.svg") center / contain no-repeat;
+}
+
+@utility next-splash-mask {
+  -webkit-mask: url("/next-button-splash.svg") center / contain no-repeat;
+  mask: url("/next-button-splash.svg") center / contain no-repeat;
 }

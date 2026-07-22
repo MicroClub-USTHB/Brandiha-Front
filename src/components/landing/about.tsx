@@ -3,7 +3,7 @@ import { Section } from "@/components/landing/section";
 export function About() {
   return (
     <Section as="section" id="about" className="bg-muted">
-      <h2 className="text-3xl font-bold text-foreground">About</h2>
+      <h2 className="font-heading text-3xl font-bold text-foreground">About</h2>
       <p className="mt-4 max-w-3xl text-muted-foreground">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure
         dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat

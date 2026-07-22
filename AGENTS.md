@@ -10,7 +10,7 @@ easy to get wrong.
 - **Next.js 16** (App Router, Turbopack) · **React 19**
 - **TypeScript** (strict)
 - **Tailwind CSS v4** (CSS-first config in `globals.css`, no `tailwind.config`)
-- **shadcn/ui** on **base-ui** (`@base-ui/react`), style `base-nova` — see `components.json`
+- **shadcn/ui** on **Radix** (`radix-ui`), style `radix-vega` — see `components.json`
 - **next-themes** for theming
 - **lucide-react** for icons
 - **pnpm** (Node 24). Use pnpm only; do not introduce npm/yarn lockfiles.
@@ -31,11 +31,26 @@ both pass; run them after any non-trivial change.
 
 ```
 src/
-  app/            # App Router: layout.tsx, page.tsx, globals.css
+  app/
+    page.tsx               # Landing page
+    register/page.tsx      # Registration page
+    globals.css            # Tailwind v4 config + theme CSS variables
+    layout.tsx             # Root layout (ThemeProvider, fonts)
   components/
-    ui/           # shadcn primitives (button, dropdown-menu, …) — add via CLI
-    *.tsx         # app-level components (theme-picker, theme-provider, …)
-  lib/            # utilities & shared data (utils.ts → cn(), themes.ts)
+    ui/                    # shadcn primitives — add via CLI
+    landing/               # Landing page sections (hero, about, agenda, authors, footer, header, section)
+    register/              # Registration form (registration-form.tsx)
+    form.tsx               # FormInput, FormTextarea, FormSelect, FormCheckbox wrappers
+    theme-picker.tsx       # Theme picker UI
+    theme-provider.tsx     # "use client" boundary for next-themes
+  hooks/
+    use-registration-form.tsx  # Multi-step form logic (react-hook-form + Zod)
+  lib/
+    utils.ts               # cn() helper
+    themes.ts              # Theme list (single source of truth)
+    registration-fields.ts # Step/field definitions for the registration form
+    validators/
+      registration-schema.ts  # Zod schema (superRefine for AvailabilityMessage)
 ```
 
 ## Conventions (the ones that matter)
@@ -43,7 +58,7 @@ src/
 - **Imports use the `@/…` alias** (maps to `src/`). Never `../../`.
 - **UI primitives come from `src/components/ui/`.** Add new ones with the shadcn
   CLI (`pnpm dlx shadcn@latest add <component>`) — do not hand-roll them or add a
-  competing UI library. They're base-ui under the hood.
+  competing UI library. They're Radix under the hood.
 - **Colors are semantic tokens only** — `bg-background`, `text-foreground`,
   `bg-primary`, etc., which resolve to CSS variables in `globals.css`. No raw
   Tailwind palette (`bg-red-500`), hex, or inline `oklch(...)` in components.
@@ -68,10 +83,27 @@ src/
   add or change a theme, edit both `themes.ts` and the matching `globals.css`
   block. Brand colors are authored in hex, then converted to oklch.
 
+## Registration form
+
+- Multi-step form (4 steps) using **react-hook-form** + **Zod** validation.
+- Field definitions live in `src/lib/registration-fields.ts` (label, type, options).
+- Zod schema in `src/lib/validators/registration-schema.ts` with `superRefine` for
+  conditional validation (AvailabilityMessage required when Availability === "Other").
+- Form wrappers (`FormInput`, `FormTextarea`, `FormSelect`, `FormCheckbox`) in
+  `src/components/form.tsx` — use these instead of raw shadcn inputs.
+- Custom hook `src/hooks/use-registration-form.tsx` manages step state, field
+  visibility, and validation triggers.
+- Form fields use PascalCase names (e.g. `FullName`, `Email`) to match the schema.
+
 ## Git
 
 - Branch off `dev`; all PRs target `dev`. `main` is production.
 - Conventional Commits (`feat`, `fix`, `refactor`, `docs`, `chore`), one concern
   per commit.
+- **Link the issue in the PR body** with a closing keyword — `Closes #42`
+  (or `Fixes`/`Resolves`). Repeat the line per issue; a comma-separated list
+  does not work. The `.github/pull_request_template.md` has a `Closes #` line for
+  this. Note: because PRs target `dev`, GitHub only auto-closes the issue once the
+  change reaches the default branch `main` (i.e. on the next dev→main promotion).
 - **Never add attribution trailers** — no `Co-Authored-By`, no "Generated with
   Claude Code" — in commits or PR descriptions.

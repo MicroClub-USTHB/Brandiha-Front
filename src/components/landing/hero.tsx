@@ -1,29 +1,30 @@
+import Image from "next/image";
 import { Section } from "@/components/landing/section";
+import { CountdownTimer } from "@/components/landing/countdown-timer";
+
+const targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
 export function Hero() {
   return (
-    <Section as="section" className="flex flex-col items-center text-center py-24">
-      <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-        Lorem ipsum dolor sit amet
-      </h1>
-      <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-        Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
-        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </p>
-      <div className="mt-8 flex gap-4">
-        <a
-          href="#about"
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-        >
-          Learn More
-        </a>
-        <a
-          href="#agenda"
-          className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-6 text-sm font-medium text-foreground hover:bg-muted"
-        >
-          View Agenda
-        </a>
+    <Section
+      as="section"
+      className="relative flex min-h-screen w-full max-w-none flex-col items-center justify-center overflow-hidden px-[5%] py-[12vh]"
+    >
+      <div className="relative z-10 flex w-[90%] max-w-5xl flex-col items-center gap-[3vh]">
+        <Image
+          src="/primary-logo.svg"
+          alt="Brandiha"
+          width={620}
+          height={153}
+          priority
+          className="h-auto w-full lg:w-[55%] 2xl:w-[85%] max-w-200"
+        />
+        <CountdownTimer targetDate={targetDate} />
+        <div className="flex w-full flex-col items-center gap-[2vh] text-center">
+          <p className="font-heading text-[clamp(1.25rem,4vw,2rem)] font-semibold tracking-wide text-white uppercase">
+            one virage away from your brand !
+          </p>
+        </div>
       </div>
     </Section>
   );

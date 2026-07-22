@@ -10,7 +10,7 @@ const agendaItems = [
 export function Agenda() {
   return (
     <Section as="section" id="agenda">
-      <h2 className="text-3xl font-bold text-foreground">Agenda</h2>
+      <h2 className="font-heading text-3xl font-bold text-foreground">Agenda</h2>
       <ul className="mt-8 space-y-6">
         {agendaItems.map((item) => (
           <li
