@@ -11,11 +11,11 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <About />
+        {/* <About />
         <Agenda />
-        <Authors />
+        <Authors /> */}
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

@@ -119,6 +119,14 @@
     var(--grad-3) 68.11%,
     var(--grad-4) 84.94%
   );
+
+  /* Gekko mascot's own gradient stops. Defined for the default theme only, so
+     under any other theme the SVG stops fall back to that theme's solid
+     --primary (see src/components/gekko.tsx). */
+  --gekko-1: #c55715;
+  --gekko-2: #c42e67;
+  --gekko-3: #2684d4;
+  --gekko-4: #19d5be;
 }
 
 /* Paint the gradient over any primary background (buttons, badges, …). The

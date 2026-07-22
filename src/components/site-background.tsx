@@ -22,7 +22,7 @@ export function SiteBackground() {
   return (
     <div
       aria-hidden
-      className="absolute inset-0 -z-10 overflow-hidden bg-repeat bg-top"
+      className="fixed inset-0 -z-10 h-screen w-screen overflow-hidden bg-repeat bg-top"
       style={{ backgroundImage: "url(/wall-background.png)" }}
     >
       {decorations.map((name) => (
