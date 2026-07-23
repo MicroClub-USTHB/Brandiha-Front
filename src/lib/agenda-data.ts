@@ -10,7 +10,7 @@ export interface AgendaCardData {
   title: string;
   stopsCount: string;
   imageSrc: string;
-  accentColor: string;
+  accentValue: string;
   rotateClass: string;
   contentRotateClass: string;
   contentOffsetClass: string;
@@ -24,7 +24,7 @@ export const BRANDIHA_AGENDA_DATA: AgendaCardData[] = [
     title: "SKETCH",
     stopsCount: "5 stops",
     imageSrc: "/orange-card.png",
-    accentColor: "text-orange-500",
+    accentValue: "oklch(0.6734 0.1841 45.03)",
     rotateClass: "-rotate-3",
     contentRotateClass: "-rotate-4",
     contentOffsetClass: "translate-x-1 translate-y-0",
@@ -41,7 +41,7 @@ export const BRANDIHA_AGENDA_DATA: AgendaCardData[] = [
     title: "FILL-IN",
     stopsCount: "12 stops",
     imageSrc: "/pink-card.png",
-    accentColor: "text-pink-500",
+    accentValue: "oklch(0.6298 0.2193 3.49)",
     rotateClass: "rotate-2",
     contentRotateClass: "rotate-10",
     contentOffsetClass: "translate-x-5 translate-y-0",
@@ -69,7 +69,7 @@ export const BRANDIHA_AGENDA_DATA: AgendaCardData[] = [
     title: "OUTLINE",
     stopsCount: "10 stops",
     imageSrc: "/blue-card.png",
-    accentColor: "text-blue-500",
+    accentValue: "oklch(0.6747 0.1787 250.27)",
     rotateClass: "-rotate-2",
     contentRotateClass: "-rotate-4",
     contentOffsetClass: "translate-x-2 translate-y-0",
@@ -91,7 +91,7 @@ export const BRANDIHA_AGENDA_DATA: AgendaCardData[] = [
     title: "FINAL PIECE",
     stopsCount: "9 stops",
     imageSrc: "/cyan-card.png",
-    accentColor: "text-cyan-400",
+    accentValue: "oklch(0.8971 0.1605 180.46)",
     rotateClass: "rotate-3",
     contentRotateClass: "-rotate-2",
     contentOffsetClass: "translate-x-0 translate-y-0",

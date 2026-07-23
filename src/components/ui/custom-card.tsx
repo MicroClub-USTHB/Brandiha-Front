@@ -24,7 +24,7 @@ export function CustomCard({ card }: CustomCardProps) {
     title,
     stopsCount,
     imageSrc,
-    accentColor,
+    accentValue,
     rotateClass = "rotate-0",
     contentRotateClass = "rotate-0",
     contentOffsetClass = "translate-x-0 translate-y-0",
@@ -62,7 +62,8 @@ export function CustomCard({ card }: CustomCardProps) {
                     {dayNumber}
                   </h2>
                   <h2
-                    className={`font-hand relative text-[2.2rem] font-bold leading-none tracking-tight ${accentColor}`}
+                    className="font-hand relative text-[2.2rem] font-bold leading-none tracking-tight"
+                    style={{ color: accentValue }}
                   >
                     {dayNumber}
                   </h2>
@@ -91,7 +92,7 @@ export function CustomCard({ card }: CustomCardProps) {
             <DialogDescription className="sr-only">
               {dayNumber} {title} Schedule
             </DialogDescription>
-            <div className="mt-2.5 inline-block rounded-lg bg-orange-500 px-4 py-1 font-hand text-2xl font-bold text-white shadow-md -rotate-3">
+            <div className="mt-2.5 inline-block rounded-lg px-4 py-1 font-hand text-2xl font-bold text-white shadow-md -rotate-3" style={{ backgroundColor: accentValue }}>
               {title}
             </div>
           </div>
@@ -114,20 +115,20 @@ export function CustomCard({ card }: CustomCardProps) {
 
         <div className="relative max-h-[60vh] overflow-y-auto pr-4 pl-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="space-y-8 relative">
-            <div className="absolute left-[13px] top-3.5 bottom-3.5 w-1 bg-orange-500" />
+            <div className="absolute left-[13px] top-3.5 bottom-3.5 w-1" style={{ backgroundColor: accentValue }} />
 
             {schedule.map((item, index) => (
               <div key={index} className="flex items-start relative pl-10">
-                <Circle className="absolute left-0 top-1.5 h-7 w-7 fill-[#0d131a] text-orange-500 stroke-[3]" />
+                <Circle className="absolute left-0 top-1.5 h-7 w-7 fill-[#0d131a] stroke-[3]" style={{ color: accentValue }} />
                 <div>
-                  <span className="font-heading text-xl font-normal tracking-wide text-orange-500 block">
+                  <span className="font-heading text-xl font-normal tracking-wide block" style={{ color: accentValue }}>
                     {item.time}
                   </span>
                   <h3 className="font-hand text-2xl font-bold text-white leading-tight">
                     {item.title}
                   </h3>
                   {item.badge && (
-                    <div className="mt-2 inline-block rounded-md bg-orange-500/90 px-2.5 py-0.5 text-sm font-bold text-white shadow -rotate-2">
+                    <div className="mt-2 inline-block rounded-md px-2.5 py-0.5 text-sm font-bold text-white shadow -rotate-2" style={{ backgroundColor: accentValue }}>
                       {item.badge}
                     </div>
                   )}
