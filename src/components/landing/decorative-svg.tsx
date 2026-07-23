@@ -116,6 +116,7 @@ export function DecorativeSvg({ name, className }: DecorativeSvgProps) {
       alt=""
       width={svg.width}
       height={svg.height}
+      draggable={false}
       className={resolvedClassName}
     />
   );

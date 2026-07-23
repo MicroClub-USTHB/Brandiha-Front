@@ -90,6 +90,7 @@ export function NavBar() {
                 alt=""
                 width={72}
                 height={16}
+                draggable={false}
                 className="absolute -bottom-1 left-1/2 -translate-x-1/2"
               />
             )}

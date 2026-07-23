@@ -43,6 +43,7 @@ function LogoReveal() {
         alt="Brandiha"
         width={620}
         height={153}
+        draggable={false}
         priority
         className="h-auto w-[clamp(280px,70vw,620px)]"
       />
@@ -126,6 +127,7 @@ export function SplashScreen({ children }: { children: React.ReactNode }) {
                     alt=""
                     width={fp.size}
                     height={fp.size}
+                    draggable={false}
                     style={{
                       width: `clamp(${fp.size * 0.2}px, ${(fp.size / 16).toFixed(3)}vw, ${fp.size}px)`,
                       height: `clamp(${fp.size * 0.2}px, ${(fp.size / 16).toFixed(3)}vw, ${fp.size}px)`,

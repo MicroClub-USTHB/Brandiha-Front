@@ -16,6 +16,7 @@ export function Hero() {
           alt="Brandiha"
           width={620}
           height={153}
+          draggable={false}
           priority
           className="h-auto w-full lg:w-[55%] 2xl:w-[85%] max-w-200"
         />

@@ -57,6 +57,7 @@ export function Header() {
             alt="Brandiha"
             width={253}
             height={62}
+            draggable={false}
             className="h-12"
             priority
           />
@@ -69,6 +70,7 @@ export function Header() {
               alt="Join"
               width={211}
               height={69}
+              draggable={false}
               className="h-15"
               priority
             />
@@ -80,6 +82,7 @@ export function Header() {
         alt=""
         width={337}
         height={125}
+        draggable={false}
         className="absolute top-[99%] left-0"
       />
     </header>
