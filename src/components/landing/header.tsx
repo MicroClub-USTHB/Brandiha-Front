@@ -53,7 +53,7 @@ export function Header() {
   const activeButton = getActiveEffectButton(isClient ? theme : undefined);
   const activeLogo = getActiveEffectLogo(isClient ? theme : undefined);
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 w-full  bg-[#000000]">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-[#000000]">
       <div className="mx-auto flex h-24 items-center px-4 sm:px-6 lg:px-8">
         <Link href="/">
           <Image
