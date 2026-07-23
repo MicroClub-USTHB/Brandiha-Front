@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 
@@ -51,14 +51,14 @@ function LogoReveal() {
 }
 
 export function SplashScreen({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<"loading" | "splash" | "exit" | "done">(
-    () => {
-      if (typeof window !== "undefined" && sessionStorage.getItem("brandiha-splash-seen")) {
-        return "done";
-      }
-      return "splash";
-    }
-  );
+  const [state, setState] = useState<"loading" | "splash" | "exit" | "done">("loading");
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    const seen = sessionStorage.getItem("brandiha-splash-seen");
+    requestAnimationFrame(() => setState(seen ? "done" : "splash"));
+  }, []);
 
   useEffect(() => {
     if (state !== "splash") return;
@@ -86,7 +86,7 @@ export function SplashScreen({ children }: { children: React.ReactNode }) {
     };
   }, [state]);
 
-  const showSplash = state === "splash" || state === "exit";
+  const showSplash = mounted && (state === "splash" || state === "exit");
   const blockInteraction = state !== "done";
 
   return (
