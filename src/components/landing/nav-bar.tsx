@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 const links = [
   { href: "/", label: "Home" },
@@ -11,10 +12,32 @@ const links = [
   { href: "#authors", label: "Authors" },
 ];
 
+function getActiveEffectImage(theme?: string) {
+  switch (theme) {
+    case "design":
+      return "/activeLink-Design.svg";
+
+    case "multimedia":
+      return "/activeLink-Multi.svg";
+
+    case "communication":
+      return "/activeLink-Comm.svg";
+
+    case "marketing":
+      return "/activeLink-Marketing.svg";
+
+    case "chameleon":
+    default:
+      return "/activeLink-Default.svg";
+  }
+} 
+
+
 export function NavBar() {
   const [active, setActive] = useState("/");
   const scrollingRef = useRef(false);
-
+  const {theme} = useTheme();
+  const activeImage = getActiveEffectImage(theme);
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -48,7 +71,7 @@ export function NavBar() {
   };
 
   return (
-    <nav className="flex h-[59px] w-[677px] items-center justify-around">
+    <nav className="flex h-14.75 w-169.25 items-center justify-around">
       {links.map(({ href, label }) => {
         const isActive = active === href;
         return (
@@ -56,17 +79,18 @@ export function NavBar() {
             key={href}
             href={href}
             onClick={() => handleClick(href)}
-            className={`relative font-[family-name:var(--font-hand)] text-[28px] text-white/70 hover:text-white ${
+            className={`relative font-hand text-[28px] text-white/70 hover:text-white ${
               isActive ? "text-white" : ""
             }`}
           >
             {label}
             {isActive && (
               <Image
-                src="/active-effect.svg"
+                src={activeImage}
                 alt=""
                 width={72}
                 height={16}
+                draggable={false}
                 className="absolute -bottom-1 left-1/2 -translate-x-1/2"
               />
             )}
