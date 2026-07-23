@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore, useState } from "react";
 import { useTheme } from "next-themes";
+
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 import { cn } from "@/lib/utils";
 
 function getTimeLeft(target: Date) {
@@ -39,6 +41,7 @@ function getTimerBackground(theme?: string) {
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const { theme } = useTheme();
+  const isClient = useIsClient();
 
   useEffect(() => {
     const id = setInterval(() => setTime(getTimeLeft(targetDate)), 1000);
@@ -52,7 +55,7 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
     { label: "Seconds", value: time.seconds },
   ];
 
-  const timerBackground = getTimerBackground(theme);
+  const timerBackground = getTimerBackground(isClient ? theme : undefined);
 
   return (
     <div

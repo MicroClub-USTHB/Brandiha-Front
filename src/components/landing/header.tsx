@@ -1,8 +1,11 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import { ThemePicker } from "../theme-picker";
 import { useTheme } from "next-themes";
+
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 
 function getActiveEffectButton(theme?: string) {
   switch (theme) {
@@ -46,8 +49,9 @@ function getActiveEffectLogo(theme?: string) {
 
 export function Header() {
   const { theme } = useTheme();
-  const activeButton = getActiveEffectButton(theme);
-  const activeLogo = getActiveEffectLogo(theme);
+  const isClient = useIsClient();
+  const activeButton = getActiveEffectButton(isClient ? theme : undefined);
+  const activeLogo = getActiveEffectLogo(isClient ? theme : undefined);
   return (
     <header className="absolute top-0 left-0 right-0 z-50 w-full  bg-[#000000]">
       <div className="mx-auto flex h-24 items-center px-4 sm:px-6 lg:px-8">

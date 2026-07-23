@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Section } from "@/components/landing/section";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
+import { PaintWall } from "@/components/paint-wall";
 
 const targetDate = new Date(2026, 6, 25, 22, 30, 0, 0);
 
@@ -10,6 +11,7 @@ export function Hero() {
       as="section"
       className="relative flex min-h-screen w-full max-w-none flex-col items-center justify-center overflow-hidden px-[5%] py-[12vh]"
     >
+      <PaintWall />
       <div className="relative z-10 flex w-[90%] max-w-5xl flex-col items-center gap-[3vh]">
         <Image
           src="/primary-logo.svg"
