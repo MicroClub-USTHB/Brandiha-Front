@@ -437,3 +437,9 @@
   -webkit-mask: url("/next-button-splash.svg") center / contain no-repeat;
   mask: url("/next-button-splash.svg") center / contain no-repeat;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen {
+    display: none;
+  }
+}

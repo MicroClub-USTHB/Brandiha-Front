@@ -69,6 +69,7 @@ export function GraffitiTrail({ paused }: GraffitiTrailProps) {
 
     const root = document.documentElement;
     const points: Point[] = [];
+    const isDown = { current: false };
     let dpr = 1;
 
     const resize = () => {
@@ -81,13 +82,16 @@ export function GraffitiTrail({ paused }: GraffitiTrailProps) {
     resize();
 
     const onMove = (e: MouseEvent) => {
-      if (pausedRef.current) return;
+      if (pausedRef.current || !isDown.current) return;
       const now = performance.now();
       const last = points[points.length - 1];
       // A gap (paused, or mouse left/re-entered) starts a fresh, disconnected stroke.
       const isBreak = !last || now - last.t > 60;
       points.push({ x: e.clientX, y: e.clientY, t: now, break: isBreak });
     };
+
+    const onDown = () => { isDown.current = true; };
+    const onUp = () => { isDown.current = false; };
 
     let raf = 0;
     const draw = () => {
@@ -124,10 +128,14 @@ export function GraffitiTrail({ paused }: GraffitiTrailProps) {
     };
     raf = requestAnimationFrame(draw);
 
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("resize", resize);
     return () => {
       cancelAnimationFrame(raf);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("resize", resize);
     };

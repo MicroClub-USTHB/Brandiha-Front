@@ -6,6 +6,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SiteBackground } from "@/components/site-background";
 import { GraffitiCursor } from "@/components/cursor/graffiti-cursor";
+import { SplashScreen } from "@/components/splash-screen";
 import { DEFAULT_THEME, THEME_VALUES } from "@/lib/themes";
 
 const seekuw = localFont({
@@ -77,7 +78,9 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
+          <SplashScreen>
+            {children}
+          </SplashScreen>
           <GraffitiCursor />
         </ThemeProvider>
       </body>
