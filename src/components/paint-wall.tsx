@@ -92,15 +92,22 @@ export function PaintWall() {
     ctx.globalAlpha = 1;
   };
 
+  const isOverInteractive = (e: React.PointerEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return false;
+    canvas.style.pointerEvents = "none";
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    canvas.style.pointerEvents = "auto";
+    return !!el?.closest("a, button, [role=button], input, select, textarea, [data-no-paint]");
+  };
+
   const handlePointerDown = (e: React.PointerEvent) => {
-    const t = e.target as Element;
-    if (t.closest("a, button, [role=button], input, select, textarea, [data-no-paint]"))
-      return;
+    if (isOverInteractive(e)) return;
 
     drawing.current = true;
     last.current = { x: e.clientX, y: e.clientY };
     drawSegment(e.clientX, e.clientY, e.clientX, e.clientY);
-    (e.target as Element).closest("canvas")?.setPointerCapture?.(e.pointerId);
+    canvasRef.current?.setPointerCapture?.(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -117,7 +124,7 @@ export function PaintWall() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 touch-none"
+      className="fixed inset-0 touch-none"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
