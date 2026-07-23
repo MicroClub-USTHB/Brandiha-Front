@@ -32,14 +32,10 @@ function getThemeHand(theme: string) {
 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
-  const activeEffectHand = getThemeHand(theme ?? "chameleon");
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
-
-  const active = mounted ? THEMES.find((t) => t.value === theme) : undefined;
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const resolved = isClient ? theme : undefined;
+  const activeEffectHand = getThemeHand(resolved ?? "chameleon");
+  const active = THEMES.find((t) => t.value === (resolved ?? "chameleon"));
 
   return (
     <DropdownMenu>
@@ -62,7 +58,7 @@ export function ThemePicker() {
         className="font-heading min-w-40 border-none bg-[url('/dropDown-cover.svg')] bg-cover bg-center p-2 text-black shadow-lg"
       >
         <DropdownMenuRadioGroup
-          value={active?.value}
+          value={active?.value ?? THEMES[0].value}
           onValueChange={(value) => setTheme(value)}
         >
           {THEMES.map((t) => (
