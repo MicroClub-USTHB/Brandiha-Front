@@ -12,6 +12,10 @@ import { loginSchema, LoginFormData } from "@/lib/validators/login-schema";
 import { loginJudge } from "@/lib/api/auth";
 import { cn } from "@/lib/utils";
 
+const LOGIN_PATH = "/login";
+/** Where to land after login when there's no `?from=` to return to. */
+const POST_LOGIN_HOME = "/jury";
+
 function LoginTitle() {
   return (
     <h2 className={cn("text-center text-[clamp(1.75rem,min(4.2vw,6vh),3.75rem)] font-extrabold uppercase tracking-wide font-heading text-foreground")}>
@@ -34,11 +38,22 @@ export default function LoginForm() {
   const onSubmit = form.handleSubmit(async (data) => {
     setSubmitError(null);
     const result = await loginJudge(data);
-    if (result.ok) {
-      router.push("/");
-    } else {
+    if (!result.ok) {
       setSubmitError(result.error);
+      return;
     }
+
+    // Return the user to wherever middleware bounced them from (?from=…), else
+    // the default landing. Only accept internal paths to avoid open redirects.
+    const from = new URLSearchParams(window.location.search).get("from");
+    const dest =
+      from && from.startsWith("/") && !from.startsWith("//") && from !== LOGIN_PATH
+        ? from
+        : POST_LOGIN_HOME;
+
+    router.replace(dest);
+    // Re-run Server Components so they observe the freshly-set session cookie.
+    router.refresh();
   });
 
   // A single fixed hue (unlike the per-step recolouring of the register form),
