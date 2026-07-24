@@ -5,7 +5,7 @@ import { SESSION_COOKIE } from "@/lib/auth/jwt";
  * Route prefixes that require an authenticated jury/staff session. Add the jury
  * dashboard routes here as they're built (e.g. "/jury").
  */
-const PROTECTED_PREFIXES = ["/jury"];
+const PROTECTED_PREFIXES = ["/jury", "/hr"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
@@ -45,5 +45,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/jury/:path*"],
+  matcher: ["/login", "/jury/:path*", "/hr/:path*"],
 };

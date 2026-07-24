@@ -1,6 +1,12 @@
 "use server";
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
+import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import type {
+  PaginatedRegistrations,
+  RegistrationDetail,
+  RegistrationStatus,
+} from "@/lib/api/registration-types";
 
 const API_BASE_URL =
   (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
@@ -116,4 +122,57 @@ export async function submitRegistration(
     ok: false,
     error: "Something went wrong on our side. Please try again in a moment.",
   };
+}
+
+/** Serializable result for admin reads — data on success, a message on failure. */
+export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+export interface ListRegistrationsParams {
+  status?: RegistrationStatus;
+  page?: number;
+  limit?: number;
+}
+
+/** Turn a fetch outcome into a user-facing error result (admin reads are authed). */
+function readError(status: number): string {
+  if (status === 401 || status === 403) return "You're not authorized to view this.";
+  if (status === 404) return "Not found.";
+  return "Something went wrong loading the data.";
+}
+
+/**
+ * Server Action: fetch the paginated registrations list (Admin). The bearer
+ * token is attached by `apiFetch` from the session cookie.
+ */
+export async function listRegistrations(
+  params: ListRegistrationsParams = {},
+): Promise<FetchResult<PaginatedRegistrations>> {
+  const qs = new URLSearchParams();
+  if (params.status) qs.set("status", params.status);
+  if (params.page) qs.set("page", String(params.page));
+  if (params.limit) qs.set("limit", String(params.limit));
+  const query = qs.toString();
+
+  try {
+    const res = await apiFetch(`/registrations${query ? `?${query}` : ""}`);
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as PaginatedRegistrations };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/** Server Action: fetch a single registration's full details (Admin). */
+export async function getRegistration(
+  id: string,
+): Promise<FetchResult<RegistrationDetail>> {
+  try {
+    const res = await apiFetch(`/registrations/${id}`);
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
 }
