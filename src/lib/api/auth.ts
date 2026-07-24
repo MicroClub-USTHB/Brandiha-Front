@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
+import { SESSION_COOKIE } from "@/lib/auth/jwt";
 
 const API_BASE_URL =
   (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
@@ -59,7 +60,7 @@ export async function loginJudge(data: LoginFormData): Promise<LoginResult> {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set("access_token", body.access_token, {
+  cookieStore.set(SESSION_COOKIE, body.access_token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -67,4 +68,10 @@ export async function loginJudge(data: LoginFormData): Promise<LoginResult> {
   });
 
   return { ok: true };
+}
+
+/** Server Action: clear the session cookie, logging the user out. */
+export async function logout(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
 }
