@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,27 +56,18 @@ export default function LoginForm() {
     router.refresh();
   });
 
-  // A single fixed hue (unlike the per-step recolouring of the register form),
-  // with the gradient disabled so the button fill reads solid like the mask.
-  const formStyle = {
-    "--primary": "var(--brand-marketing)",
-    "--ring": "var(--brand-marketing)",
-    "--primary-gradient": "none",
-  } as CSSProperties;
-
   const isSubmitting = form.formState.isSubmitting;
 
   return (
-    <div className={cn("relative mx-auto flex w-full max-w-md flex-col items-center px-4")}>
+    <div className={cn("relative mx-auto flex w-full max-w-md flex-col items-center px-4 overflow-visible")}>
       <form
         onSubmit={onSubmit}
         style={{
-          ...formStyle,
           backgroundImage: "url('/paper.svg')",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
         }}
-        className={cn("login-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] border-0 bg-transparent px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans")}
+        className={cn("login-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] overflow-visible border-0 bg-transparent px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans")}
       >
         {/* Scoped to `.login-form` so the hand font on inputs doesn't leak elsewhere. */}
         <style jsx global>{`
