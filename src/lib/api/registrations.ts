@@ -149,14 +149,14 @@ export async function getRegistration(
 
 /**
  * Server Action: set a single registration's status (Admin) via
- * `PATCH /registrations/{id}/status`.
+ * `PATCH /registrations/{id}` (body `{ status }`).
  */
 export async function setRegistrationStatus(
   id: string,
   status: RegistrationStatus,
 ): Promise<FetchResult<{ id: string; status: RegistrationStatus }>> {
   try {
-    const res = await apiFetch(`/registrations/${id}/status`, {
+    const res = await apiFetch(`/registrations/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
@@ -173,15 +173,16 @@ export async function setRegistrationStatus(
 
 /**
  * Server Action: move a registration to another team (Admin) via
- * `PATCH /registrations/{id}/transfer`. The backend joins/creates the team by
- * name and reassigns the member's `team_id`. Returns the updated registration.
+ * `PATCH /registrations/{id}` (body `{ team_name }`). The backend joins/creates
+ * the team by name and reassigns the member's `team_id`. Returns the updated
+ * registration.
  */
 export async function transferRegistration(
   id: string,
   teamName: string,
 ): Promise<FetchResult<RegistrationDetail>> {
   try {
-    const res = await apiFetch(`/registrations/${id}/transfer`, {
+    const res = await apiFetch(`/registrations/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ team_name: teamName }),
     });
