@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Info } from "lucide-react";
-import { motion } from "motion/react";
 import {
   setRegistrationStatus,
   transferRegistration,
@@ -74,6 +73,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Set while confirming so the dialog's close handler doesn't revert the move.
+  const confirmingRef = useRef(false);
 
   const cardEls = useState(() => new Map<string, HTMLElement>())[0];
 
@@ -117,23 +118,28 @@ export function HrBoard({ teams }: { teams: Team[] }) {
 
   const confirmMove = async () => {
     if (!pending) return;
-    const { member, toTeam } = pending;
+    const move = pending;
+    const { member, toTeam } = move;
     const targetStatus = teamStatus(toTeam.members);
 
     setError(null);
     setBusy(true);
     const moved = await transferRegistration(member.registration_id, toTeam.name);
     if (!moved.ok) {
+      setPending(null);
       setBusy(false);
       setError(moved.error);
-      setPending(null);
       return;
     }
     // The member's status follows the team (majority) they landed in.
     const synced = await setRegistrationStatus(member.registration_id, targetStatus);
-    await refreshBoard();
-    setBusy(false);
+
+    // Commit the move into the board locally — the optimistic overlay already
+    // shows it, so no refetch (which would reshuffle the unstable backend order).
+    const committed = { ...move, member: { ...member, status: targetStatus } };
+    setBoard((b) => withMove(b, committed));
     setPending(null);
+    setBusy(false);
     if (!synced.ok) setError(synced.error);
   };
 
@@ -161,7 +167,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
       <div
         className={cn(
           "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3",
-          busy && "pointer-events-none opacity-60",
+          busy && "pointer-events-none",
         )}
       >
         {view.map((team) => {
@@ -208,10 +214,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                   />
                 ))}
                 {isTarget && (
-                  <motion.li
-                    layout
-                    className="mt-2 h-11 rounded-md border-2 border-dashed border-primary/50"
-                  />
+                  <li className="mt-2 h-11 rounded-md border-2 border-dashed border-primary/50" />
                 )}
               </ul>
 
@@ -228,7 +231,14 @@ export function HrBoard({ teams }: { teams: Team[] }) {
       <AlertDialog
         open={pending !== null}
         onOpenChange={(open) => {
-          if (!open) setPending(null);
+          if (open) return;
+          // Confirming also closes the dialog — don't revert in that case;
+          // confirmMove keeps the overlay until it commits the move.
+          if (confirmingRef.current) {
+            confirmingRef.current = false;
+            return;
+          }
+          setPending(null);
         }}
       >
         <AlertDialogContent>
@@ -250,7 +260,14 @@ export function HrBoard({ teams }: { teams: Team[] }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmMove}>Move</AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                confirmingRef.current = true;
+                confirmMove();
+              }}
+            >
+              Move
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

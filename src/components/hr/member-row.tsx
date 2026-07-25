@@ -40,8 +40,6 @@ export function MemberRow({
 
   return (
     <motion.li
-      layout
-      layoutId={member.registration_id}
       drag
       dragListener={false}
       dragControls={controls}
