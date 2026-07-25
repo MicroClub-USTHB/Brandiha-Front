@@ -176,3 +176,25 @@ export async function getRegistration(
     return { ok: false, error: "Couldn't reach the server." };
   }
 }
+
+/**
+ * Server Action: move a registration to another team (Admin) via
+ * `PATCH /registrations/{id}/transfer`. The backend joins/creates the team by
+ * name and reassigns the member's `team_id`. Returns the updated registration.
+ */
+export async function transferRegistration(
+  id: string,
+  teamName: string,
+): Promise<FetchResult<RegistrationDetail>> {
+  try {
+    const res = await apiFetch(`/registrations/${id}/transfer`, {
+      method: "PATCH",
+      body: JSON.stringify({ team_name: teamName }),
+    });
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
