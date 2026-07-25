@@ -39,20 +39,43 @@ export function ActionButton({
       )}
       {...props}
     >
-      {/* Optional paint-splatter, larger than the box, bleeding out behind it. */}
+      {/* Optional paint-splatter. It spans the button's full width (inset-x-0)
+          and shares the same centre + scale as the fill below, so the horizontal
+          brand gradient flows continuously across both instead of restarting
+          inside the splatter. The `contain` mask keeps the blob's shape/size,
+          centred in this wider box. Sits above the fill (-z-20) but below the
+          text (auto). */}
       {splash && (
         <span
           aria-hidden
           className={cn(
-            "next-splash-mask pointer-events-none absolute left-1/2 top-1/2 -z-20 size-40 translate-x-[calc(-50%+5px)] translate-y-[calc(-50%+15px)]",
+            // The splatter SVG art sits high-left in its canvas, so it needs
+            // re-centring. Vertical is done with a transform (not mask-position):
+            // `contain` leaves no vertical slack, so a Y mask-position offset
+            // would push the blob past the box and clip it — moving the whole
+            // box is safe (mask stays centred) and, since the gradient is
+            // horizontal, a vertical shift keeps continuity with the fill.
+            "pointer-events-none absolute inset-x-0 -inset-y-10 -z-10 translate-y-4 scale-110",
             fill,
           )}
+          style={{
+            WebkitMaskImage: "url('/next-button-splash.svg')",
+            maskImage: "url('/next-button-splash.svg')",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            // Horizontal re-centre. Safe on this axis: the box is far wider than
+            // the blob, so there's slack to shift without clipping (unlike Y).
+            WebkitMaskPosition: "calc(50% + 5px) center",
+            maskPosition: "calc(50% + 5px) center",
+          }}
         />
       )}
-      {/* Splash background, masked to the shape and scaled to bleed past the box. */}
+      {/* Button fill, masked to the shape and scaled to bleed past the box. */}
       <span
         aria-hidden
-        className={cn("pointer-events-none absolute inset-0 -z-10 scale-110", fill)}
+        className={cn("pointer-events-none absolute inset-0 -z-20 scale-110", fill)}
         style={{
           WebkitMaskImage: `url('${mask}')`,
           maskImage: `url('${mask}')`,
