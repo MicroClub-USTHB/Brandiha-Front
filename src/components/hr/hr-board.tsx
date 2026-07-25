@@ -11,6 +11,7 @@ import type { Team } from "@/lib/api/team-types";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
+import { MemberDetail } from "@/components/hr/member-detail";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,6 +61,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
   const [pending, setPending] = useState<{ member: Dragged; team: Team } | null>(
     null,
   );
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   // A drop stages the move and opens the confirmation dialog; the transfer runs
   // from `confirmMove` once the user accepts.
@@ -159,7 +161,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                       setDragged(null);
                       setOverTeamId(null);
                     }}
-                    className="flex cursor-grab items-center justify-between gap-2 py-2 active:cursor-grabbing"
+                    onClick={() => setDetailId(m.registration_id)}
+                    className="flex cursor-grab items-center justify-between gap-2 rounded-md py-2 transition-colors hover:bg-muted/50 active:cursor-grabbing"
                   >
                     <div className="flex min-w-0 items-center gap-1.5">
                       <GripVertical className="size-4 shrink-0 text-muted-foreground/60" />
@@ -210,6 +213,11 @@ export function HrBoard({ teams }: { teams: Team[] }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MemberDetail
+        registrationId={detailId}
+        onClose={() => setDetailId(null)}
+      />
     </>
   );
 }
