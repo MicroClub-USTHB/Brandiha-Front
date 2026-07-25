@@ -27,8 +27,8 @@ interface GraffitiCursor {
 
 const randomVariant = () => Math.floor(Math.random() * SPLATTER_VARIANTS);
 
-export function useGraffitiCursor(): GraffitiCursor {
-  const [enabled, setEnabled] = useState(false);
+export function useGraffitiCursor(disabled = false): GraffitiCursor {
+  const [deviceOk, setDeviceOk] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [splatters, setSplatters] = useState<Mark[]>([]);
 
@@ -46,7 +46,7 @@ export function useGraffitiCursor(): GraffitiCursor {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    const sync = () => setEnabled(fine.matches && !reduced.matches);
+    const sync = () => setDeviceOk(fine.matches && !reduced.matches);
     sync();
 
     fine.addEventListener("change", sync);
@@ -60,6 +60,11 @@ export function useGraffitiCursor(): GraffitiCursor {
   const removeSplatter = useCallback((id: number) => {
     setSplatters((prev) => prev.filter((s) => s.id !== id));
   }, []);
+
+  // Mount only on capable devices and where the caller hasn't disabled it (e.g.
+  // routes that need the native cursor). Flipping this off tears down the effect
+  // below, which also removes `graffiti-cursor-active` and restores the pointer.
+  const enabled = deviceOk && !disabled;
 
   useEffect(() => {
     if (!enabled) return;

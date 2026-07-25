@@ -1,9 +1,13 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
 import { useGraffitiCursor } from "@/hooks/use-graffiti-cursor";
 import { GraffitiTrail } from "./graffiti-trail";
 import { SpraySplatter } from "./spray-splatter";
+
+/** Routes where the native cursor is kept (e.g. drag-and-drop needs it). */
+const CURSOR_DISABLED_PREFIXES = ["/hr"];
 
 /**
  * Graffiti paint-splash cursor. Mounted once in the root layout. Renders via a
@@ -12,7 +16,12 @@ import { SpraySplatter } from "./spray-splatter";
  * uses `pointer-events: none` so it never intercepts clicks.
  */
 export function GraffitiCursor() {
-  const { enabled, cursorRef, hovering, splatters, removeSplatter } = useGraffitiCursor();
+  const pathname = usePathname();
+  const disabled = CURSOR_DISABLED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  const { enabled, cursorRef, hovering, splatters, removeSplatter } =
+    useGraffitiCursor(disabled);
 
   // `enabled` only flips true inside a client effect, so by the time we render
   // the portal we're guaranteed to be on the client with `document.body` ready.

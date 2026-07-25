@@ -3,7 +3,7 @@ import { Section } from "@/components/landing/section";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
 import { PaintWall } from "@/components/paint-wall";
 
-const targetDate = new Date(2026, 6, 25, 22, 30, 0, 0);
+const targetDate = new Date(Date.UTC(2026, 6, 25, 21, 30, 0));
 
 export function Hero() {
   return (

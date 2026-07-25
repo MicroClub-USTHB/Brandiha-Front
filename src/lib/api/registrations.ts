@@ -1,6 +1,11 @@
 "use server";
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
+import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import type {
+  RegistrationDetail,
+  RegistrationStatus,
+} from "@/lib/api/registration-types";
 
 const API_BASE_URL =
   (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
@@ -116,4 +121,57 @@ export async function submitRegistration(
     ok: false,
     error: "Something went wrong on our side. Please try again in a moment.",
   };
+}
+
+/** Serializable result for admin reads — data on success, a message on failure. */
+export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+/** Turn a fetch outcome into a user-facing error result (admin reads are authed). */
+function readError(status: number): string {
+  if (status === 401 || status === 403) return "You're not authorized to view this.";
+  if (status === 404) return "Not found.";
+  return "Something went wrong loading the data.";
+}
+
+/** Server Action: fetch a single registration's full details (Admin). */
+export async function getRegistration(
+  id: string,
+): Promise<FetchResult<RegistrationDetail>> {
+  try {
+    const res = await apiFetch(`/registrations/${id}`);
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/** Fields accepted by `PATCH /registrations/{id}`. */
+export interface RegistrationPatch {
+  /** New team name — the backend joins/creates it and reassigns `team_id`. */
+  team_name?: string;
+  status?: RegistrationStatus;
+}
+
+/**
+ * Server Action: update a registration (Admin) via `PATCH /registrations/{id}`.
+ * Applies a team move and/or a status change in a single request. Returns the
+ * updated registration.
+ */
+export async function updateRegistration(
+  id: string,
+  patch: RegistrationPatch,
+): Promise<FetchResult<RegistrationDetail>> {
+  try {
+    const res = await apiFetch(`/registrations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
 }
