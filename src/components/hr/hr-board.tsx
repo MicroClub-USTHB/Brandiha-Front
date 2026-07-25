@@ -11,6 +11,16 @@ import type { Team } from "@/lib/api/team-types";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 type Dragged = {
@@ -47,20 +57,26 @@ export function HrBoard({ teams }: { teams: Team[] }) {
   const [overTeamId, setOverTeamId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<{ member: Dragged; team: Team } | null>(
+    null,
+  );
 
-  const handleDrop = async (team: Team) => {
+  // A drop stages the move and opens the confirmation dialog; the transfer runs
+  // from `confirmMove` once the user accepts.
+  const handleDrop = (team: Team) => {
     setOverTeamId(null);
     const d = dragged;
     setDragged(null);
     // Nothing to do when dropped back onto the member's own team.
     if (!d || d.fromTeamId === team.id) return;
+    setPending({ member: d, team });
+  };
 
+  const confirmMove = async () => {
+    if (!pending) return;
+    const { member: d, team } = pending;
     const targetStatus = teamStatus(team.members);
-    const confirmed = window.confirm(
-      `Move ${d.memberName} from "${d.fromTeamName}" to "${team.name}"?\n` +
-        `They'll be marked "${targetStatus}" to match the team.`,
-    );
-    if (!confirmed) return;
+    setPending(null);
 
     setError(null);
     setBusy(true);
@@ -164,6 +180,36 @@ export function HrBoard({ teams }: { teams: Team[] }) {
           );
         })}
       </div>
+
+      <AlertDialog
+        open={pending !== null}
+        onOpenChange={(open) => {
+          if (!open) setPending(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Move member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pending && (
+                <>
+                  Move{" "}
+                  <span className="font-semibold text-foreground">
+                    {pending.member.memberName}
+                  </span>{" "}
+                  from &ldquo;{pending.member.fromTeamName}&rdquo; to &ldquo;
+                  {pending.team.name}&rdquo;? They&rsquo;ll be marked &ldquo;
+                  {teamStatus(pending.team.members)}&rdquo; to match the team.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmMove}>Move</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
