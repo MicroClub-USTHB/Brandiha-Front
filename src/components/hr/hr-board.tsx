@@ -173,7 +173,6 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                         </p>
                       </div>
                     </div>
-                    <StatusBadge status={m.status} />
                   </li>
                 ))}
               </ul>
