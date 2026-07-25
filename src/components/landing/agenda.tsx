@@ -1,32 +1,23 @@
 import { Section } from "@/components/landing/section";
-
-const agendaItems = [
-  { time: "09:00", title: "Lorem ipsum dolor", description: "Consectetur adipiscing elit." },
-  { time: "10:30", title: "Sed do eiusmod", description: "Tempor incididunt ut labore." },
-  { time: "12:00", title: "Ut enim ad minim", description: "Quis nostrud exercitation." },
-  { time: "14:00", title: "Duis aute irure", description: "Dolor in reprehenderit." },
-];
+import { CustomCard } from "@/components/ui/custom-card";
+import { BRANDIHA_AGENDA_DATA } from "@/lib/agenda-data";
 
 export function Agenda() {
   return (
-    <Section as="section" id="agenda">
-      <h2 className="font-heading text-3xl font-bold text-foreground">Agenda</h2>
-      <ul className="mt-8 space-y-6">
-        {agendaItems.map((item) => (
-          <li
-            key={item.time}
-            className="flex gap-4 rounded-lg border border-border bg-background p-4"
-          >
-            <span className="text-sm font-medium text-muted-foreground">
-              {item.time}
-            </span>
-            <div>
-              <h3 className="font-medium text-foreground">{item.title}</h3>
-              <p className="text-sm text-muted-foreground">{item.description}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <Section as="section" id="agenda" className="w-full py-16">
+      <div className="mx-auto max-w-[1500px] px-6">
+        <div className="text-center mb-16">
+          <h2 className="font-heading text-6xl md:text-8xl font-black uppercase tracking-wider text-white drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]">
+            BRANDIHA AGENDA
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 items-center justify-items-center gap-y-14 sm:grid-cols-2 sm:gap-x-10 lg:grid-cols-4 lg:gap-x-44">
+          {BRANDIHA_AGENDA_DATA.map((card, index) => (
+            <CustomCard key={index} card={card} />
+          ))}
+        </div>
+      </div>
     </Section>
   );
 }
