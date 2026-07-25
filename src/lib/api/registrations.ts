@@ -178,6 +178,30 @@ export async function getRegistration(
 }
 
 /**
+ * Server Action: set a single registration's status (Admin) via
+ * `PATCH /registrations/{id}/status`.
+ */
+export async function setRegistrationStatus(
+  id: string,
+  status: RegistrationStatus,
+): Promise<FetchResult<{ id: string; status: RegistrationStatus }>> {
+  try {
+    const res = await apiFetch(`/registrations/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return {
+      ok: true,
+      data: (await res.json()) as { id: string; status: RegistrationStatus },
+    };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/**
  * Server Action: move a registration to another team (Admin) via
  * `PATCH /registrations/{id}/transfer`. The backend joins/creates the team by
  * name and reassigns the member's `team_id`. Returns the updated registration.

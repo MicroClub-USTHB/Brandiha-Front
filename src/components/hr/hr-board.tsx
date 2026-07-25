@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
-import { transferRegistration } from "@/lib/api/registrations";
+import {
+  setRegistrationStatus,
+  transferRegistration,
+} from "@/lib/api/registrations";
 import type { Team } from "@/lib/api/team-types";
+import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
 import { cn } from "@/lib/utils";
@@ -15,6 +19,26 @@ type Dragged = {
   fromTeamId: string;
   fromTeamName: string;
 };
+
+/**
+ * A team's status is the majority of its members' statuses. Ties (no clear
+ * majority, including an empty team) resolve to `pending`. This replaces the
+ * backend's arbitrary single-member value.
+ */
+function teamStatus(members: Team["members"]): RegistrationStatus {
+  const counts: Record<RegistrationStatus, number> = {
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  };
+  for (const m of members) counts[m.status]++;
+
+  const max = Math.max(counts.pending, counts.accepted, counts.rejected);
+  const leaders = (["accepted", "rejected", "pending"] as const).filter(
+    (s) => counts[s] === max,
+  );
+  return leaders.length === 1 ? leaders[0] : "pending";
+}
 
 /** HR board: cards per team with drag-and-drop to move a member between teams. */
 export function HrBoard({ teams }: { teams: Team[] }) {
@@ -31,17 +55,26 @@ export function HrBoard({ teams }: { teams: Team[] }) {
     // Nothing to do when dropped back onto the member's own team.
     if (!d || d.fromTeamId === team.id) return;
 
+    const targetStatus = teamStatus(team.members);
     const confirmed = window.confirm(
-      `Move ${d.memberName} from "${d.fromTeamName}" to "${team.name}"?`,
+      `Move ${d.memberName} from "${d.fromTeamName}" to "${team.name}"?\n` +
+        `They'll be marked "${targetStatus}" to match the team.`,
     );
     if (!confirmed) return;
 
     setError(null);
     setBusy(true);
-    const res = await transferRegistration(d.registrationId, team.name);
+    const moved = await transferRegistration(d.registrationId, team.name);
+    if (!moved.ok) {
+      setBusy(false);
+      setError(moved.error);
+      return;
+    }
+    // The member's status follows the team (majority) they landed in.
+    const synced = await setRegistrationStatus(d.registrationId, targetStatus);
     setBusy(false);
-    if (res.ok) router.refresh();
-    else setError(res.error);
+    if (synced.ok) router.refresh();
+    else setError(synced.error);
   };
 
   return (
@@ -90,7 +123,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                     <span className="font-mono">{team.id.slice(0, 8)}</span>
                   </p>
                 </div>
-                <StatusBadge status={team.status} />
+                <StatusBadge status={teamStatus(team.members)} />
               </header>
 
               <ul className="flex flex-1 flex-col divide-y divide-border">
