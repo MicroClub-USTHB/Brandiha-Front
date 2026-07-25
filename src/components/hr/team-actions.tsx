@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Check, RotateCcw, X } from "lucide-react";
 import { updateTeamStatus } from "@/lib/api/teams";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
@@ -31,11 +30,12 @@ const VERB: Record<RegistrationStatus, string> = {
 export function TeamActions({
   teamId,
   teamName,
+  onDone,
 }: {
   teamId: string;
   teamName: string;
+  onDone: () => void | Promise<void>;
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<RegistrationStatus | null>(null);
@@ -45,7 +45,7 @@ export function TeamActions({
     setError(null);
     startTransition(async () => {
       const res = await updateTeamStatus(teamId, status);
-      if (res.ok) router.refresh();
+      if (res.ok) await onDone();
       else setError(res.error);
     });
   };

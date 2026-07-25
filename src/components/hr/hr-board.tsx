@@ -1,18 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Eye, GripVertical, Info } from "lucide-react";
+import { useState } from "react";
+import { Info } from "lucide-react";
+import { motion } from "motion/react";
 import {
   setRegistrationStatus,
   transferRegistration,
 } from "@/lib/api/registrations";
-import type { Team } from "@/lib/api/team-types";
+import { listTeams } from "@/lib/api/teams";
+import type { Team, TeamMember } from "@/lib/api/team-types";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
 import { MemberDetail } from "@/components/hr/member-detail";
-import { Button } from "@/components/ui/button";
+import { MemberRow, type Point } from "@/components/hr/member-row";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,19 +26,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
-type Dragged = {
-  registrationId: string;
-  memberName: string;
-  fromTeamId: string;
-  fromTeamName: string;
-};
-
 /**
  * A team's status is the majority of its members' statuses. Ties (no clear
- * majority, including an empty team) resolve to `pending`. This replaces the
+ * majority, including an empty team) resolve to `pending`. Replaces the
  * backend's arbitrary single-member value.
  */
-function teamStatus(members: Team["members"]): RegistrationStatus {
+function teamStatus(members: TeamMember[]): RegistrationStatus {
   const counts: Record<RegistrationStatus, number> = {
     pending: 0,
     accepted: 0,
@@ -52,51 +46,98 @@ function teamStatus(members: Team["members"]): RegistrationStatus {
   return leaders.length === 1 ? leaders[0] : "pending";
 }
 
+type PendingMove = { member: TeamMember; fromTeam: Team; toTeam: Team };
+
+/** Apply a staged move to the board so the member shows in the target team. */
+function withMove(board: Team[], move: PendingMove): Team[] {
+  return board.map((t) => {
+    if (t.id === move.toTeam.id)
+      return { ...t, members: [...t.members, move.member] };
+    if (t.id === move.fromTeam.id)
+      return {
+        ...t,
+        members: t.members.filter(
+          (m) => m.registration_id !== move.member.registration_id,
+        ),
+      };
+    return t;
+  });
+}
+
 /** HR board: cards per team with drag-and-drop to move a member between teams. */
 export function HrBoard({ teams }: { teams: Team[] }) {
-  const router = useRouter();
-  const [dragged, setDragged] = useState<Dragged | null>(null);
-  const [overTeamId, setOverTeamId] = useState<string | null>(null);
+  // Client-owned board; seeded from the server, then refreshed via `listTeams`.
+  const [board, setBoard] = useState<Team[]>(teams);
+  const [pending, setPending] = useState<PendingMove | null>(null);
+  const [dragging, setDragging] = useState<{ fromTeamId: string } | null>(null);
+  const [hoverTeamId, setHoverTeamId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pending, setPending] = useState<{ member: Dragged; team: Team } | null>(
-    null,
-  );
-  const [detailId, setDetailId] = useState<string | null>(null);
-  // True only while a drag was initiated from a member's grip handle.
-  const dragOkRef = useRef(false);
 
-  // A drop stages the move and opens the confirmation dialog; the transfer runs
-  // from `confirmMove` once the user accepts.
-  const handleDrop = (team: Team) => {
-    setOverTeamId(null);
-    const d = dragged;
-    setDragged(null);
-    // Nothing to do when dropped back onto the member's own team.
-    if (!d || d.fromTeamId === team.id) return;
-    setPending({ member: d, team });
+  const cardEls = useState(() => new Map<string, HTMLElement>())[0];
+
+  const teamAtPoint = (point: Point): Team | null => {
+    for (const t of board) {
+      const el = cardEls.get(t.id);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (
+        point.x >= r.left &&
+        point.x <= r.right &&
+        point.y >= r.top &&
+        point.y <= r.bottom
+      ) {
+        return t;
+      }
+    }
+    return null;
+  };
+
+  const handleDragStart = (_member: TeamMember, fromTeam: Team) =>
+    setDragging({ fromTeamId: fromTeam.id });
+
+  const handleDragOver = (point: Point) => {
+    const id = teamAtPoint(point)?.id ?? null;
+    setHoverTeamId((prev) => (prev === id ? prev : id));
+  };
+
+  const handleDragEnd = (member: TeamMember, fromTeam: Team, point: Point) => {
+    const target = teamAtPoint(point);
+    setDragging(null);
+    setHoverTeamId(null);
+    if (!target || target.id === fromTeam.id) return;
+    setPending({ member, fromTeam, toTeam: target });
+  };
+
+  const refreshBoard = async () => {
+    const res = await listTeams();
+    if (res.ok) setBoard(res.data);
   };
 
   const confirmMove = async () => {
     if (!pending) return;
-    const { member: d, team } = pending;
-    const targetStatus = teamStatus(team.members);
-    setPending(null);
+    const { member, toTeam } = pending;
+    const targetStatus = teamStatus(toTeam.members);
 
     setError(null);
     setBusy(true);
-    const moved = await transferRegistration(d.registrationId, team.name);
+    const moved = await transferRegistration(member.registration_id, toTeam.name);
     if (!moved.ok) {
       setBusy(false);
       setError(moved.error);
+      setPending(null);
       return;
     }
     // The member's status follows the team (majority) they landed in.
-    const synced = await setRegistrationStatus(d.registrationId, targetStatus);
+    const synced = await setRegistrationStatus(member.registration_id, targetStatus);
+    await refreshBoard();
     setBusy(false);
-    if (synced.ok) router.refresh();
-    else setError(synced.error);
+    setPending(null);
+    if (!synced.ok) setError(synced.error);
   };
+
+  const view = pending ? withMove(board, pending) : board;
 
   return (
     <>
@@ -123,19 +164,18 @@ export function HrBoard({ teams }: { teams: Team[] }) {
           busy && "pointer-events-none opacity-60",
         )}
       >
-        {teams.map((team) => {
-          const isTarget = overTeamId === team.id && dragged?.fromTeamId !== team.id;
+        {view.map((team) => {
+          const isTarget =
+            !!dragging &&
+            hoverTeamId === team.id &&
+            dragging.fromTeamId !== team.id;
           return (
             <section
               key={team.id}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (overTeamId !== team.id) setOverTeamId(team.id);
+              ref={(el) => {
+                if (el) cardEls.set(team.id, el);
+                else cardEls.delete(team.id);
               }}
-              onDragLeave={() =>
-                setOverTeamId((id) => (id === team.id ? null : id))
-              }
-              onDrop={() => handleDrop(team)}
               className={cn(
                 "flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-colors",
                 isTarget ? "border-primary ring-2 ring-primary/40" : "border-border",
@@ -157,65 +197,29 @@ export function HrBoard({ teams }: { teams: Team[] }) {
 
               <ul className="flex flex-1 flex-col divide-y divide-border">
                 {team.members.map((m) => (
-                  <li
+                  <MemberRow
                     key={m.registration_id}
-                    draggable
-                    onDragStart={(e) => {
-                      // Only allow drags that began on the grip handle.
-                      if (!dragOkRef.current) {
-                        e.preventDefault();
-                        return;
-                      }
-                      dragOkRef.current = false;
-                      setDragged({
-                        registrationId: m.registration_id,
-                        memberName: m.full_name,
-                        fromTeamId: team.id,
-                        fromTeamName: team.name,
-                      });
-                    }}
-                    onDragEnd={() => {
-                      setDragged(null);
-                      setOverTeamId(null);
-                    }}
-                    onMouseUp={() => {
-                      dragOkRef.current = false;
-                    }}
-                    className="flex items-center justify-between gap-2 py-2"
-                  >
-                    <div className="flex min-w-0 items-center gap-1.5">
-                      <button
-                        type="button"
-                        aria-label={`Drag ${m.full_name} to another team`}
-                        onMouseDown={() => {
-                          dragOkRef.current = true;
-                        }}
-                        className="shrink-0 cursor-grab text-muted-foreground/60 active:cursor-grabbing"
-                      >
-                        <GripVertical className="size-4" />
-                      </button>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{m.full_name}</p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {m.email}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setDetailId(m.registration_id)}
-                      aria-label={`View ${m.full_name}`}
-                      className="shrink-0 cursor-pointer text-muted-foreground"
-                    >
-                      <Eye className="size-4" />
-                    </Button>
-                  </li>
+                    member={m}
+                    team={team}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                    onView={setDetailId}
+                  />
                 ))}
+                {isTarget && (
+                  <motion.li
+                    layout
+                    className="mt-2 h-11 rounded-md border-2 border-dashed border-primary/50"
+                  />
+                )}
               </ul>
 
-              <TeamActions teamId={team.id} teamName={team.name} />
+              <TeamActions
+                teamId={team.id}
+                teamName={team.name}
+                onDone={refreshBoard}
+              />
             </section>
           );
         })}
@@ -235,11 +239,11 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 <>
                   Move{" "}
                   <span className="font-semibold text-foreground">
-                    {pending.member.memberName}
+                    {pending.member.full_name}
                   </span>{" "}
-                  from &ldquo;{pending.member.fromTeamName}&rdquo; to &ldquo;
-                  {pending.team.name}&rdquo;? They&rsquo;ll be marked &ldquo;
-                  {teamStatus(pending.team.members)}&rdquo; to match the team.
+                  from &ldquo;{pending.fromTeam.name}&rdquo; to &ldquo;
+                  {pending.toTeam.name}&rdquo;? They&rsquo;ll be marked &ldquo;
+                  {teamStatus(pending.toTeam.members)}&rdquo; to match the team.
                 </>
               )}
             </AlertDialogDescription>
@@ -251,10 +255,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <MemberDetail
-        registrationId={detailId}
-        onClose={() => setDetailId(null)}
-      />
+      <MemberDetail registrationId={detailId} onClose={() => setDetailId(null)} />
     </>
   );
 }
