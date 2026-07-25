@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, GripVertical } from "lucide-react";
+import { Eye, GripVertical, Info } from "lucide-react";
 import {
   setRegistrationStatus,
   transferRegistration,
@@ -98,9 +98,17 @@ export function HrBoard({ teams }: { teams: Team[] }) {
 
   return (
     <>
-      <p className="mb-4 text-sm text-white/70">
-        Drag a member onto another team to move them.
-      </p>
+      <div className="mb-6 flex items-start gap-3 rounded-xl border border-white/20 bg-white/30 p-4">
+        <Info className="mt-0.5 size-5 shrink-0 text-white" />
+        <div>
+          <h2 className="text-sm font-semibold text-white">
+            Move members between teams
+          </h2>
+          <p className="text-sm text-white/70">
+            Drag a member onto another team to move them.
+          </p>
+        </div>
+      </div>
       {error && (
         <p role="alert" className="mb-4 text-sm font-semibold text-destructive">
           {error}
