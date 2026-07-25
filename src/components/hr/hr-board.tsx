@@ -175,7 +175,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 ))}
               </ul>
 
-              <TeamActions teamId={team.id} />
+              <TeamActions teamId={team.id} teamName={team.name} />
             </section>
           );
         })}
