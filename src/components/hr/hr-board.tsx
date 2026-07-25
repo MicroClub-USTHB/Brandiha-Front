@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GripVertical } from "lucide-react";
+import { Eye, GripVertical } from "lucide-react";
 import {
   setRegistrationStatus,
   transferRegistration,
@@ -12,6 +12,7 @@ import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
 import { MemberDetail } from "@/components/hr/member-detail";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -161,8 +162,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                       setDragged(null);
                       setOverTeamId(null);
                     }}
-                    onClick={() => setDetailId(m.registration_id)}
-                    className="flex cursor-grab items-center justify-between gap-2 rounded-md py-2 transition-colors hover:bg-muted/50 active:cursor-grabbing"
+                    className="flex cursor-grab items-center justify-between gap-2 py-2 active:cursor-grabbing"
                   >
                     <div className="flex min-w-0 items-center gap-1.5">
                       <GripVertical className="size-4 shrink-0 text-muted-foreground/60" />
@@ -173,6 +173,16 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                         </p>
                       </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDetailId(m.registration_id)}
+                      aria-label={`View ${m.full_name}`}
+                      className="shrink-0 cursor-pointer text-muted-foreground"
+                    >
+                      <Eye className="size-4" />
+                    </Button>
                   </li>
                 ))}
               </ul>
