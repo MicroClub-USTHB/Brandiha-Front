@@ -28,6 +28,20 @@ export interface MeResponse {
 }
 
 /**
+ * Cheap client-side freshness check: token is well-formed and not expired.
+ * No signature verification (the backend is the authority) — used by middleware
+ * to gate routes and drop obviously-stale cookies without a round-trip.
+ */
+export function isTokenFresh(token: string): boolean {
+  try {
+    const claims = decodeJwt(token);
+    return typeof claims.exp !== "number" || claims.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+/**
  * TEMPORARY STUB — remove once `GET /auth/me` exists.
  *
  * Synthesizes a session from the JWT's own claims *without verifying the

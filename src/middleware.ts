@@ -1,39 +1,44 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/lib/auth/jwt";
+import { SESSION_COOKIE, isTokenFresh } from "@/lib/auth/jwt";
 
-/**
- * Route prefixes that require an authenticated jury/staff session. Add the jury
- * dashboard routes here as they're built (e.g. "/jury").
- */
-const PROTECTED_PREFIXES = ["/jury", "/hr"];
+/** Route prefixes that require an authenticated staff session. */
+const PROTECTED_PREFIXES = ["/hr"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
-const AUTHED_HOME = "/jury";
+const AUTHED_HOME = "/hr";
 
 /**
- * Cheap, optimistic gate: redirect based only on whether a session cookie is
- * present. This is UX, not security — the backend is the real authority and
- * validates the token on every protected call (and in `getSession`). An expired
- * cookie may pass here, but the page's `getSession()`/`apiFetch` will reject it.
+ * Optimistic gate based on the session cookie. This is UX, not security — the
+ * backend is the real authority and validates the token on every protected call
+ * (and in `getSession`). We do a cheap local expiry check so an expired cookie
+ * is treated as logged-out (and cleared) rather than looping between the page's
+ * `getSession()` redirect and this middleware's "already-authed" bounce.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  const hasSession = token ? isTokenFresh(token) : false;
+
+  // Drop a present-but-invalid/expired cookie so it can't linger or loop.
+  const clearStale = (res: NextResponse) => {
+    if (token && !hasSession) res.cookies.delete(SESSION_COOKIE);
+    return res;
+  };
 
   const isProtected = PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 
-  // No cookie on a protected route → login, remembering where they were headed.
+  // No valid session on a protected route → login (remembering where headed).
   if (isProtected && !hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = LOGIN_PATH;
     url.searchParams.set("from", pathname);
-    return NextResponse.redirect(url);
+    return clearStale(NextResponse.redirect(url));
   }
 
-  // Cookie present but sitting on /login → send them into the app.
+  // Valid session sitting on /login → send them into the app.
   if (pathname === LOGIN_PATH && hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = AUTHED_HOME;
@@ -41,9 +46,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return clearStale(NextResponse.next());
 }
 
 export const config = {
-  matcher: ["/login", "/jury/:path*", "/hr/:path*"],
+  matcher: ["/login", "/hr/:path*"],
 };

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const LOGIN_PATH = "/login";
 /** Where to land after login when there's no `?from=` to return to. */
-const POST_LOGIN_HOME = "/jury";
+const POST_LOGIN_HOME = "/hr";
 
 function LoginTitle() {
   return (

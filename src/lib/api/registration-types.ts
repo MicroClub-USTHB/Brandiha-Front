@@ -45,12 +45,3 @@ export interface RegistrationDetail {
   team_name: string;
   team_secret_code: string;
 }
-
-/** Envelope returned by the paginated `GET /registrations` list. */
-export interface PaginatedRegistrations {
-  data: RegistrationDetail[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
