@@ -11,22 +11,22 @@ const API_BASE_URL =
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };
 
-/** Body returned by `POST /auth/judge/login` on the backend. */
+/** Body returned by `POST /auth/login` on the backend. */
 interface LoginResponse {
   access_token: string;
   token_type: string;
 }
 
 /**
- * Server Action: authenticate a staff/jury member against the backend. Runs on
- * the server, so the backend URL stays private and no CORS is involved. On
- * success the JWT is stored in an httpOnly cookie for later protected requests;
- * failures map to user-facing messages.
+ * Server Action: authenticate a staff member against the backend. Runs on the
+ * server, so the backend URL stays private and no CORS is involved. On success
+ * the JWT is stored in an httpOnly cookie for later protected requests; failures
+ * map to user-facing messages.
  */
-export async function loginJudge(data: LoginFormData): Promise<LoginResult> {
+export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/auth/judge/login`, {
+    response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: data.Email.trim(), password: data.Password }),

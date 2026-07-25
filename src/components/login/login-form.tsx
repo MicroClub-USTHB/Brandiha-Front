@@ -9,7 +9,7 @@ import { ArrowRight, Lock, Mail } from "lucide-react";
 import { FormInput } from "@/components/form";
 import { ActionButton } from "@/components/action-button";
 import { loginSchema, LoginFormData } from "@/lib/validators/login-schema";
-import { loginJudge } from "@/lib/api/auth";
+import { loginStaff } from "@/lib/api/auth";
 import { cn } from "@/lib/utils";
 
 const LOGIN_PATH = "/login";
@@ -37,7 +37,7 @@ export default function LoginForm() {
 
   const onSubmit = form.handleSubmit(async (data) => {
     setSubmitError(null);
-    const result = await loginJudge(data);
+    const result = await loginStaff(data);
     if (!result.ok) {
       setSubmitError(result.error);
       return;
