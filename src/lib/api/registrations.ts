@@ -147,44 +147,26 @@ export async function getRegistration(
   }
 }
 
-/**
- * Server Action: set a single registration's status (Admin) via
- * `PATCH /registrations/{id}` (body `{ status }`).
- */
-export async function setRegistrationStatus(
-  id: string,
-  status: RegistrationStatus,
-): Promise<FetchResult<{ id: string; status: RegistrationStatus }>> {
-  try {
-    const res = await apiFetch(`/registrations/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    });
-    if (!res.ok) return { ok: false, error: readError(res.status) };
-    return {
-      ok: true,
-      data: (await res.json()) as { id: string; status: RegistrationStatus },
-    };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+/** Fields accepted by `PATCH /registrations/{id}`. */
+export interface RegistrationPatch {
+  /** New team name — the backend joins/creates it and reassigns `team_id`. */
+  team_name?: string;
+  status?: RegistrationStatus;
 }
 
 /**
- * Server Action: move a registration to another team (Admin) via
- * `PATCH /registrations/{id}` (body `{ team_name }`). The backend joins/creates
- * the team by name and reassigns the member's `team_id`. Returns the updated
- * registration.
+ * Server Action: update a registration (Admin) via `PATCH /registrations/{id}`.
+ * Applies a team move and/or a status change in a single request. Returns the
+ * updated registration.
  */
-export async function transferRegistration(
+export async function updateRegistration(
   id: string,
-  teamName: string,
+  patch: RegistrationPatch,
 ): Promise<FetchResult<RegistrationDetail>> {
   try {
     const res = await apiFetch(`/registrations/${id}`, {
       method: "PATCH",
-      body: JSON.stringify({ team_name: teamName }),
+      body: JSON.stringify(patch),
     });
     if (!res.ok) return { ok: false, error: readError(res.status) };
     return { ok: true, data: (await res.json()) as RegistrationDetail };

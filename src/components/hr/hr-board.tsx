@@ -2,10 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Info } from "lucide-react";
-import {
-  setRegistrationStatus,
-  transferRegistration,
-} from "@/lib/api/registrations";
+import { updateRegistration } from "@/lib/api/registrations";
 import { listTeams } from "@/lib/api/teams";
 import type { Team, TeamMember } from "@/lib/api/team-types";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
@@ -124,15 +121,17 @@ export function HrBoard({ teams }: { teams: Team[] }) {
 
     setError(null);
     setBusy(true);
-    const moved = await transferRegistration(member.registration_id, toTeam.name);
-    if (!moved.ok) {
+    // One atomic request: move team + set status to the target's majority.
+    const res = await updateRegistration(member.registration_id, {
+      team_name: toTeam.name,
+      status: targetStatus,
+    });
+    if (!res.ok) {
       setPending(null);
       setBusy(false);
-      setError(moved.error);
+      setError(res.error);
       return;
     }
-    // The member's status follows the team (majority) they landed in.
-    const synced = await setRegistrationStatus(member.registration_id, targetStatus);
 
     // Commit the move into the board locally — the optimistic overlay already
     // shows it, so no refetch (which would reshuffle the unstable backend order).
@@ -140,7 +139,6 @@ export function HrBoard({ teams }: { teams: Team[] }) {
     setBoard((b) => withMove(b, committed));
     setPending(null);
     setBusy(false);
-    if (!synced.ok) setError(synced.error);
   };
 
   const view = pending ? withMove(board, pending) : board;
