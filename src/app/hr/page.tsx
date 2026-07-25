@@ -21,7 +21,7 @@ export default async function HrPage() {
 
   return (
     <main className="mx-auto max-w-6xl p-6 font-sans">
-      <h1 className="mb-6 font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
+      <h1 className="mb-3 font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
         Teams <span className="text-white/60">({teams.length})</span>
       </h1>
       <HrBoard teams={teams} />

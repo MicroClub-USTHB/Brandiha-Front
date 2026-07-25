@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, GripVertical, Info } from "lucide-react";
 import {
@@ -63,6 +63,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
     null,
   );
   const [detailId, setDetailId] = useState<string | null>(null);
+  // True only while a drag was initiated from a member's grip handle.
+  const dragOkRef = useRef(false);
 
   // A drop stages the move and opens the confirmation dialog; the transfer runs
   // from `confirmMove` once the user accepts.
@@ -158,22 +160,40 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                   <li
                     key={m.registration_id}
                     draggable
-                    onDragStart={() =>
+                    onDragStart={(e) => {
+                      // Only allow drags that began on the grip handle.
+                      if (!dragOkRef.current) {
+                        e.preventDefault();
+                        return;
+                      }
+                      dragOkRef.current = false;
                       setDragged({
                         registrationId: m.registration_id,
                         memberName: m.full_name,
                         fromTeamId: team.id,
                         fromTeamName: team.name,
-                      })
-                    }
+                      });
+                    }}
                     onDragEnd={() => {
                       setDragged(null);
                       setOverTeamId(null);
                     }}
-                    className="flex cursor-grab items-center justify-between gap-2 py-2 active:cursor-grabbing"
+                    onMouseUp={() => {
+                      dragOkRef.current = false;
+                    }}
+                    className="flex items-center justify-between gap-2 py-2"
                   >
                     <div className="flex min-w-0 items-center gap-1.5">
-                      <GripVertical className="size-4 shrink-0 text-muted-foreground/60" />
+                      <button
+                        type="button"
+                        aria-label={`Drag ${m.full_name} to another team`}
+                        onMouseDown={() => {
+                          dragOkRef.current = true;
+                        }}
+                        className="shrink-0 cursor-grab text-muted-foreground/60 active:cursor-grabbing"
+                      >
+                        <GripVertical className="size-4" />
+                      </button>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{m.full_name}</p>
                         <p className="truncate text-xs text-muted-foreground">
