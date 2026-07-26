@@ -230,6 +230,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 teamId={team.id}
                 teamName={team.name}
                 currentStatus={teamStatus(team.members)}
+                memberCount={team.members.length}
                 onDone={refreshBoard}
               />
             </section>

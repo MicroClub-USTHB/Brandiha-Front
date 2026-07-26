@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, RotateCcw, X } from "lucide-react";
-import { updateTeamStatus } from "@/lib/api/teams";
+import { Check, RotateCcw, Trash2, X } from "lucide-react";
+import { deleteTeam, updateTeamStatus } from "@/lib/api/teams";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import {
   AlertDialog,
@@ -31,22 +31,38 @@ export function TeamActions({
   teamId,
   teamName,
   currentStatus,
+  memberCount,
   onDone,
 }: {
   teamId: string;
   teamName: string;
   currentStatus: RegistrationStatus;
+  memberCount: number;
   onDone: () => void | Promise<void>;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<RegistrationStatus | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  // A team can only be deleted once it has no members left.
+  const isEmpty = memberCount === 0;
 
   const run = (status: RegistrationStatus) => {
     setConfirming(null);
     setError(null);
     startTransition(async () => {
       const res = await updateTeamStatus(teamId, status);
+      if (res.ok) await onDone();
+      else setError(res.error);
+    });
+  };
+
+  const runDelete = () => {
+    setConfirmingDelete(false);
+    setError(null);
+    startTransition(async () => {
+      const res = await deleteTeam(teamId);
       if (res.ok) await onDone();
       else setError(res.error);
     });
@@ -83,7 +99,45 @@ export function TeamActions({
           Accept
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setConfirmingDelete(true)}
+        disabled={pending || !isEmpty}
+        title={isEmpty ? undefined : "Only empty teams can be deleted"}
+        className={cn(
+          BTN_BASE,
+          "mt-2 w-full bg-destructive/10 text-destructive hover:bg-destructive/20",
+        )}
+      >
+        <Trash2 className="size-3.5 stroke-[2.5]" />
+        Delete team
+      </button>
+
       {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+
+      <AlertDialog
+        open={confirmingDelete}
+        onOpenChange={(open) => {
+          if (!open) setConfirmingDelete(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete team?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes &ldquo;{teamName}&rdquo;. This action
+              can&rsquo;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={runDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={confirming !== null}
