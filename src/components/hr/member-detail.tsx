@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { getRegistration } from "@/lib/api/registrations";
 import type { RegistrationDetail } from "@/lib/api/registration-types";
 import {
@@ -47,7 +49,18 @@ function MemberDetailBody({ registrationId }: { registrationId: string }) {
         {error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : data ? (
-          <RegistrationDetails r={data} />
+          <>
+            <RegistrationDetails r={data} showAudit={false} />
+            <div className="mt-6 border-t border-border pt-4 text-center">
+              <Link
+                href={`/rh?registration-id=${data.id}`}
+                className="inline-flex items-center gap-1.5 text-sm text-primary underline underline-offset-2 hover:text-primary/80"
+              >
+                <ExternalLink className="size-3.5" />
+                Open full page
+              </Link>
+            </div>
+          </>
         ) : (
           <p className="text-sm text-muted-foreground">Loading…</p>
         )}

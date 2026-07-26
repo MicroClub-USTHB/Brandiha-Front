@@ -53,7 +53,13 @@ function fmtDateTime(iso: string) {
   return d.toLocaleString("fr-DZ", { timeZone: "Africa/Algiers" });
 }
 
-export function RegistrationDetails({ r }: { r: RegistrationDetail }) {
+export function RegistrationDetails({
+  r,
+  showAudit = true,
+}: {
+  r: RegistrationDetail;
+  showAudit?: boolean;
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -136,19 +142,21 @@ export function RegistrationDetails({ r }: { r: RegistrationDetail }) {
         </Field>
       </Section>
 
-      <Section title="Audit">
-        <Field label="Registration ID" full>
-          <code className="text-xs">{r.id}</code>
-        </Field>
-        <Field label="User ID" full>
-          <code className="text-xs">{r.user_id}</code>
-        </Field>
-        <Field label="Team ID" full>
-          <code className="text-xs">{r.team_id}</code>
-        </Field>
-        <Field label="Created">{fmtDateTime(r.created_at)}</Field>
-        <Field label="Updated">{fmtDateTime(r.updated_at)}</Field>
-      </Section>
+      {showAudit && (
+        <Section title="Audit">
+          <Field label="Registration ID" full>
+            <code className="text-xs">{r.id}</code>
+          </Field>
+          <Field label="User ID" full>
+            <code className="text-xs">{r.user_id}</code>
+          </Field>
+          <Field label="Team ID" full>
+            <code className="text-xs">{r.team_id}</code>
+          </Field>
+          <Field label="Created">{fmtDateTime(r.created_at)}</Field>
+          <Field label="Updated">{fmtDateTime(r.updated_at)}</Field>
+        </Section>
+      )}
     </div>
   );
 }

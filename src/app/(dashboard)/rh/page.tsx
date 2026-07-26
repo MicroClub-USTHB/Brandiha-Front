@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getRegistration } from "@/lib/api/registrations";
 import { RegistrationDetails } from "@/components/hr/registration-details";
+import { ShareButton } from "@/components/hr/share-button";
 
 type Props = {
   searchParams: Promise<{ "registration-id"?: string }>;
@@ -42,12 +43,15 @@ export default async function RhPage(props: Props) {
           </h1>
           <p className="text-sm text-muted-foreground">{r.user_email}</p>
         </div>
-        <Link
-          href="/hr"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          &larr; Back to HR
-        </Link>
+        <div className="flex items-center gap-2">
+          <ShareButton />
+          <Link
+            href="/hr"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            &larr; Back to HR
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card p-6 text-card-foreground">
