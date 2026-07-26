@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { listAllRegistrations } from "@/lib/api/registrations";
-import type { RegistrationDetail } from "@/lib/api/registration-types";
+import type { RegistrationDetail, RegistrationStatus } from "@/lib/api/registration-types";
 
 /** CSV columns: [header, accessor]. Order defines the column order in the file. */
 const COLUMNS: [string, (r: RegistrationDetail) => string | null | undefined][] = [
@@ -11,7 +11,8 @@ const COLUMNS: [string, (r: RegistrationDetail) => string | null | undefined][] 
   ["Email", (r) => r.user_email],
   ["Phone", (r) => r.phone_number],
   ["Discord ID", (r) => r.discord_id],
-  ["Team", (r) => r.team_name],
+  ["Team Name", (r) => r.team_name],
+  ["Team Code", (r) => r.team_secret_code],
   ["Department", (r) => r.department],
   ["Status", (r) => r.status],
   ["Participated Before", (r) => (r.participated_before ? "yes" : "no")],
@@ -56,14 +57,20 @@ function download(csv: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ExportCsvButton() {
+export function ExportCsvButton({
+  disabled,
+  filter,
+}: {
+  disabled?: boolean;
+  filter?: RegistrationStatus | null;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const exportCsv = async () => {
     setLoading(true);
     setError(null);
-    const result = await listAllRegistrations();
+    const result = await listAllRegistrations(filter ?? undefined);
     setLoading(false);
 
     if (!result.ok) {
@@ -79,7 +86,7 @@ export function ExportCsvButton() {
       <button
         type="button"
         onClick={exportCsv}
-        disabled={loading}
+        disabled={disabled || loading}
         className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-card-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (

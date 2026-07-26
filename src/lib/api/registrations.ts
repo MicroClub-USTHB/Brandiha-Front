@@ -138,10 +138,11 @@ function readError(status: number): string {
 /**
  * Server Action: fetch every registration's full details (Admin), following the
  * pagination on `GET /registrations` to the end. Used to export all rows at once.
+ * Optionally filter by team status.
  */
-export async function listAllRegistrations(): Promise<
-  FetchResult<RegistrationDetail[]>
-> {
+export async function listAllRegistrations(
+  status?: RegistrationStatus,
+): Promise<FetchResult<RegistrationDetail[]>> {
   const denied = await requireAdmin();
   if (denied) return denied;
 
@@ -152,7 +153,10 @@ export async function listAllRegistrations(): Promise<
     let page = 1;
     let pages = 1;
     do {
-      const res = await apiFetch(`/registrations?page=${page}&limit=${limit}`);
+      const q = status
+        ? `/registrations?page=${page}&limit=${limit}&status=${status}`
+        : `/registrations?page=${page}&limit=${limit}`;
+      const res = await apiFetch(q);
       if (!res.ok) return { ok: false, error: readError(res.status) };
       const body = (await res.json()) as PaginatedRegistrations;
       all.push(...body.data);
