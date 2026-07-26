@@ -3,6 +3,7 @@
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
 import type {
+  PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
 } from "@/lib/api/registration-types";
@@ -131,6 +132,35 @@ function readError(status: number): string {
   if (status === 401 || status === 403) return "You're not authorized to view this.";
   if (status === 404) return "Not found.";
   return "Something went wrong loading the data.";
+}
+
+/**
+ * Server Action: fetch every registration's full details (Admin), following the
+ * pagination on `GET /registrations` to the end. Used to export all rows at once.
+ */
+export async function listAllRegistrations(): Promise<
+  FetchResult<RegistrationDetail[]>
+> {
+  const limit = 100;
+  const all: RegistrationDetail[] = [];
+
+  try {
+    let page = 1;
+    let pages = 1;
+    do {
+      const res = await apiFetch(`/registrations?page=${page}&limit=${limit}`);
+      if (!res.ok) return { ok: false, error: readError(res.status) };
+      const body = (await res.json()) as PaginatedRegistrations;
+      all.push(...body.data);
+      pages = body.pages;
+      page += 1;
+    } while (page <= pages);
+
+    return { ok: true, data: all };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
 }
 
 /** Server Action: fetch a single registration's full details (Admin). */
