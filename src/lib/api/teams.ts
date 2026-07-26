@@ -4,6 +4,7 @@ import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { Team } from "@/lib/api/team-types";
+import type { TeamStats } from "@/lib/api/team-types";
 
 /**
  * Server Action: fetch all teams with their members (Admin). Optionally filter
@@ -19,6 +20,22 @@ export async function listTeams(
       return { ok: false, error: "You're not authorized to view this." };
     if (!res.ok) return { ok: false, error: "Something went wrong loading teams." };
     return { ok: true, data: (await res.json()) as Team[] };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/**
+ * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
+ */
+export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
+  try {
+    const res = await apiFetch("/teams/stats");
+    if (res.status === 401 || res.status === 403)
+      return { ok: false, error: "You're not authorized to view this." };
+    if (!res.ok) return { ok: false, error: "Something went loading stats." };
+    return { ok: true, data: (await res.json()) as TeamStats };
   } catch (e) {
     if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
     return { ok: false, error: "Couldn't reach the server." };

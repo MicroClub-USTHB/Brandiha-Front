@@ -9,6 +9,14 @@ export interface TeamMember {
   status: RegistrationStatus;
 }
 
+/** Stats returned by `GET /teams/stats`. */
+export interface TeamStats {
+  total_teams: number;
+  accepted_teams: number;
+  rejected_teams: number;
+  pending_teams: number;
+}
+
 /** A team with its members. The team `status` is derived by the backend. */
 export interface Team {
   id: string;

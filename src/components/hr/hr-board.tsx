@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { updateRegistration } from "@/lib/api/registrations";
 import { listTeams } from "@/lib/api/teams";
@@ -62,6 +63,7 @@ function withMove(board: Team[], move: PendingMove): Team[] {
 
 /** HR board: cards per team with drag-and-drop to move a member between teams. */
 export function HrBoard({ teams }: { teams: Team[] }) {
+  const router = useRouter();
   // Client-owned board; seeded from the server, then refreshed via `listTeams`.
   const [board, setBoard] = useState<Team[]>(teams);
   const [pending, setPending] = useState<PendingMove | null>(null);
@@ -110,7 +112,10 @@ export function HrBoard({ teams }: { teams: Team[] }) {
 
   const refreshBoard = async () => {
     const res = await listTeams();
-    if (res.ok) setBoard(res.data);
+    if (res.ok) {
+      setBoard(res.data);
+      router.refresh();
+    }
   };
 
   const confirmMove = async () => {
