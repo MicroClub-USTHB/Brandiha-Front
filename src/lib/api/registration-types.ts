@@ -49,3 +49,12 @@ export interface RegistrationDetail {
   team_name: string;
   team_secret_code: string;
 }
+
+/** Response shape of `GET /registrations` (Admin), which is paginated. */
+export interface PaginatedRegistrations {
+  data: RegistrationDetail[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}

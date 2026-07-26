@@ -107,3 +107,8 @@ src/
   change reaches the default branch `main` (i.e. on the next dev→main promotion).
 - **Never add attribution trailers** — no `Co-Authored-By`, no "Generated with
   Claude Code" — in commits or PR descriptions.
+- **Don't rename a branch that already has an open PR** by deleting and
+  recreating the remote ref (the `branches/{branch}/rename` API, or a
+  delete-and-push). GitHub closes the PR when its head branch disappears instead
+  of retargeting it, orphaning the review. Rename *before* opening the PR, or use
+  GitHub's web UI "Rename branch", which retargets open PRs in place.
