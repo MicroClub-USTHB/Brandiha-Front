@@ -219,6 +219,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
               <TeamActions
                 teamId={team.id}
                 teamName={team.name}
+                currentStatus={teamStatus(team.members)}
                 onDone={refreshBoard}
               />
             </section>
