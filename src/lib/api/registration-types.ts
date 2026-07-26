@@ -38,6 +38,10 @@ export interface RegistrationDetail {
 
   status: RegistrationStatus;
 
+  /** Formatted as ISO-8601 by the backend */
+  phone_number: string;
+  discord_id: string;
+
   // Joined display fields.
   user_full_name: string;
   user_email: string;
