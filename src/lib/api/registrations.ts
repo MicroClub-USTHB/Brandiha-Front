@@ -2,6 +2,7 @@
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { requireAdmin } from "@/lib/auth/session";
 import type {
   PaginatedRegistrations,
   RegistrationDetail,
@@ -141,6 +142,9 @@ function readError(status: number): string {
 export async function listAllRegistrations(): Promise<
   FetchResult<RegistrationDetail[]>
 > {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const limit = 100;
   const all: RegistrationDetail[] = [];
 
@@ -167,6 +171,9 @@ export async function listAllRegistrations(): Promise<
 export async function getRegistration(
   id: string,
 ): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch(`/registrations/${id}`);
     if (!res.ok) return { ok: false, error: readError(res.status) };
@@ -193,6 +200,9 @@ export async function updateRegistration(
   id: string,
   patch: RegistrationPatch,
 ): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch(`/registrations/${id}`, {
       method: "PATCH",

@@ -1,6 +1,7 @@
 "use server";
 
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { requireAdmin } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { Team } from "@/lib/api/team-types";
@@ -13,6 +14,9 @@ import type { TeamStats } from "@/lib/api/team-types";
 export async function listTeams(
   status?: RegistrationStatus,
 ): Promise<FetchResult<Team[]>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const query = status ? `?status=${status}` : "";
   try {
     const res = await apiFetch(`/teams${query}`);
@@ -30,6 +34,9 @@ export async function listTeams(
  * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
  */
 export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch("/teams/stats");
     if (res.status === 401 || res.status === 403)
@@ -50,6 +57,9 @@ export async function updateTeamStatus(
   id: string,
   status: RegistrationStatus,
 ): Promise<FetchResult<Team>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch(`/teams/${id}`, {
       method: "PATCH",
