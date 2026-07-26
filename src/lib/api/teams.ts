@@ -82,8 +82,8 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 /**
  * Server Action: delete an (empty) team (Admin) via `DELETE /teams/{id}`. The
  * backend only allows deleting a team with no members and rejects a non-empty
- * one with `409 Conflict`, which we surface as a user-facing error even though
- * the UI also disables the button in that case.
+ * one with `400 Bad Request`, which we surface as a user-facing error even
+ * though the UI also disables the button in that case.
  */
 export async function deleteTeam(id: string): Promise<ActionResult> {
   const denied = await requireAdmin();
@@ -94,7 +94,7 @@ export async function deleteTeam(id: string): Promise<ActionResult> {
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to do this." };
     if (res.status === 404) return { ok: false, error: "Team not found." };
-    if (res.status === 409)
+    if (res.status === 400)
       return { ok: false, error: "Only empty teams can be deleted." };
     if (!res.ok) return { ok: false, error: "Something went wrong deleting the team." };
     return { ok: true };
