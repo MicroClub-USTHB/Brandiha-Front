@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, isTokenFresh } from "@/lib/auth/jwt";
 
 /** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr"];
+const PROTECTED_PREFIXES = ["/hr", "/rh"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
@@ -50,5 +50,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/hr/:path*"],
+  matcher: ["/login", "/hr/:path*", "/rh"],
 };

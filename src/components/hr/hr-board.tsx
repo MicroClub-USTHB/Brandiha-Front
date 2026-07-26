@@ -181,9 +181,14 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 else cardEls.delete(team.id);
               }}
               className={cn(
-                "flex flex-col rounded-xl border bg-card p-4 shadow-sm transition-colors",
-                isTarget ? "border-primary ring-2 ring-primary/40" : "border-border",
+                "flex flex-col rounded-xl p-6 shadow-sm transition-colors",
+                isTarget ? "ring-2 ring-primary/40" : "",
               )}
+              style={{
+                backgroundImage: "url('/paper.svg')",
+                backgroundSize: "100% 100%",
+                backgroundRepeat: "no-repeat",
+              }}
             >
               <header className="mb-3 flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -219,6 +224,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
               <TeamActions
                 teamId={team.id}
                 teamName={team.name}
+                currentStatus={teamStatus(team.members)}
                 onDone={refreshBoard}
               />
             </section>

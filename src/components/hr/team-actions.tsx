@@ -30,10 +30,12 @@ const VERB: Record<RegistrationStatus, string> = {
 export function TeamActions({
   teamId,
   teamName,
+  currentStatus,
   onDone,
 }: {
   teamId: string;
   teamName: string;
+  currentStatus: RegistrationStatus;
   onDone: () => void | Promise<void>;
 }) {
   const [pending, startTransition] = useTransition();
@@ -56,7 +58,7 @@ export function TeamActions({
         <button
           type="button"
           onClick={() => setConfirming("rejected")}
-          disabled={pending}
+          disabled={pending || currentStatus === "rejected"}
           className={cn(BTN_BASE, "bg-red-500/10 text-red-700 hover:bg-red-500/20")}
         >
           <X className="size-3.5 stroke-[2.5]" />
@@ -65,7 +67,7 @@ export function TeamActions({
         <button
           type="button"
           onClick={() => setConfirming("pending")}
-          disabled={pending}
+          disabled={pending || currentStatus === "pending"}
           className={cn(BTN_BASE, "bg-muted text-muted-foreground hover:bg-muted/70")}
         >
           <RotateCcw className="size-3.5 stroke-[2.5]" />
@@ -74,7 +76,7 @@ export function TeamActions({
         <button
           type="button"
           onClick={() => setConfirming("accepted")}
-          disabled={pending}
+          disabled={pending || currentStatus === "accepted"}
           className={cn(BTN_BASE, "bg-green-500/10 text-green-700 hover:bg-green-500/20")}
         >
           <Check className="size-3.5 stroke-[2.5]" />
