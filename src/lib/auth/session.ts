@@ -33,3 +33,15 @@ export async function getSession(): Promise<Session | null> {
     return null;
   }
 }
+
+/**
+ * Guard for admin server actions: resolve the session (which `getSession` gates
+ * to admins via `/auth/me`) before touching the backend. Server actions are
+ * publicly callable endpoints, so each one re-checks rather than trusting the
+ * page. Returns an error result to short-circuit, or `null` when authorized.
+ */
+export async function requireAdmin(): Promise<{ ok: false; error: string } | null> {
+  const session = await getSession();
+  if (!session) return { ok: false, error: "You're not authorized to view this." };
+  return null;
+}

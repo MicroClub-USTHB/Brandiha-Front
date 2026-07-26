@@ -2,7 +2,9 @@
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { requireAdmin } from "@/lib/auth/session";
 import type {
+  PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
 } from "@/lib/api/registration-types";
@@ -133,10 +135,49 @@ function readError(status: number): string {
   return "Something went wrong loading the data.";
 }
 
+/**
+ * Server Action: fetch every registration's full details (Admin), following the
+ * pagination on `GET /registrations` to the end. Used to export all rows at once.
+ * Optionally filter by team status.
+ */
+export async function listAllRegistrations(
+  status?: RegistrationStatus,
+): Promise<FetchResult<RegistrationDetail[]>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const limit = 100;
+  const all: RegistrationDetail[] = [];
+
+  try {
+    let page = 1;
+    let pages = 1;
+    do {
+      const q = status
+        ? `/registrations?page=${page}&limit=${limit}&status=${status}`
+        : `/registrations?page=${page}&limit=${limit}`;
+      const res = await apiFetch(q);
+      if (!res.ok) return { ok: false, error: readError(res.status) };
+      const body = (await res.json()) as PaginatedRegistrations;
+      all.push(...body.data);
+      pages = body.pages;
+      page += 1;
+    } while (page <= pages);
+
+    return { ok: true, data: all };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
 /** Server Action: fetch a single registration's full details (Admin). */
 export async function getRegistration(
   id: string,
 ): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch(`/registrations/${id}`);
     if (!res.ok) return { ok: false, error: readError(res.status) };
@@ -163,6 +204,9 @@ export async function updateRegistration(
   id: string,
   patch: RegistrationPatch,
 ): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const res = await apiFetch(`/registrations/${id}`, {
       method: "PATCH",

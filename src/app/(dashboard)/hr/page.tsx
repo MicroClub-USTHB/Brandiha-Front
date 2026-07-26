@@ -21,24 +21,13 @@ export default async function HrPage() {
     );
   }
 
-  if (!statsResult.ok) {
-    return (
-      <main className="mx-auto max-w-6xl p-6 font-sans">
-        <h1 className="mb-6 font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
-          Teams <span className="text-white/60">({teamsResult.data.length})</span>
-        </h1>
-        <HrPageClient stats={{ total_teams: 0, pending_teams: 0, accepted_teams: 0, rejected_teams: 0 }} teams={teamsResult.data} />
-      </main>
-    );
-  }
+  const stats = statsResult.ok
+    ? statsResult.data
+    : { total_teams: 0, pending_teams: 0, accepted_teams: 0, rejected_teams: 0 };
 
   return (
     <main className="mx-auto max-w-6xl p-6 font-sans">
-      <h1 className="mb-6 font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
-        Teams <span className="text-white/60">({teamsResult.data.length})</span>
-      </h1>
-
-      <HrPageClient stats={statsResult.data} teams={teamsResult.data} />
+      <HrPageClient stats={stats} teams={teamsResult.data} />
     </main>
   );
 }
