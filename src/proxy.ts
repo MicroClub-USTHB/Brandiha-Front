@@ -22,19 +22,15 @@ const AUTHED_HOME = "/hr";
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  let token = request.cookies.get(SESSION_COOKIE)?.value;
-  let hasSession = token ? isTokenFresh(token) : false;
+
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
 
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  let hasSession = token ? isTokenFresh(token) : false;
+  let refreshed: { access_token: string; refresh_token: string } | null = null;
+  let clearCookies = false;
 
-  let response = NextResponse.next({ request });
-  let cookiesCleared = false;
-
-  // Try to refresh if the access token is dead but we have a refresh token
+  // Try to refresh if the access token is dead but we have a refresh token.
   if (!hasSession && refreshToken) {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -44,50 +40,54 @@ export async function proxy(request: NextRequest) {
       });
 
       if (res.ok) {
-        const body = await res.json();
-        
-        token = body.access_token;
+        const tokens = await res.json();
+        refreshed = tokens;
         hasSession = true;
 
-        // 1. Update the request so downstream Server Components see the new tokens
-        request.cookies.set(SESSION_COOKIE, body.access_token);
-        request.cookies.set(REFRESH_COOKIE, body.refresh_token);
-        
-        // 2. Re-create the response to capture the mutated request
-        response = NextResponse.next({ request });
-        
-        // 3. Set the Set-Cookie headers so the browser saves the new tokens
-        response.cookies.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
-        response.cookies.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
+        // Downstream Server Components read cookies off the request, so mutate
+        // it too — otherwise this pass still renders with the expired token.
+        request.cookies.set(SESSION_COOKIE, tokens.access_token);
+        request.cookies.set(REFRESH_COOKIE, tokens.refresh_token);
       } else {
-        // Refresh token rejected/expired
-        hasSession = false;
-        cookiesCleared = true;
+        clearCookies = true;
       }
     } catch {
-      // Network error, we can't refresh. We leave cookies alone so it can retry later.
-      hasSession = false;
+      // Network error, we can't refresh. Leave the cookies so a later request
+      // can retry rather than ending a session that may well be valid.
     }
   } else if (!hasSession && token) {
-    // No refresh token and access token is dead
-    cookiesCleared = true;
+    // Dead access token and nothing to refresh with.
+    clearCookies = true;
   }
 
-  // Helper to clear cookies on whatever response we end up sending
-  const applyClear = (res: NextResponse) => {
-    if (cookiesCleared) {
+  /**
+   * Apply pending cookie changes to whichever response we actually return.
+   * Redirects included: the backend has already deleted the rotated token, so a
+   * redirect that drops the new pair strands the browser holding one that no
+   * longer exists — and the next request logs the user out for good.
+   */
+  const withAuthCookies = (res: NextResponse) => {
+    if (refreshed) {
+      res.cookies.set(SESSION_COOKIE, refreshed.access_token, AUTH_COOKIE_OPTIONS);
+      res.cookies.set(REFRESH_COOKIE, refreshed.refresh_token, AUTH_COOKIE_OPTIONS);
+    }
+    if (clearCookies) {
       res.cookies.delete(SESSION_COOKIE);
       res.cookies.delete(REFRESH_COOKIE);
     }
     return res;
   };
 
+  const isProtected = PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
   // No valid session on a protected route → login (remembering where headed).
   if (isProtected && !hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = LOGIN_PATH;
     url.searchParams.set("from", pathname);
-    return applyClear(NextResponse.redirect(url));
+    return withAuthCookies(NextResponse.redirect(url));
   }
 
   // Valid session sitting on /login → send them into the app.
@@ -95,10 +95,10 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = AUTHED_HOME;
     url.search = "";
-    return NextResponse.redirect(url); // Don't clear, cookies are valid
+    return withAuthCookies(NextResponse.redirect(url));
   }
 
-  return applyClear(response);
+  return withAuthCookies(NextResponse.next({ request }));
 }
 
 export const config = {
