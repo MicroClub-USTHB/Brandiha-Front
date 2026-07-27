@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
-import { SESSION_COOKIE } from "@/lib/auth/jwt";
+import { SESSION_COOKIE, REFRESH_COOKIE } from "@/lib/auth/jwt";
 
 const API_BASE_URL =
   (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
@@ -11,9 +11,9 @@ const API_BASE_URL =
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };
 
-/** Body returned by `POST /auth/login` on the backend. */
 interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
 }
 
@@ -66,12 +66,33 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     sameSite: "lax",
     path: "/",
   });
+  cookieStore.set(REFRESH_COOKIE, body.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 
   return { ok: true };
 }
 
-/** Server Action: clear the session cookie, logging the user out. */
+/** Server Action: clear the session cookies and notify backend, logging the user out. */
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+
+  if (refreshToken) {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+    } catch {
+      // Ignore network errors on logout, proceed to clear local cookies
+    }
+  }
+
   cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(REFRESH_COOKIE);
 }

@@ -3,6 +3,9 @@ import { decodeJwt } from "jose";
 /** Name of the httpOnly cookie holding the backend-issued JWT. */
 export const SESSION_COOKIE = "access_token";
 
+/** Name of the httpOnly cookie holding the long-lived refresh token. */
+export const REFRESH_COOKIE = "refresh_token";
+
 /** Roles the backend encodes. Only `admin` may call protected endpoints. */
 export type Role = "admin" | "alumni";
 
