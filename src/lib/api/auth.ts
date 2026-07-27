@@ -2,20 +2,16 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
-import { SESSION_COOKIE } from "@/lib/auth/jwt";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
+import { API_BASE_URL } from "@/lib/api/base-url";
+import {
+  SESSION_COOKIE,
+  REFRESH_COOKIE,
+  AUTH_COOKIE_OPTIONS,
+  isTokenPair,
+} from "@/lib/auth/jwt";
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };
-
-/** Body returned by `POST /auth/login` on the backend. */
-interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
 
 /**
  * Server Action: authenticate a staff member against the backend. Runs on the
@@ -49,7 +45,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
-  let body: LoginResponse;
+  let body: unknown;
   try {
     body = await response.json();
   } catch {
@@ -59,19 +55,40 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
+  // A 200 missing either token would otherwise be stored as a cookie reading
+  // "undefined" and pass for a live session until the first protected call.
+  if (!isTokenPair(body)) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, body.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+  cookieStore.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
+  cookieStore.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
 
   return { ok: true };
 }
 
-/** Server Action: clear the session cookie, logging the user out. */
+/** Server Action: clear the session cookies and notify backend, logging the user out. */
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+
+  if (refreshToken) {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        signal: AbortSignal.timeout(5_000),
+      });
+    } catch {
+      // Ignore network errors on logout, proceed to clear local cookies
+    }
+  }
+
   cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(REFRESH_COOKIE);
 }

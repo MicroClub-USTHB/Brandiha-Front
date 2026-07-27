@@ -27,6 +27,16 @@ pnpm build    # production build — must pass
 There is **no test suite** yet. "Verified" means `pnpm lint` and `pnpm build`
 both pass; run them after any non-trivial change.
 
+## Outstanding work
+
+`tasks/` records known-outstanding work — one file per item, covering things
+left undone on purpose and the reasoning behind it. Read it before picking up
+auth, proxy, or session code, where most of it currently sits.
+
+Add a file when you knowingly leave something unfinished, so the reasoning
+outlives the PR thread; delete one when its item ships. It is not a general
+backlog — issues are for that.
+
 ## Project layout
 
 ```
