@@ -24,7 +24,7 @@ export interface MeResponse {
 
 /**
  * Cheap client-side freshness check: token is well-formed and not expired.
- * No signature verification (the backend is the authority) — used by middleware
+ * No signature verification (the backend is the authority) — used by the proxy
  * to gate routes and drop obviously-stale cookies without a round-trip.
  */
 export function isTokenFresh(token: string): boolean {

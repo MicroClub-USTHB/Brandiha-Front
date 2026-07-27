@@ -43,7 +43,7 @@ export default function LoginForm() {
       return;
     }
 
-    // Return the user to wherever middleware bounced them from (?from=…), else
+    // Return the user to wherever the proxy bounced them from (?from=…), else
     // the default landing. Only accept internal paths to avoid open redirects.
     const from = new URLSearchParams(window.location.search).get("from");
     const dest =
