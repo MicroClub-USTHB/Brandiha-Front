@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { API_BASE_URL } from "@/lib/api/base-url";
-import { SESSION_COOKIE, REFRESH_COOKIE, isTokenFresh } from "@/lib/auth/jwt";
+import {
+  SESSION_COOKIE,
+  REFRESH_COOKIE,
+  AUTH_COOKIE_OPTIONS,
+  isTokenFresh,
+} from "@/lib/auth/jwt";
 
 /** Route prefixes that require an authenticated staff session. */
 const PROTECTED_PREFIXES = ["/hr", "/rh"];
@@ -52,18 +57,8 @@ export async function proxy(request: NextRequest) {
         response = NextResponse.next({ request });
         
         // 3. Set the Set-Cookie headers so the browser saves the new tokens
-        response.cookies.set(SESSION_COOKIE, body.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-        });
-        response.cookies.set(REFRESH_COOKIE, body.refresh_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-        });
+        response.cookies.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
+        response.cookies.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
       } else {
         // Refresh token rejected/expired
         hasSession = false;

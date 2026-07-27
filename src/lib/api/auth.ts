@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
 import { API_BASE_URL } from "@/lib/api/base-url";
-import { SESSION_COOKIE, REFRESH_COOKIE } from "@/lib/auth/jwt";
+import { SESSION_COOKIE, REFRESH_COOKIE, AUTH_COOKIE_OPTIONS } from "@/lib/auth/jwt";
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };
@@ -57,18 +57,8 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, body.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-  cookieStore.set(REFRESH_COOKIE, body.refresh_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+  cookieStore.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
+  cookieStore.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
 
   return { ok: true };
 }
