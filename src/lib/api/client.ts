@@ -1,12 +1,10 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { API_BASE_URL } from "@/lib/api/base-url";
 import { SESSION_COOKIE } from "@/lib/auth/jwt";
 
-/** Backend base URL, trailing slash stripped. Kept private to the server. */
-export const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
+export { API_BASE_URL };
 
 /** Thrown when a protected call is made without a session cookie present. */
 export class UnauthenticatedError extends Error {

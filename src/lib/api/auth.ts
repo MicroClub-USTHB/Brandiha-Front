@@ -2,11 +2,8 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
+import { API_BASE_URL } from "@/lib/api/base-url";
 import { SESSION_COOKIE, REFRESH_COOKIE } from "@/lib/auth/jwt";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };

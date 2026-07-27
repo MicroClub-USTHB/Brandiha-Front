@@ -1,9 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { API_BASE_URL } from "@/lib/api/base-url";
 import { SESSION_COOKIE, REFRESH_COOKIE, isTokenFresh } from "@/lib/auth/jwt";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
 
 /** Route prefixes that require an authenticated staff session. */
 const PROTECTED_PREFIXES = ["/hr", "/rh"];
