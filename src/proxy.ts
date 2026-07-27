@@ -13,9 +13,9 @@ const AUTHED_HOME = "/hr";
  * backend is the real authority and validates the token on every protected call
  * (and in `getSession`). We do a cheap local expiry check so an expired cookie
  * is treated as logged-out (and cleared) rather than looping between the page's
- * `getSession()` redirect and this middleware's "already-authed" bounce.
+ * `getSession()` redirect and this proxy's "already-authed" bounce.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const hasSession = token ? isTokenFresh(token) : false;
