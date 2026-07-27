@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { API_BASE_URL } from "@/lib/api/base-url";
 import {
   SESSION_COOKIE,
   REFRESH_COOKIE,
   AUTH_COOKIE_OPTIONS,
   isTokenFresh,
+  type TokenPair,
 } from "@/lib/auth/jwt";
+import { refreshSession } from "@/lib/auth/refresh";
 
 /** Route prefixes that require an authenticated staff session. */
 const PROTECTED_PREFIXES = ["/hr", "/rh"];
@@ -16,9 +17,15 @@ const AUTHED_HOME = "/hr";
 
 /**
  * Optimistic gate based on the session cookie. This is UX, not security — the
- * backend is the real authority. Here we also handle silent token refresh using
- * the refresh token to keep the UX seamless and ensure Server Components receive
- * a fresh access token without crashing.
+ * backend is the real authority and validates the token on every protected call
+ * (and in `getSession`). We do a cheap local expiry check so an expired cookie
+ * is treated as logged-out rather than looping between the page's `getSession()`
+ * redirect and this proxy's "already-authed" bounce.
+ *
+ * Silent refresh lives here rather than in a Server Component because only
+ * middleware can write cookies during a navigation. Refreshed tokens are
+ * applied to the request (so Server Components downstream see them on this very
+ * pass) and to whatever response we return.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,34 +34,24 @@ export async function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
 
   let hasSession = token ? isTokenFresh(token) : false;
-  let refreshed: { access_token: string; refresh_token: string } | null = null;
+  let refreshed: TokenPair | null = null;
   let clearCookies = false;
 
-  // Try to refresh if the access token is dead but we have a refresh token.
   if (!hasSession && refreshToken) {
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
+    const outcome = await refreshSession(refreshToken);
 
-      if (res.ok) {
-        const tokens = await res.json();
-        refreshed = tokens;
-        hasSession = true;
-
-        // Downstream Server Components read cookies off the request, so mutate
-        // it too — otherwise this pass still renders with the expired token.
-        request.cookies.set(SESSION_COOKIE, tokens.access_token);
-        request.cookies.set(REFRESH_COOKIE, tokens.refresh_token);
-      } else {
-        clearCookies = true;
-      }
-    } catch {
-      // Network error, we can't refresh. Leave the cookies so a later request
-      // can retry rather than ending a session that may well be valid.
+    if (outcome.status === "refreshed") {
+      refreshed = outcome.tokens;
+      hasSession = true;
+      // Downstream Server Components read cookies off the request, so mutate it
+      // too — otherwise this pass still renders with the expired token.
+      request.cookies.set(SESSION_COOKIE, refreshed.access_token);
+      request.cookies.set(REFRESH_COOKIE, refreshed.refresh_token);
+    } else if (outcome.status === "rejected") {
+      clearCookies = true;
     }
+    // "unavailable" → the backend is unreachable, not the session invalid. Leave
+    // the cookies in place so the next request can retry the refresh.
   } else if (!hasSession && token) {
     // Dead access token and nothing to refresh with.
     clearCookies = true;

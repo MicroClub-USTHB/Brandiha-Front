@@ -3,16 +3,15 @@
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
 import { API_BASE_URL } from "@/lib/api/base-url";
-import { SESSION_COOKIE, REFRESH_COOKIE, AUTH_COOKIE_OPTIONS } from "@/lib/auth/jwt";
+import {
+  SESSION_COOKIE,
+  REFRESH_COOKIE,
+  AUTH_COOKIE_OPTIONS,
+  isTokenPair,
+} from "@/lib/auth/jwt";
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type LoginResult = { ok: true } | { ok: false; error: string };
-
-interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-}
 
 /**
  * Server Action: authenticate a staff member against the backend. Runs on the
@@ -46,10 +45,19 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
-  let body: LoginResponse;
+  let body: unknown;
   try {
     body = await response.json();
   } catch {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
+  // A 200 missing either token would otherwise be stored as a cookie reading
+  // "undefined" and pass for a live session until the first protected call.
+  if (!isTokenPair(body)) {
     return {
       ok: false,
       error: "Something went wrong on our side. Please try again in a moment.",
@@ -74,6 +82,7 @@ export async function logout(): Promise<void> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
+        signal: AbortSignal.timeout(5_000),
       });
     } catch {
       // Ignore network errors on logout, proceed to clear local cookies

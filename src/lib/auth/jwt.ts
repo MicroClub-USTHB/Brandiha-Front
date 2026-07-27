@@ -28,6 +28,28 @@ export const AUTH_COOKIE_OPTIONS = {
   maxAge: AUTH_COOKIE_MAX_AGE,
 } as const;
 
+/** The token pair as the backend serializes it, on both login and refresh. */
+export interface TokenPair {
+  access_token: string;
+  refresh_token: string;
+}
+
+/**
+ * Narrow an untrusted JSON body to a token pair. A 200 with an unexpected shape
+ * would otherwise store the string `"undefined"` as a cookie and present it as
+ * a live session, failing later and further from the cause.
+ */
+export function isTokenPair(value: unknown): value is TokenPair {
+  if (typeof value !== "object" || value === null) return false;
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.access_token === "string" &&
+    body.access_token.length > 0 &&
+    typeof body.refresh_token === "string" &&
+    body.refresh_token.length > 0
+  );
+}
+
 /** Roles the backend encodes. Only `admin` may call protected endpoints. */
 export type Role = "admin" | "alumni";
 
