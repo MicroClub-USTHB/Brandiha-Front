@@ -45,8 +45,8 @@ export function TeamActions({
   const [confirming, setConfirming] = useState<RegistrationStatus | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  // A team can only be deleted once it has no members left.
-  const isEmpty = memberCount === 0;
+  // A team can be deleted if it has no members or if it's been rejected.
+  const canDelete = memberCount === 0 || currentStatus === "rejected";
 
   const run = (status: RegistrationStatus) => {
     setConfirming(null);
@@ -103,8 +103,8 @@ export function TeamActions({
       <button
         type="button"
         onClick={() => setConfirmingDelete(true)}
-        disabled={pending || !isEmpty}
-        title={isEmpty ? undefined : "Only empty teams can be deleted"}
+        disabled={pending || !canDelete}
+        title={canDelete ? undefined : "Only empty or rejected teams can be deleted"}
         className={cn(
           BTN_BASE,
           "mt-2 w-full bg-destructive/10 text-destructive hover:bg-destructive/20",
