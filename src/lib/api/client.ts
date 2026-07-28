@@ -67,7 +67,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   };
 
   const cookieStore = await cookies();
-  let token = cookieStore.get(SESSION_COOKIE)?.value;
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) throw new UnauthenticatedError();
 
   let res = await doFetch(token);
