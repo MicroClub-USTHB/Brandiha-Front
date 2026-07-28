@@ -35,10 +35,10 @@ export default async function SubmissionsPage(props: Props) {
       <main className="mx-auto max-w-4xl p-6 font-sans">
         <p className="text-destructive">{result.error}</p>
         <Link
-          href="/hr"
+          href="/submissions"
           className="mt-4 inline-block text-sm text-primary underline underline-offset-2"
         >
-          &larr; Back to HR
+          &larr; All challenges
         </Link>
       </main>
     );
@@ -50,6 +50,12 @@ export default async function SubmissionsPage(props: Props) {
     <main className="mx-auto max-w-4xl p-6 font-sans">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
+          <Link
+            href="/submissions"
+            className="mb-1 inline-block text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
+          >
+            &larr; All challenges
+          </Link>
           <h1 className="font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
             {challenge.title}
           </h1>
