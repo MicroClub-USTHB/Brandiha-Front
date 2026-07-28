@@ -1,10 +1,14 @@
 "use server";
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
+import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { API_BASE_URL } from "@/lib/api/base-url";
+import { requireRole } from "@/lib/auth/session";
+import type {
+  PaginatedRegistrations,
+  RegistrationDetail,
+  RegistrationStatus,
+} from "@/lib/api/registration-types";
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type RegistrationResult = { ok: true } | { ok: false; error: string };
@@ -116,4 +120,99 @@ export async function submitRegistration(
     ok: false,
     error: "Something went wrong on our side. Please try again in a moment.",
   };
+}
+
+/** Serializable result for admin reads — data on success, a message on failure. */
+export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+/** Turn a fetch outcome into a user-facing error result (admin reads are authed). */
+function readError(status: number): string {
+  if (status === 401 || status === 403) return "You're not authorized to view this.";
+  if (status === 404) return "Not found.";
+  return "Something went wrong loading the data.";
+}
+
+/**
+ * Server Action: fetch every registration's full details (Admin), following the
+ * pagination on `GET /registrations` to the end. Used to export all rows at once.
+ * Optionally filter by team status.
+ */
+export async function listAllRegistrations(
+  status?: RegistrationStatus,
+): Promise<FetchResult<RegistrationDetail[]>> {
+  const denied = await requireRole("admin");
+  if (denied) return denied;
+
+  const limit = 100;
+  const all: RegistrationDetail[] = [];
+
+  try {
+    let page = 1;
+    let pages = 1;
+    do {
+      const q = status
+        ? `/registrations?page=${page}&limit=${limit}&status=${status}`
+        : `/registrations?page=${page}&limit=${limit}`;
+      const res = await apiFetch(q);
+      if (!res.ok) return { ok: false, error: readError(res.status) };
+      const body = (await res.json()) as PaginatedRegistrations;
+      all.push(...body.data);
+      pages = body.pages;
+      page += 1;
+    } while (page <= pages);
+
+    return { ok: true, data: all };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/** Server Action: fetch a single registration's full details (Admin). */
+export async function getRegistration(
+  id: string,
+): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireRole("admin");
+  if (denied) return denied;
+
+  try {
+    const res = await apiFetch(`/registrations/${id}`);
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/** Fields accepted by `PATCH /registrations/{id}`. */
+export interface RegistrationPatch {
+  /** New team name — the backend joins/creates it and reassigns `team_id`. */
+  team_name?: string;
+  status?: RegistrationStatus;
+}
+
+/**
+ * Server Action: update a registration (Admin) via `PATCH /registrations/{id}`.
+ * Applies a team move and/or a status change in a single request. Returns the
+ * updated registration.
+ */
+export async function updateRegistration(
+  id: string,
+  patch: RegistrationPatch,
+): Promise<FetchResult<RegistrationDetail>> {
+  const denied = await requireRole("admin");
+  if (denied) return denied;
+
+  try {
+    const res = await apiFetch(`/registrations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) return { ok: false, error: readError(res.status) };
+    return { ok: true, data: (await res.json()) as RegistrationDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
 }

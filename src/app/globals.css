@@ -54,7 +54,7 @@
 }
 
 :root,
-[data-theme="default"] {
+[data-theme="chameleon"] {
   /* Shared ink + paper used across every theme */
   --white: oklch(0.996 0.0196 106.75);
   /* #FFFFF0 */
@@ -103,11 +103,11 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Default theme only: the primary "colour" is a 4-stop brand gradient. Authored
+/* Chameleon theme only: the primary "colour" is a 4-stop brand gradient. Authored
    in sRGB hex to preserve the exact stops. The graffiti splash/trail read these
    stops directly; other themes never define them, so those fall back to the
    theme's solid --primary. */
-[data-theme="default"] {
+[data-theme="chameleon"] {
   --grad-1: #ee6818;
   --grad-2: #eb367b;
   --grad-3: #249aff;
@@ -119,12 +119,20 @@
     var(--grad-3) 68.11%,
     var(--grad-4) 84.94%
   );
+
+  /* Gekko mascot's own gradient stops. Defined for the chameleon theme only, so
+     under any other theme the SVG stops fall back to that theme's solid
+     --primary (see src/components/gekko.tsx). */
+  --gekko-1: #c55715;
+  --gekko-2: #c42e67;
+  --gekko-3: #2684d4;
+  --gekko-4: #19d5be;
 }
 
 /* Paint the gradient over any primary background (buttons, badges, …). The
    solid --primary stays underneath, so hover:bg-primary/xx and non-background
    primary uses still resolve to a colour. */
-[data-theme="default"] .bg-primary {
+[data-theme="chameleon"] .bg-primary {
   background-image: var(--primary-gradient);
 }
 
@@ -428,4 +436,10 @@
 @utility next-splash-mask {
   -webkit-mask: url("/next-button-splash.svg") center / contain no-repeat;
   mask: url("/next-button-splash.svg") center / contain no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen {
+    display: none;
+  }
 }

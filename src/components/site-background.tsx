@@ -1,14 +1,15 @@
 import { DecorativeSvg } from "@/components/landing/decorative-svg";
 
 const decorations = [
-  "compound-path-17",
-  "compound-path-18",
-  "vector",
-  "design",
-  "marketing",
-  "multi",
-  "comm",
-  "bshhhhh",
+  "pink-splash",
+  "blue-splash",
+  "gekko",
+  "design-tag",
+  "marketing-tag",
+  "multimedia-tag",
+  "dev-tag",
+  "communication-tag",
+  "spray-bomb",
 ] as const;
 
 /**
@@ -22,7 +23,7 @@ export function SiteBackground() {
   return (
     <div
       aria-hidden
-      className="absolute inset-0 -z-10 overflow-hidden bg-repeat bg-top"
+      className="fixed inset-0 -z-10 h-screen w-screen overflow-hidden bg-repeat bg-top"
       style={{ backgroundImage: "url(/wall-background.png)" }}
     >
       {decorations.map((name) => (

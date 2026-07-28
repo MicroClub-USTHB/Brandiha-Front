@@ -1,0 +1,94 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { LoginFormData } from "@/lib/validators/login-schema";
+import { API_BASE_URL } from "@/lib/api/base-url";
+import {
+  SESSION_COOKIE,
+  REFRESH_COOKIE,
+  AUTH_COOKIE_OPTIONS,
+  isTokenPair,
+} from "@/lib/auth/jwt";
+
+/** Result returned to the client — errors are serialized, never thrown across the boundary. */
+export type LoginResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Server Action: authenticate a staff member against the backend. Runs on the
+ * server, so the backend URL stays private and no CORS is involved. On success
+ * the JWT is stored in an httpOnly cookie for later protected requests; failures
+ * map to user-facing messages.
+ */
+export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.Email.trim(), password: data.Password }),
+    });
+  } catch {
+    return {
+      ok: false,
+      error: "Couldn't reach the server. Please try again in a moment.",
+    };
+  }
+
+  if (response.status === 401 || response.status === 403) {
+    return { ok: false, error: "Incorrect email or password." };
+  }
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
+  // A 200 missing either token would otherwise be stored as a cookie reading
+  // "undefined" and pass for a live session until the first protected call.
+  if (!isTokenPair(body)) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
+  cookieStore.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
+
+  return { ok: true };
+}
+
+/** Server Action: clear the session cookies and notify backend, logging the user out. */
+export async function logout(): Promise<void> {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+
+  if (refreshToken) {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        signal: AbortSignal.timeout(5_000),
+      });
+    } catch {
+      // Ignore network errors on logout, proceed to clear local cookies
+    }
+  }
+
+  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(REFRESH_COOKIE);
+}

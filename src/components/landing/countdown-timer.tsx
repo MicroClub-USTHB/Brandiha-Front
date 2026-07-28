@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useEffect, useSyncExternalStore, useState } from "react";
+import { useTheme } from "next-themes";
+
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 import { cn } from "@/lib/utils";
 
 function getTimeLeft(target: Date) {
@@ -18,8 +22,26 @@ interface CountdownTimerProps {
   className?: string;
 }
 
+function getTimerBackground(theme?: string) {
+  switch (theme) {
+    case "design":
+      return "/timer-Design.svg";
+    case "multimedia":
+      return "/timer-Multimedia.svg";
+    case "communication":
+      return "/timer-Communication.svg";
+    case "marketing":
+      return "/timer-Marketing.svg";
+    case "chameleon":
+    default:
+      return "/timer-Default.svg";
+  }
+}
+
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
-  const [time, setTime] = useState(() => getTimeLeft(targetDate));
+  const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const { theme } = useTheme();
+  const isClient = useIsClient();
 
   useEffect(() => {
     const id = setInterval(() => setTime(getTimeLeft(targetDate)), 1000);
@@ -29,25 +51,38 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   const units = [
     { label: "Days", value: time.days },
     { label: "Hours", value: time.hours },
-    { label: "Min", value: time.minutes },
-    { label: "Sec", value: time.seconds },
+    { label: "Minutes", value: time.minutes },
+    { label: "Seconds", value: time.seconds },
   ];
 
+  const timerBackground = getTimerBackground(isClient ? theme : undefined);
+
   return (
-    <div className={cn("relative z-10 flex gap-4", className)}>
-      {units.map((unit) => (
+    <div
+      className={cn(
+        "relative z-10 overflow-hidden min-w-[30svw] max-w-[80svw] px-8 py-3 grid grid-cols-4 text-white gap-5",
+        className,
+      )}
+
+      style={{
+        backgroundImage: `url('${timerBackground}')`,
+        backgroundSize: "100%",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {units.map((unit) =>
         <div
           key={unit.label}
-          className="flex flex-col items-center rounded-xl border border-white/30 bg-white/20 backdrop-blur-sm px-6 py-4"
+          className="flex min-w-0 flex-col items-center justify-center text-center"
         >
-          <span className="text-5xl font-bold tabular-nums text-white">
+          <span className="font-heading drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)] text-3xl font-bold sm:text-4xl">
             {String(unit.value).padStart(2, "0")}
           </span>
-          <span className="mt-1 text-sm font-medium text-white/80 uppercase tracking-wider">
+          <span className="font-heading uppercase text-white">
             {unit.label}
           </span>
         </div>
-      ))}
-    </div>
+      )}
+    </div >
   );
 }

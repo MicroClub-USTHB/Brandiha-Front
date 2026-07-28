@@ -50,6 +50,7 @@ type FormBaseProps<
   horizontal?: boolean;
   controlFirst?: boolean;
   hideLabel?: boolean;
+  fieldClassName?: string;
   children: (
     field: Parameters<
       ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
@@ -84,6 +85,7 @@ function FormField<
   controlFirst,
   horizontal,
   hideLabel,
+  fieldClassName,
 }: FormBaseProps<TFieldValues, TName, TTransformedValues>) {
   return (
     <Controller
@@ -92,7 +94,7 @@ function FormField<
       render={({ field, fieldState }) => {
         const labelElement = (
           <FieldLabel htmlFor={field.name} className={hideLabel ? "sr-only" : undefined}>
-            <span>
+            <span className="text-md">
               {label}
               {required && (
                 <span
@@ -124,6 +126,7 @@ function FormField<
           <Field
             data-invalid={fieldState.invalid}
             orientation={horizontal ? "horizontal" : undefined}
+            className={fieldClassName}
           >
             {controlFirst ? (
               <>
@@ -169,23 +172,23 @@ export const FormInput: FormControlFunction<{
   onChangeCapture,
   ...props
 }) => (
-  <FormField {...props} hideLabel>
-    {(field) => (
-      <Input
-        type={type}
-        placeholder={
-          placeholder ?? (typeof props.label === "string" ? props.label : undefined)
-        }
-        icon={icon}
-        required={props.required}
-        className={className}
-        disabled={disabled}
-        onChangeCapture={onChangeCapture}
-        {...field}
-      />
-    )}
-  </FormField>
-);
+    <FormField {...props} hideLabel>
+      {(field) => (
+        <Input
+          type={type}
+          placeholder={
+            placeholder ?? (typeof props.label === "string" ? props.label : undefined)
+          }
+          icon={icon}
+          required={props.required}
+          className={className}
+          disabled={disabled}
+          onChangeCapture={onChangeCapture}
+          {...field}
+        />
+      )}
+    </FormField>
+  );
 
 export const FormTextarea: FormControlFunction<
   ComponentPropsWithoutRef<typeof Textarea>
@@ -208,16 +211,41 @@ export const FormSelect: FormControlFunction<{
   children: ReactNode;
   placeholder?: string;
   disabled?: boolean;
-}> = ({ children, placeholder = "Select", disabled, ...props }) => (
-  <FormField {...props}>
+}> = ({ children, placeholder, disabled, ...props }) => (
+  // `hideLabel` + label-as-placeholder so the trigger reads as a pill matching
+  // the text inputs (same height, radius, border-2, and card background).
+  <FormField {...props} hideLabel>
     {({ onChange, onBlur, ...field }) => (
       <Select {...field} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           aria-invalid={field["aria-invalid"]}
           id={field.id}
           onBlur={onBlur}
+          // Inline bg/border tokens so the trigger fill and stroke exactly match
+          // the text-input pill, regardless of the base trigger classes.
+          style={{ backgroundColor: "var(--card)", borderColor: "var(--input)" }}
+          className="relative h-12 w-full rounded-lg border-2 px-4 text-base shadow-xs md:text-sm data-[size=default]:h-12"
         >
-          <SelectValue placeholder={placeholder} />
+          {/* Decorative break in the top-left border, matching the inputs. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-[3px] left-5 h-[3px] w-3.5"
+            style={{ backgroundColor: "var(--card)" }}
+          />
+          {props.required && (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute top-1.5 right-3 text-lg leading-none font-bold text-primary"
+            >
+              *
+            </span>
+          )}
+          <SelectValue
+            placeholder={
+              placeholder ??
+              (typeof props.label === "string" ? props.label : "Select")
+            }
+          />
         </SelectTrigger>
         <SelectContent>{children}</SelectContent>
       </Select>
@@ -226,7 +254,10 @@ export const FormSelect: FormControlFunction<{
 );
 
 export const FormCheckbox: FormControlFunction = (props) => (
-  <FormField {...props} horizontal controlFirst>
+  // The horizontal Field top-aligns the box with the label block (`items-start`)
+  // for multi-line labels; a single-line checkbox reads better centered. The
+  // matching label bottom-margin reset lives in the `.reg-form` global styles.
+  <FormField {...props} horizontal controlFirst fieldClassName="!items-center">
     {({ onChange, value, ...field }) => (
       <Checkbox {...field} checked={value} onCheckedChange={onChange} />
     )}
