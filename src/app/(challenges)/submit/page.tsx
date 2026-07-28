@@ -12,11 +12,10 @@ export default async  function submitChallenge() {
             {!result.ok ? (
                 <p className="font-sans text-destructive">{result.error}</p>
             ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {result.data.map((challenge) => (
                 <Link key={challenge.id} href={`/submit/${challenge.id}`}>
                     <ChallengeCard
-                        key={challenge.id}
                         department={challenge.department as  Department}
                         title={challenge.title}
                         unlocks_at={challenge.unlocks_at}
