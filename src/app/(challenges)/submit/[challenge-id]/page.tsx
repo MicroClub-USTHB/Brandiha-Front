@@ -133,7 +133,17 @@ export default async function SubmitPage(props: Props) {
       <div className="absolute right-4 top-4 md:right-6 md:top-6 z-50">
         <ThemePicker />
       </div>
-      {body}
+      <div className="flex w-full flex-col items-center gap-6">
+        {body}
+        {/* The challenge picker this page is reached from — without it the page
+            is a dead end, since there is no header here. */}
+        <Link
+          href="/submit"
+          className="font-sans text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
+        >
+          &larr; All challenges
+        </Link>
+      </div>
     </main>
   );
 }
