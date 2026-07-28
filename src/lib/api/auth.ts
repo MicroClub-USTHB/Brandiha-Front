@@ -74,13 +74,17 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
 /** Server Action: clear the session cookies and notify backend, logging the user out. */
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
+  const accessToken = cookieStore.get(SESSION_COOKIE)?.value;
   const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
 
   if (refreshToken) {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ refresh_token: refreshToken }),
         signal: AbortSignal.timeout(5_000),
       });
