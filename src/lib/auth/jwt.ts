@@ -11,6 +11,13 @@ export const SESSION_COOKIE = "access_token";
  */
 export type Role = "admin" | "super_admin" | "alumni";
 
+/**
+ * Why a page-level access check failed — selects which notice renders in the
+ * page's place. `unauthenticated` is "no resolvable session" (the backend
+ * couldn't confirm who you are), `forbidden` is "signed in, wrong role".
+ */
+export type AccessDenialReason = "unauthenticated" | "forbidden";
+
 /** Display labels for `Role`, so raw enum values never reach the UI. */
 export const ROLE_LABELS: Record<Role, string> = {
   admin: "Admin",

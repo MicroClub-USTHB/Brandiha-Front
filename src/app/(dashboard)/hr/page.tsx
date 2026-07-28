@@ -1,12 +1,13 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
+import { checkAccess } from "@/lib/auth/session";
 import { getTeamStats, listTeams } from "@/lib/api/teams";
+import { AccessNotice } from "@/components/auth/access-notice";
 import { HrPageClient } from "@/components/hr/hr-page-client";
 
 /** HR view: one card per team, with drag-and-drop to move members between teams. */
 export default async function HrPage() {
-  const session = await getSession();
-  if (!session) redirect("/login?from=/hr");
+  // `/teams` is admin-only on the backend (`get_current_admin`).
+  const access = await checkAccess("admin");
+  if (!access.ok) return <AccessNotice reason={access.reason} />;
 
   const [statsResult, teamsResult] = await Promise.all([
     getTeamStats(),

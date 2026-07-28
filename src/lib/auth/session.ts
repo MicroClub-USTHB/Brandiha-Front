@@ -2,7 +2,13 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { apiFetch } from "@/lib/api/client";
-import { SESSION_COOKIE, type MeResponse, type Role, type Session } from "@/lib/auth/jwt";
+import {
+  SESSION_COOKIE,
+  type AccessDenialReason,
+  type MeResponse,
+  type Role,
+  type Session,
+} from "@/lib/auth/jwt";
 
 export { SESSION_COOKIE, type Session, type Role } from "@/lib/auth/jwt";
 
@@ -65,4 +71,30 @@ export async function requireRole(...allowed: Role[]): Promise<RoleDenial | null
   if (!allowed.includes(session.role))
     return { ok: false, error: "You're not authorized to do this." };
   return null;
+}
+
+/** Outcome of `checkAccess`: the resolved session, or why access was denied. */
+export type AccessResult =
+  | { ok: true; session: Session }
+  | { ok: false; reason: AccessDenialReason };
+
+/**
+ * Page-level guard for Server Components: resolve the session and check it
+ * against `allowed`, mirroring the backend dependency for whatever the page
+ * loads (same table as `requireRole` above). Render `<AccessNotice />` in the
+ * page's place when it returns `ok: false`:
+ *
+ * ```tsx
+ * const access = await checkAccess("admin");
+ * if (!access.ok) return <AccessNotice reason={access.reason} />;
+ * ```
+ *
+ * Server actions use `requireRole` instead — they return a denial the caller
+ * renders inline rather than replacing the whole page.
+ */
+export async function checkAccess(...allowed: Role[]): Promise<AccessResult> {
+  const session = await getSession();
+  if (!session) return { ok: false, reason: "unauthenticated" };
+  if (!allowed.includes(session.role)) return { ok: false, reason: "forbidden" };
+  return { ok: true, session };
 }
