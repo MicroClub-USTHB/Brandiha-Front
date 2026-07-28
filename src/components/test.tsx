@@ -1,10 +1,22 @@
-export default function Test() {
-  return (
-    <div className="w-100 h-55 bg-[url('/Subtract.svg')] bg-contain bg-center bg-no-repeat flex-col items-center justify-center border ">
-      <h1 className="text-2xl font-bold text-white text-center">
-        Test Component
-      </h1>
-      
-    </div>
-  );
+import  {ChallengeBackground} from './challenge-background';
+import  Link  from 'next/link';
+interface ChallengeCardProps {
+  link: string;
+  title?: string;
+  Color?: string;
+  darkColor?: string;
+}
+export default function ChallengeCard ({ link, title, Color, darkColor }: ChallengeCardProps) {
+    return (
+            <Link href={link} className="border relative block w-full max-w-[237px] aspect-[237/458] p-6 flex flex-col justify-end hover:scale-105 transition-transform duration-200">
+                <ChallengeBackground  
+                Color={Color}
+                darkColor={darkColor}
+                className="absolute inset-0 w-full h-full -z-10"
+            />
+                <div className="relative z-10 text-white font-bold text-center text-lg">
+        {title}
+      </div>
+            </Link> 
+    );
 }
