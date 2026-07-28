@@ -1,10 +1,17 @@
 import Link from "next/link";
 import {getPublicChallenges } from "@/lib/api/challenges";
 import ChallengeCard, { Department } from "@/components/challenge-card";
+import { checkAccess } from "@/lib/auth/session";
+import { AccessNotice } from "@/components/auth/access-notice";
 
 export const dynamic = "force-dynamic";
 
 export default async  function submissionChallenge() {
+    // Picks a challenge to review submissions for, so it needs the same staff
+    // roles as the detail page it links into (`get_current_staff`).
+    const access = await checkAccess("admin", "super_admin");
+    if (!access.ok) return <AccessNotice reason={access.reason} />;
+
     const result = await getPublicChallenges();
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">

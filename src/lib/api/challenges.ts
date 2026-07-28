@@ -1,9 +1,12 @@
 "use server";
 
 import { publicApiFetch } from "@/lib/api/publicApiFetch";
+import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type {
   Challenge,
+  ChallengeDetail,
   ChallengeStatus,
   ChallengeWindow,
 } from "@/lib/api/challenge-types";
@@ -127,4 +130,31 @@ export async function submitChallenge(
     ok: false,
     error: "Something went wrong on our side. Please try again in a moment.",
   };
+}
+
+/**
+ * Server Action: fetch a challenge and every submission against it via
+ * `GET /challenges/{id}`.
+ *
+ * Mirrors the backend's `get_current_staff`, which admits `admin` and
+ * `super_admin` but not `alumni`. Roles are disjoint there — `super_admin` is
+ * not a superset of `admin` — so both are named explicitly.
+ */
+export async function getChallengeDetail(
+  id: number,
+): Promise<FetchResult<ChallengeDetail>> {
+  const denied = await requireRole("admin", "super_admin");
+  if (denied) return denied;
+
+  try {
+    const res = await apiFetch(`/challenges/${id}`);
+    if (res.status === 401 || res.status === 403)
+      return { ok: false, error: "You're not authorized to view this." };
+    if (res.status === 404) return { ok: false, error: "That challenge doesn't exist." };
+    if (!res.ok) return { ok: false, error: "Something went wrong loading this challenge." };
+    return { ok: true, data: (await res.json()) as ChallengeDetail };
+  } catch (e) {
+    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
+    return { ok: false, error: "Couldn't reach the server." };
+  }
 }
