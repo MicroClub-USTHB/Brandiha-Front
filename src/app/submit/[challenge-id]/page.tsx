@@ -18,11 +18,22 @@ function parseChallengeId(raw: string): number | null {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
+/**
+ * Fixed locale and time zone rather than the runtime's: this renders on the
+ * server, so `undefined` would silently mean the deploy host's locale and zone
+ * (UTC on most) and present it as if it were the reader's. Stating UTC outright
+ * is the honest version, and it's the zone the deadline is actually kept in.
+ */
+const TIMESTAMP = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "UTC",
+});
+
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  // The zone is appended rather than asked of `timeZoneName`, which Intl rejects
+  // alongside the `dateStyle`/`timeStyle` shorthands.
+  return `${TIMESTAMP.format(new Date(iso))} UTC`;
 }
 
 /** Stands in for the form when there's nothing to submit to (or not yet). */
