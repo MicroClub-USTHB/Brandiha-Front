@@ -48,11 +48,11 @@ export default async function SubmissionsPage(props: Props) {
 
   return (
     <main className="mx-auto max-w-4xl p-6 font-sans">
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-10 flex items-center justify-between gap-4">
         <div>
           <Link
             href="/submissions"
-            className="mb-1 inline-block text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
+            className="mb-4 inline-block text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
           >
             &larr; All challenges
           </Link>
