@@ -1,7 +1,7 @@
 "use server";
 
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { Team } from "@/lib/api/team-types";
@@ -14,7 +14,7 @@ import type { TeamStats } from "@/lib/api/team-types";
 export async function listTeams(
   status?: RegistrationStatus,
 ): Promise<FetchResult<Team[]>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   const query = status ? `?status=${status}` : "";
@@ -34,7 +34,7 @@ export async function listTeams(
  * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
  */
 export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
@@ -57,7 +57,7 @@ export async function updateTeamStatus(
   id: string,
   status: RegistrationStatus,
 ): Promise<FetchResult<Team>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
@@ -86,7 +86,7 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
  * though the UI also disables the button in that case.
  */
 export async function deleteTeam(id: string): Promise<ActionResult> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {

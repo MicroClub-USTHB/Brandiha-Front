@@ -53,7 +53,7 @@ function MemberDetailBody({ registrationId }: { registrationId: string }) {
             <RegistrationDetails r={data} showAudit={false} />
             <div className="mt-6 border-t border-border pt-4 text-center">
               <Link
-                href={`/rh?registration-id=${data.id}`}
+                href={`/hr/${data.id}`}
                 className="inline-flex items-center gap-1.5 text-sm text-primary underline underline-offset-2 hover:text-primary/80"
               >
                 <ExternalLink className="size-3.5" />
