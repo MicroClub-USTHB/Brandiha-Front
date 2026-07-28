@@ -57,7 +57,6 @@ export function Faq() {
         <Accordion
           type="single"
           collapsible
-          defaultValue="item-1"
           className="w-full space-y-4 font-hand"
         >
           {faqItems.map((item, index) => {
@@ -67,31 +66,31 @@ export function Faq() {
               <AccordionItem
                 key={item.value}
                 value={item.value}
-                className={`rounded-lg border-2 border-white/30 bg-transparent px-6 text-white transition-colors ${item.borderColor}`}
+                className={`relative rounded-lg border-2 border-white/30 bg-black/40 backdrop-blur-sm px-6 text-white transition-colors ${item.borderColor}`}
               >
-                <AccordionTrigger className="py-4 hover:no-underline [&>svg:not([class*='transition-transform'])]:hidden">
-                  <div className="flex w-full items-center justify-between gap-4">
-                    <div className="flex min-w-0 flex-1 items-center gap-6 text-left">
-                      <span
-                        className={`shrink-0 font-montserrat text-3xl font-bold uppercase md:text-4xl ${item.color}`}
-                      >
-                        {numberPrefix}.
-                      </span>
+                <AccordionTrigger className="absolute inset-0 z-10 h-full w-full opacity-0 cursor-pointer hover:no-underline" />
 
-                      <div className="flex flex-col items-center self-stretch">
-                        <div className="h-full w-px bg-white/70" />
-                      </div>
+                <div className="pointer-events-none flex w-full items-center justify-between gap-4 py-4">
+                  <div className="flex min-w-0 flex-1 items-center gap-6 text-left">
+                    <span
+                      className={`shrink-0 font-montserrat text-3xl font-bold uppercase md:text-4xl ${item.color}`}
+                    >
+                      {numberPrefix}.
+                    </span>
 
-                      <span className="min-w-0 break-words whitespace-normal font-hand text-2xl font-medium text-white md:text-3xl">
-                        {item.trigger}
-                      </span>
+                    <div className="flex flex-col items-center self-stretch">
+                      <div className="h-full w-px bg-white/70" />
                     </div>
 
-                    <ChevronDown
-                      className={`h-8 w-8 shrink-0 stroke-[2] transition-transform duration-200 [[data-state=open]_&]:rotate-180 ${item.color}`}
-                    />
+                    <span className="min-w-0 break-words whitespace-normal font-hand text-2xl font-medium text-white md:text-3xl">
+                      {item.trigger}
+                    </span>
                   </div>
-                </AccordionTrigger>
+
+                  <ChevronDown
+                    className={`h-8 w-8 shrink-0 stroke-[2] transition-transform duration-200 [details[open]_&]:rotate-180 [[data-state=open]_&]:rotate-180 ${item.color}`}
+                  />
+                </div>
 
                 <AccordionContent className="flex pb-6 font-hand text-xl text-white/80 md:text-2xl">
                   <div className={`flex shrink-0 items-start pr-6 ${item.iconOffset}`}>
