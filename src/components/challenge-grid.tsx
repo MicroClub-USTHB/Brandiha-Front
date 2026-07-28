@@ -24,7 +24,7 @@ export default async function ChallengeGrid({
       {!result.ok ? (
         <p className="font-sans text-destructive">{result.error}</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {result.data.map((challenge) => (
             <Link key={challenge.id} href={`${hrefPrefix}/${challenge.id}`}>
               <ChallengeCard

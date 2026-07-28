@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import { Lock, LockOpen } from "lucide-react";
 
 export enum Department {
   MARKETING = "marketing",
@@ -24,25 +26,27 @@ const DEPARTMENT_COLORS: Record<Department, string> = {
   [Department.DESIGN]: "var(--brand-design)",
 };
 
-function getCountdown(target?: Date | string) {
-  if (!target) return "TBD";
+const DEPARTMENT_CARDS: Record<Department, string> = {
+  [Department.MARKETING]: "marketing-card.svg",
+  [Department.COMMUNICATION]: "communication-card.svg",
+  [Department.MULTIMEDIA]: "multimedia-card.svg",
+  [Department.DESIGN]: "design-card.svg",
+};
 
-  const difference = new Date(target).getTime() - Date.now();
+const DEPARTMENT_MASCOTS: Record<Department, string> = {
+  [Department.MARKETING]: "marketing-mascot.png",
+  [Department.COMMUNICATION]: "communication-mascot.png",
+  [Department.MULTIMEDIA]: "multimedia-mascot.png",
+  [Department.DESIGN]: "design-mascot.png",
+};
 
-  if (difference <= 0) {
-    return "Unlocked";
-  }
 
-  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-  const hours = Math.floor(
-    (difference / (1000 * 60 * 60)) % 24
-  );
-  const minutes = Math.floor(
-    (difference / (1000 * 60)) % 60
-  );
-  const seconds = Math.floor(
-    (difference / 1000) % 60
-  );
+/** Time left until unlock, as `1d 2h 3m 4s`. */
+function formatCountdown(remaining: number) {
+  const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+  const seconds = Math.floor((remaining / 1000) % 60);
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
@@ -53,61 +57,85 @@ export default function ChallengeCard({
   title,
   unlocks_at,
 }: ChallengeCardProps) {
-
-  const [countdown, setCountdown] = useState(
-    getCountdown(unlocks_at)
-  );
+  // One clock for both the icon and the countdown, so they can't disagree
+  // about whether the challenge is open.
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown(getCountdown(unlocks_at));
-    }, 1000);
+    const interval = setInterval(() => setNow(Date.now()), 1000);
 
     return () => clearInterval(interval);
-  }, [unlocks_at]);
-
+  }, []);
 
   const textColor =
     DEPARTMENT_COLORS[department] ||
     "var(--brand-marketing)";
 
+  const unlocksAt = unlocks_at ? new Date(unlocks_at).getTime() : null;
+  // No unlock time yet counts as locked, not open.
+  const unlocked = unlocksAt !== null && unlocksAt <= now;
+  const LockIcon = unlocked ? LockOpen : Lock;
+
+  const cardImage =
+    DEPARTMENT_CARDS[department] ||
+    "marketing-card.svg";
+
+  const mascot =
+    DEPARTMENT_MASCOTS[department] ||
+    "marketing-mascot.png";
 
   return (
-    <div className="w-65 h-35 md:w-100 md:h-55 2xl:w-150 2xl:h-80 
-    bg-[url('/Subtract.svg')] bg-contain bg-center bg-no-repeat 
-    flex flex-col items-center justify-between p-4 px-6">
-
+    <div
+      className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8"
+      style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
+    >
       <h1
-        className="text-4xl font-heading font-bold text-center capitalize"
+        className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize"
         style={{ color: textColor }}
       >
-        {department}
+        {/* One word per line: `block` on each word rather than a width
+            constraint, so wrapping doesn't depend on the card's size. */}
+        {title
+          ?.trim()
+          .split(/\s+/)
+          .map((word, i) => (
+            <span key={`${word}-${i}`} className="block">
+              {word}
+            </span>
+          ))}
       </h1>
 
 
-      <div className="flex flex-1 flex-col items-start justify-around w-full">
+      {/* `min-h-0` lets this slot shrink below the mascot's intrinsic height,
+          so a long title takes room from the mascot instead of overflowing. */}
+      <div className="flex min-h-0 flex-1 items-center justify-center py-1">
+        <Image
+          src={`/department-mascots/${mascot}`}
+          alt={`${department} mascot`}
+          width={292}
+          height={283}
+          draggable={false}
+          className="h-[80%] object-contain"
+        />
+      </div>
 
-        <h3
-          className="text-2xl font-hand font-bold text-center"
+      <div className="flex flex-col items-center w-full">
+        {/* `currentColor` on the wrapper is what makes both the icon and the
+            countdown track the department color. */}
+        <div
+          className="flex flex-col items-center gap-1"
           style={{ color: textColor }}
         >
-          Challenge Title :
-          <span className="text-black font-hand">
-            {" "}{title}
+          {/* Decorative: the label below already states the same thing. */}
+          <LockIcon className="size-4 md:size-5 xl:size-6 shrink-0" aria-hidden />
+          <span className="lg:text-xl font-hand font-bold">
+            {unlocked
+              ? "Unlocked"
+              : unlocksAt === null
+                ? "TBD"
+                : formatCountdown(unlocksAt - now)}
           </span>
-        </h3>
-
-
-        <p
-          className="text-2xl font-hand font-bold text-center"
-          style={{ color: textColor }}
-        >
-          Unlocks in :
-          <span className="text-black">
-            {" "}{countdown}
-          </span>
-        </p>
-
+        </div>
       </div>
     </div>
   );
