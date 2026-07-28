@@ -2,16 +2,13 @@
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { API_BASE_URL } from "@/lib/api/base-url";
 import { requireRole } from "@/lib/auth/session";
 import type {
   PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
 } from "@/lib/api/registration-types";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type RegistrationResult = { ok: true } | { ok: false; error: string };
