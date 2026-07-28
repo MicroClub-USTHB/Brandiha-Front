@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { listAllRegistrations } from "@/lib/api/registrations";
 import type { RegistrationDetail, RegistrationStatus } from "@/lib/api/registration-types";
+import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
 
 /** CSV columns: [header, accessor]. Order defines the column order in the file. */
-const COLUMNS: [string, (r: RegistrationDetail) => string | null | undefined][] = [
+const COLUMNS: CsvColumns<RegistrationDetail> = [
   ["Full Name", (r) => r.user_full_name],
   ["Email", (r) => r.user_email],
   ["Phone", (r) => r.phone_number],
@@ -32,31 +33,6 @@ const COLUMNS: [string, (r: RegistrationDetail) => string | null | undefined][] 
   ["Registered At", (r) => r.created_at],
 ];
 
-/** Quote a value per RFC 4180 — wrap in quotes and double any embedded quotes. */
-function csvCell(value: string | null | undefined): string {
-  const text = value ?? "";
-  return `"${text.replace(/"/g, '""')}"`;
-}
-
-function toCsv(registrations: RegistrationDetail[]): string {
-  const header = COLUMNS.map(([label]) => csvCell(label)).join(",");
-  const rows = registrations.map((r) =>
-    COLUMNS.map(([, accessor]) => csvCell(accessor(r))).join(","),
-  );
-  // Prepend a BOM so Excel opens UTF-8 (accents in names) correctly.
-  return "﻿" + [header, ...rows].join("\r\n");
-}
-
-function download(csv: string) {
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 export function ExportCsvButton({
   disabled,
   filter,
@@ -78,7 +54,7 @@ export function ExportCsvButton({
       return;
     }
 
-    download(toCsv(result.data));
+    downloadCsv(toCsv(result.data, COLUMNS), datedCsvFilename("registrations"));
   };
 
   return (
