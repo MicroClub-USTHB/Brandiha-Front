@@ -3,7 +3,7 @@ import { Hero } from "@/components/landing/hero";
 // import { About } from "@/components/landing/about";
 import { Agenda } from "@/components/landing/agenda";
 // import { Authors } from "@/components/landing/authors";
-// import { Footer } from "@/components/landing/footer";
+import { Footer } from "@/components/landing/footer";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
         <Agenda />
         {/* <Authors /> */}
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }
