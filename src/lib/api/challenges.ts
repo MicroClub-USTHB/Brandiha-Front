@@ -27,18 +27,19 @@ export type SubmitResult = { ok: true } | { ok: false; error: string };
  */
 export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
   let response: Response;
+
   try {
     response = await publicApiFetch("/challenges", { cache: "no-store" });
   } catch {
     return { ok: false, error: "Couldn't reach the server. Please try again in a moment." };
   }
 
-  if (!response.ok) {
+  if (!response.ok)
     return { ok: false, error: "Something went wrong loading the challenges." };
-  }
 
   try {
-    return { ok: true, data: (await response.json()) as Challenge[] };
+    const data = await response.json() as Challenge[];
+    return { ok: true, data };
   } catch {
     return { ok: false, error: "Something went wrong loading the challenges." };
   }
