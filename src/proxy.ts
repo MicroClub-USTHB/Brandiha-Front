@@ -9,7 +9,7 @@ import {
 import { refreshSession } from "@/lib/auth/refresh";
 
 /** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr"];
+const PROTECTED_PREFIXES = ["/hr", "/submissions"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
@@ -99,6 +99,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // `/hr/:path*` matches the board and every registration detail page under it.
-  matcher: ["/login", "/hr/:path*"],
+  // `/hr/:path*` matches the board and every registration detail page under it;
+  // `/submissions/:path*` covers the per-challenge submission tables. The public
+  // `/submit/:id` page is deliberately absent — a team authenticates there with
+  // its secret code, not a session.
+  matcher: ["/login", "/hr/:path*", "/submissions/:path*"],
 };
