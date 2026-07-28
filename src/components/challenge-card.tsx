@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Lock, LockOpen } from "lucide-react";
+import type { ChallengeWindow } from "@/lib/api/challenge-types";
 
 export enum Department {
   MARKETING = "marketing",
@@ -51,30 +52,113 @@ function formatCountdown(remaining: number) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
+/** `null` for a missing or unparseable timestamp, so NaN never reaches the UI. */
+function toTime(value?: Date | string) {
+  if (!value) return null;
+
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : null;
+}
+
+/**
+ * Mirrors `resolveWindow` in `lib/api/challenges.ts`, which is what the detail
+ * page behind this card uses — a card and the page it links to shouldn't
+ * disagree about whether a challenge is open. No unlock time reads as upcoming.
+ */
+function resolveWindow(
+  now: number,
+  unlocksAt: number | null,
+  endsAt: number | null,
+): ChallengeWindow {
+  if (unlocksAt === null || unlocksAt > now) return "upcoming";
+  if (endsAt !== null && endsAt <= now) return "closed";
+  return "open";
+}
+
+/**
+ * One second-ticking clock shared by every card on the page, rather than an
+ * interval each. The interval only runs while at least one card is mounted.
+ */
+const clock = {
+  now: Date.now(),
+  listeners: new Set<() => void>(),
+  interval: null as ReturnType<typeof setInterval> | null,
+};
+
+function subscribeToClock(onTick: () => void) {
+  clock.listeners.add(onTick);
+
+  if (clock.interval === null) {
+    clock.now = Date.now();
+    clock.interval = setInterval(() => {
+      clock.now = Date.now();
+      clock.listeners.forEach((listener) => listener());
+    }, 1000);
+  }
+
+  return () => {
+    clock.listeners.delete(onTick);
+
+    if (clock.listeners.size === 0 && clock.interval !== null) {
+      clearInterval(clock.interval);
+      clock.interval = null;
+    }
+  };
+}
+
+/**
+ * `null` until mounted on the client. Rendering a time on the server would
+ * bake the server's clock into the HTML down to the second, and the client's
+ * first render would immediately disagree with it — a hydration mismatch on
+ * every card, every load.
+ */
+function useNow() {
+  return useSyncExternalStore(
+    subscribeToClock,
+    () => clock.now,
+    () => null,
+  );
+}
+
+function statusLabel(
+  submissionWindow: ChallengeWindow,
+  now: number,
+  unlocksAt: number | null,
+) {
+  if (submissionWindow === "open") return "Unlocked";
+  if (submissionWindow === "closed") return "Closed";
+
+  return unlocksAt === null ? "TBD" : formatCountdown(unlocksAt - now);
+}
+
 
 export default function ChallengeCard({
   department,
   title,
   unlocks_at,
+  ends_at,
 }: ChallengeCardProps) {
-  // One clock for both the icon and the countdown, so they can't disagree
-  // about whether the challenge is open.
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // One clock feeds both the icon and the label, so they can't disagree about
+  // whether the challenge is open.
+  const now = useNow();
 
   const textColor =
     DEPARTMENT_COLORS[department] ||
     "var(--brand-marketing)";
 
-  const unlocksAt = unlocks_at ? new Date(unlocks_at).getTime() : null;
-  // No unlock time yet counts as locked, not open.
-  const unlocked = unlocksAt !== null && unlocksAt <= now;
-  const LockIcon = unlocked ? LockOpen : Lock;
+  const unlocksAt = toTime(unlocks_at);
+  const endsAt = toTime(ends_at);
+  const submissionWindow =
+    now === null ? null : resolveWindow(now, unlocksAt, endsAt);
+
+  // Shut until the clock says otherwise — a closed challenge is locked again.
+  const LockIcon = submissionWindow === "open" ? LockOpen : Lock;
+  // A non-breaking space holds the line's height for the render before the
+  // clock is read, so the card doesn't reflow when the label appears.
+  const label =
+    now === null || submissionWindow === null
+      ? " "
+      : statusLabel(submissionWindow, now, unlocksAt);
 
   const cardImage =
     DEPARTMENT_CARDS[department] ||
@@ -128,13 +212,7 @@ export default function ChallengeCard({
         >
           {/* Decorative: the label below already states the same thing. */}
           <LockIcon className="size-4 md:size-5 xl:size-6 shrink-0" aria-hidden />
-          <span className="lg:text-xl font-hand font-bold">
-            {unlocked
-              ? "Unlocked"
-              : unlocksAt === null
-                ? "TBD"
-                : formatCountdown(unlocksAt - now)}
-          </span>
+          <span className="lg:text-xl font-hand font-bold">{label}</span>
         </div>
       </div>
     </div>
