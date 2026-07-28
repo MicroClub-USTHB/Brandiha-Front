@@ -86,22 +86,7 @@ export function Footer() {
 
       <div className="relative z-20 mx-auto max-w-7xl px-[clamp(1.5rem,4vw,4rem)] pt-16 pb-12 sm:pt-20 sm:pb-14 lg:pt-28 lg:pb-16">
         <div className="flex flex-col items-center gap-6 sm:gap-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-16 lg:gap-y-0">
-          <nav className="grid w-full max-w-[280px] grid-cols-2 gap-x-16 gap-y-3 sm:flex sm:max-w-none sm:items-center sm:justify-center sm:gap-12 lg:col-start-1 lg:row-start-1 lg:flex-col lg:items-start lg:gap-6">
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group flex min-h-[44px] items-center justify-center font-heading text-[clamp(1.125rem,4.5vw,1.5rem)] leading-tight text-white/70 transition-colors duration-250 ease-out hover:text-primary sm:text-[clamp(1.125rem,3vw,1.75rem)] lg:min-h-0 lg:justify-start lg:text-[clamp(1.5rem,2.5vw,2.25rem)]"
-              >
-                <span className="relative inline-block">
-                  {label}
-                  <span className="absolute -bottom-1 left-1/2 h-[3px] w-0 -translate-x-1/2 rounded-full bg-primary transition-all duration-300 ease-out group-hover:w-full lg:w-0 lg:group-hover:w-full" />
-                </span>
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex w-full flex-col items-center gap-6 sm:gap-8 lg:col-start-2 lg:row-start-1 lg:items-end lg:pt-16">
+          <div className="flex w-full flex-col items-center gap-6 sm:gap-8 lg:col-start-1 lg:row-start-1 lg:items-start">
             <Link
               href="/"
               className="transition-transform duration-300 ease-out hover:scale-[1.03]"
@@ -116,7 +101,7 @@ export function Footer() {
               />
             </Link>
 
-            <div className="flex flex-col items-center gap-4 sm:gap-6 lg:items-end">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 lg:items-start">
               <p className="font-heading text-[clamp(0.625rem,2vw,0.75rem)] tracking-[0.08em] text-white/40 sm:text-sm">
                 Follow Us
               </p>
@@ -141,7 +126,7 @@ export function Footer() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-3 lg:items-end">
+            <div className="flex flex-col items-center gap-3 lg:items-start">
               <div className="flex items-center gap-2 font-heading text-[clamp(0.675rem,2vw,0.8rem)] text-white/45 sm:text-sm">
                 <MapPin className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
                 <span>USTHB, Algiers</span>
@@ -152,6 +137,21 @@ export function Footer() {
               </div>
             </div>
           </div>
+
+          <nav className="grid w-full max-w-[280px] grid-cols-2 gap-x-16 gap-y-3 sm:flex sm:max-w-none sm:items-center sm:justify-center sm:gap-12 lg:col-start-2 lg:row-start-1 lg:flex-col lg:items-end lg:gap-6">
+            {navLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex min-h-[44px] items-center justify-center font-heading text-[clamp(1.125rem,4.5vw,1.5rem)] leading-tight text-white/70 transition-colors duration-250 ease-out hover:text-primary sm:text-[clamp(1.125rem,3vw,1.75rem)] lg:min-h-0 lg:justify-end lg:text-[clamp(1.5rem,2.5vw,2.25rem)]"
+              >
+                <span className="relative inline-block">
+                  {label}
+                  <span className="absolute -bottom-1 left-1/2 h-[3px] w-0 -translate-x-1/2 rounded-full bg-primary transition-all duration-300 ease-out group-hover:w-full lg:w-0 lg:group-hover:w-full" />
+                </span>
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <p className="mt-12 text-center font-heading text-[10px] text-white/20 sm:text-xs lg:mt-16">
