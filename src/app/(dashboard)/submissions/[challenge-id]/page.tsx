@@ -4,6 +4,7 @@ import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
+import { ExportCsvButton } from "@/components/submissions/export-csv-button";
 
 type Props = {
   params: Promise<{ "challenge-id": string }>;
@@ -57,12 +58,9 @@ export default async function SubmissionsPage(props: Props) {
             {submissions.length === 1 ? "1 submission" : `${submissions.length} submissions`}
           </p>
         </div>
-        <Link
-          href="/hr"
-          className="shrink-0 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          &larr; Back to HR
-        </Link>
+        <div className="shrink-0">
+          <ExportCsvButton submissions={submissions} challengeTitle={challenge.title} />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card p-2 text-card-foreground">
