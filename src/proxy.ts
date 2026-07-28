@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, isTokenFresh } from "@/lib/auth/jwt";
 
 /** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr", "/rh"];
+const PROTECTED_PREFIXES = ["/hr"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
@@ -50,5 +50,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/hr/:path*", "/rh"],
+  // `/hr/:path*` matches the board and every registration detail page under it.
+  matcher: ["/login", "/hr/:path*"],
 };
