@@ -1,7 +1,8 @@
 import Link from "next/link";
 import {getPublicChallenges } from "@/lib/api/challenges";
 import ChallengeCard, { Department } from "@/components/challenge-card";
-export default async  function submitChallenge() {  
+
+export default async  function submissionChallenge() {  
     const challenges = await getPublicChallenges();
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
@@ -10,7 +11,6 @@ export default async  function submitChallenge() {
             {challenges.map((challenge) => (
                 <Link key={challenge.id} href={`/submissions/${challenge.id}`}>
                     <ChallengeCard
-                        key={challenge.id}
                         department={challenge.department as  Department}
                         title={challenge.title}
                         unlocks_at={challenge.unlocks_at}
