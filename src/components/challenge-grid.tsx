@@ -20,7 +20,9 @@ export default async function ChallengeGrid({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
-      <h1 className="mb-4 font-heading text-5xl font-bold text-white">Challenges</h1>
+      <h1 className="mb-4 font-heading text-5xl font-bold tracking-wider text-white">
+        Challenges
+      </h1>
       {!result.ok ? (
         <p className="font-sans text-destructive">{result.error}</p>
       ) : (
