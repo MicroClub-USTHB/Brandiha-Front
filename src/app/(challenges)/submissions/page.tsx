@@ -2,6 +2,8 @@ import Link from "next/link";
 import {getPublicChallenges } from "@/lib/api/challenges";
 import ChallengeCard, { Department } from "@/components/challenge-card";
 
+export const dynamic = "force-dynamic";
+
 export default async  function submissionChallenge() {  
     const challenges = await getPublicChallenges();
     return (
