@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPublicChallenges } from "@/lib/api/challenges";
+import { windowFor } from "@/lib/api/challenge-window";
 import ChallengeCard, { Department } from "@/components/challenge-card";
 
 /**
@@ -34,6 +35,10 @@ export default async function ChallengeGrid({
                 title={challenge.title}
                 unlocks_at={challenge.unlocks_at}
                 ends_at={challenge.ends_at ?? undefined}
+                // Resolved here so the card's first paint is already right.
+                // The page is `force-dynamic`, so this is the request's clock,
+                // not a stale build-time one.
+                initialWindow={windowFor(challenge.unlocks_at, challenge.ends_at)}
               />
             </Link>
           ))}

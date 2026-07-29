@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
 
 export enum Department {
@@ -19,6 +20,12 @@ interface ChallengeCardProps {
   title?: string;
   unlocks_at?: Date | string;
   ends_at?: Date | string;
+  /**
+   * The window as the server saw it, used for the first paint. Without it the
+   * card would have to guess before the client clock is readable, and a locked
+   * card would flash its real title in full color on every load.
+   */
+  initialWindow: ChallengeWindow;
 }
 
 const DEPARTMENT_COLORS: Record<Department, string> = {
@@ -51,29 +58,6 @@ function formatCountdown(remaining: number) {
   const seconds = Math.floor((remaining / 1000) % 60);
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
-
-/** `null` for a missing or unparseable timestamp, so NaN never reaches the UI. */
-function toTime(value?: Date | string) {
-  if (!value) return null;
-
-  const time = new Date(value).getTime();
-  return Number.isFinite(time) ? time : null;
-}
-
-/**
- * Mirrors `resolveWindow` in `lib/api/challenges.ts`, which is what the detail
- * page behind this card uses — a card and the page it links to shouldn't
- * disagree about whether a challenge is open. No unlock time reads as upcoming.
- */
-function resolveWindow(
-  now: number,
-  unlocksAt: number | null,
-  endsAt: number | null,
-): ChallengeWindow {
-  if (unlocksAt === null || unlocksAt > now) return "upcoming";
-  if (endsAt !== null && endsAt <= now) return "closed";
-  return "open";
 }
 
 /**
@@ -112,6 +96,10 @@ function subscribeToClock(onTick: () => void) {
  * bake the server's clock into the HTML down to the second, and the client's
  * first render would immediately disagree with it — a hydration mismatch on
  * every card, every load.
+ *
+ * Which is why the window itself arrives as a prop instead: it only changes at
+ * the unlock boundary, so the server can resolve it safely. Only the countdown
+ * has to wait for this.
  */
 function useNow() {
   return useSyncExternalStore(
@@ -141,6 +129,7 @@ export default function ChallengeCard({
   title,
   unlocks_at,
   ends_at,
+  initialWindow,
 }: ChallengeCardProps) {
   // One clock decides the whole card's look, so the color, the mascot and the
   // countdown can't disagree about whether the challenge is open.
@@ -152,18 +141,19 @@ export default function ChallengeCard({
 
   const unlocksAt = toTime(unlocks_at);
   const endsAt = toTime(ends_at);
+  // The server's answer holds the first paint; the client clock takes over on
+  // mount and from then on ticks the card open the moment it unlocks.
   const submissionWindow =
-    now === null ? null : resolveWindow(now, unlocksAt, endsAt);
+    now === null ? initialWindow : resolveWindow(now, unlocksAt, endsAt);
 
   // Shut until the clock says otherwise — a closed challenge is locked again.
-  // Until then the card is in neither state, so it commits to neither look:
-  // showing the wrong one for a frame would flash a mascot onto a locked card,
-  // or drain the color out of an open one.
-  const isLocked = submissionWindow !== null && submissionWindow !== "open";
+  const isLocked = submissionWindow !== "open";
+  // Only the countdown has to wait for the client clock, so it alone is blank
+  // on the first paint — everything else is already in its final state.
   const label =
-    now === null || !isLocked
-      ? null
-      : lockedLabel(submissionWindow, now, unlocksAt);
+    isLocked && now !== null
+      ? lockedLabel(submissionWindow, now, unlocksAt)
+      : null;
 
   // An unopened challenge keeps its brief to itself — the real title is a hint
   // at the work, so it stays hidden until the card unlocks. A closed one has
@@ -221,7 +211,11 @@ export default function ChallengeCard({
           >
             {/* Decorative: the countdown below already states the same thing. */}
             <Lock className="size-6 md:size-8 xl:size-10 shrink-0" aria-hidden />
-            <span className="lg:text-xl font-hand font-bold">{label}</span>
+            {/* A non-breaking space holds the line's height until the clock is
+                read, so the card doesn't reflow when the countdown appears. */}
+            <span className="lg:text-xl font-hand font-bold">
+              {label ?? " "}
+            </span>
           </div>
         ) : (
           <Image
@@ -230,12 +224,7 @@ export default function ChallengeCard({
             width={292}
             height={283}
             draggable={false}
-            // Held in the layout but unseen until the clock says the challenge
-            // is open, so an open card doesn't have to reflow to show it.
-            className={cn(
-              "h-[80%] object-contain",
-              submissionWindow === null && "invisible",
-            )}
+            className="h-[80%] object-contain"
           />
         )}
       </div>

@@ -1,6 +1,7 @@
 "use server";
 
 import { publicApiFetch } from "@/lib/api/publicApiFetch";
+import { windowFor } from "@/lib/api/challenge-window";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
 import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
@@ -8,7 +9,6 @@ import type {
   Challenge,
   ChallengeDetail,
   ChallengeStatus,
-  ChallengeWindow,
 } from "@/lib/api/challenge-types";
 import type { SubmissionFormData } from "@/lib/validators/submission-schema";
 
@@ -64,13 +64,6 @@ function byUnlockTime(challenges: Challenge[]): Challenge[] {
   return [...challenges].sort((a, b) => unlockTime(a) - unlockTime(b));
 }
 
-/** Resolve a challenge's submission window against the current clock. */
-function resolveWindow(challenge: Challenge, now: number): ChallengeWindow {
-  if (new Date(challenge.unlocks_at).getTime() > now) return "upcoming";
-  if (challenge.ends_at && new Date(challenge.ends_at).getTime() <= now) return "closed";
-  return "open";
-}
-
 /**
  * Server Action: one challenge by id, with its current submission window.
  *
@@ -86,7 +79,10 @@ export async function getChallenge(id: number): Promise<FetchResult<ChallengeSta
   const challenge = result.data.find((c) => c.id === id);
   if (!challenge) return { ok: false, error: "That challenge doesn't exist." };
 
-  return { ok: true, data: { challenge, window: resolveWindow(challenge, Date.now()) } };
+  return {
+    ok: true,
+    data: { challenge, window: windowFor(challenge.unlocks_at, challenge.ends_at) },
+  };
 }
 
 /**
