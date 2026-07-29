@@ -10,8 +10,8 @@ import {
 import { HOME_BY_ROLE } from "@/lib/auth/home";
 import { refreshSession } from "@/lib/auth/refresh";
 
-/** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr", "/submissions"];
+/** Route prefixes that require an authenticated session, whatever the role. */
+const PROTECTED_PREFIXES = ["/hr", "/submissions", "/vote"];
 
 /** Where to send unauthenticated users. */
 const LOGIN_PATH = "/login";
@@ -115,8 +115,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // `/hr/:path*` matches the board and every registration detail page under it;
-  // `/submissions/:path*` covers the per-challenge submission tables. The public
-  // `/submit/:id` page is deliberately absent — a team authenticates there with
-  // its secret code, not a session.
-  matcher: ["/login", "/hr/:path*", "/submissions/:path*"],
+  // `/submissions/:path*` covers the per-challenge submission tables; `/vote` is
+  // the alumni ballot. The public `/submit/:id` page is deliberately absent — a
+  // team authenticates there with its secret code, not a session.
+  matcher: ["/login", "/hr/:path*", "/submissions/:path*", "/vote/:path*"],
 };
