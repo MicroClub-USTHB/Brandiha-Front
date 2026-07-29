@@ -28,7 +28,13 @@ export default async function ChallengeGrid({
   const result = await getPublicChallenges();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
+    // Fills the viewport minus whatever chrome sits above it: `--shell-offset`
+    // is published by the layout that owns that chrome (the staff dashboard's
+    // header), and defaults to nothing on a route with none, like `/submit`.
+    // Without the subtraction a route with a header overflows by exactly the
+    // header's height. `svh` rather than `vh` so mobile browser UI doesn't push
+    // it over either.
+    <div className="flex min-h-[calc(100svh-var(--shell-offset,0px))] flex-col items-center justify-center">
       <h1 className="mb-4 font-heading text-5xl font-bold tracking-wider text-white">
         Challenges
       </h1>
