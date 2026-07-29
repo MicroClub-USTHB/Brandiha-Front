@@ -2,9 +2,9 @@ import { Header } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
 // import { About } from "@/components/landing/about";
 import { Agenda } from "@/components/landing/agenda";
-import { Authors } from "@/components/landing/authors";
+// import { Authors } from "@/components/landing/authors";
 import { Faq } from "@/components/landing/faq";
-import { Footer } from "@/components/landing/footer";
+// import { Footer } from "@/components/landing/footer";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
         <Hero />
         {/* <About /> */}
         <Agenda />
-        <Authors />
+        {/* <Authors /> */}
         <Faq />
       </main>
       {/* <Footer /> */}
