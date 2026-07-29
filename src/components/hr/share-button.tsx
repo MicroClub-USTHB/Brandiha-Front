@@ -20,7 +20,7 @@ export function ShareButton() {
     >
       {copied ? (
         <>
-          <Check className="size-4 text-green-500" />
+          <Check className="size-4 text-success" />
           Copied
         </>
       ) : (

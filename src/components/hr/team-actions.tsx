@@ -77,7 +77,7 @@ export function TeamActions({
           type="button"
           onClick={() => setConfirming("rejected")}
           disabled={pending || currentStatus === "rejected"}
-          className={cn(BTN_BASE, "bg-red-500/10 text-red-700 hover:bg-red-500/20")}
+          className={cn(BTN_BASE, "bg-destructive/10 text-destructive hover:bg-destructive/20")}
         >
           <X className="size-3.5 stroke-[2.5]" />
           Decline
@@ -95,7 +95,7 @@ export function TeamActions({
           type="button"
           onClick={() => setConfirming("accepted")}
           disabled={pending || currentStatus === "accepted"}
-          className={cn(BTN_BASE, "bg-green-500/10 text-green-700 hover:bg-green-500/20")}
+          className={cn(BTN_BASE, "bg-success/10 text-success hover:bg-success/20")}
         >
           <Check className="size-3.5 stroke-[2.5]" />
           Accept
