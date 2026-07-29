@@ -13,14 +13,26 @@ import ChallengeCard, { Department } from "@/components/challenge-card";
  */
 export default async function ChallengeGrid({
   hrefPrefix,
+  allowClosed = false,
 }: {
   /** Route the cards link into; the challenge id is appended. */
   hrefPrefix: string;
+  /**
+   * Whether a closed challenge links in too. Reviewing submissions outlives the
+   * submission window — the entries are still there once the deadline passes —
+   * but submitting to a closed challenge doesn't, so `/submit` leaves this off
+   * and `/submissions` turns it on.
+   */
+  allowClosed?: boolean;
 }) {
   const result = await getPublicChallenges();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
+    // Fills the flex parent it's handed rather than claiming a screen's worth of
+    // height for itself, so the caller decides how much room there is. A route
+    // with chrome above the grid — the staff dashboard's header — would
+    // otherwise overflow by exactly that chrome's height.
+    <div className="flex flex-1 flex-col items-center justify-center">
       <h1 className="mb-4 font-heading text-5xl font-bold tracking-wider text-white">
         Challenges
       </h1>
@@ -49,11 +61,17 @@ export default async function ChallengeGrid({
               />
             );
 
-            // A locked card leads nowhere — the page behind it redirects
-            // straight back here — so it isn't a link at all rather than one
-            // that bounces. Wrapped in a plain element either way, to keep it
-            // a grid item and the columns even.
-            return submissionWindow === "open" ? (
+            // A card only links where the page behind it will actually let the
+            // caller in; anywhere else it isn't a link at all, rather than one
+            // that bounces off a redirect. An upcoming challenge is never
+            // navigable — there is nothing behind it yet, in either route.
+            // Wrapped in a plain element either way, to keep it a grid item and
+            // the columns even.
+            const isNavigable =
+              submissionWindow === "open" ||
+              (allowClosed && submissionWindow === "closed");
+
+            return isNavigable ? (
               <Link key={challenge.id} href={`${hrefPrefix}/${challenge.id}`}>
                 {card}
               </Link>

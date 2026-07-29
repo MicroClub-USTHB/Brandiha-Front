@@ -10,9 +10,13 @@ export default async function DashboardLayout({
   const session = await getSession();
 
   return (
-    <>
+    // A screen-tall column: the header takes its own height off the top and the
+    // page below fills whatever is left. That's what lets a page fill the screen
+    // without knowing the header's height — the header is `sticky`, so it stays
+    // in flow and really does take that space.
+    <div className="min-h-screen flex flex-col">
       <DashboardHeader userName={session?.name} userRole={session?.role} />
       {children}
-    </>
+    </div>
   );
 }

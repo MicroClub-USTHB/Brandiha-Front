@@ -11,5 +11,8 @@ export default async function SubmissionsIndexPage() {
   const access = await checkAccess("admin", "super_admin");
   if (!access.ok) return <AccessNotice reason={access.reason} />;
 
-  return <ChallengeGrid hrefPrefix="/submissions" />;
+  // Closed challenges included: a passed deadline stops submissions, not the
+  // review of the ones already in. The detail page gates on role alone, so it
+  // serves a closed challenge to staff the same as an open one.
+  return <ChallengeGrid hrefPrefix="/submissions" allowClosed />;
 }

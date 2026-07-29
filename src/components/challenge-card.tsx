@@ -111,16 +111,10 @@ function useNow() {
 }
 
 /**
- * Only locked cards carry a label — an open one says so by being in color,
- * with its mascot showing, so there is nothing left to spell out.
+ * How long until an upcoming challenge unlocks, or `TBD` when there is no
+ * usable unlock time to count towards.
  */
-function lockedLabel(
-  submissionWindow: Exclude<ChallengeWindow, "open">,
-  now: number,
-  unlocksAt: number | null,
-) {
-  if (submissionWindow === "closed") return "Closed";
-
+function unlockLabel(now: number, unlocksAt: number | null) {
   return unlocksAt === null ? "TBD" : formatCountdown(unlocksAt - now);
 }
 
@@ -147,8 +141,15 @@ export default function ChallengeCard({
   const submissionWindow =
     now === null ? initialWindow : resolveWindow(now, unlocksAt, endsAt);
 
-  // Shut until the clock says otherwise — a closed challenge is locked again.
+  // Shut until the clock says otherwise — a closed challenge is locked again,
+  // and drained of its color the same way.
   const isLocked = submissionWindow !== "open";
+
+  // Only a challenge that hasn't unlocked hides its mascot: there is nothing to
+  // show off yet, and a lock is the whole message. A closed one keeps the
+  // mascot — it did run — and says it's over in the line underneath instead.
+  const isUpcoming = submissionWindow === "upcoming";
+  const isClosed = submissionWindow === "closed";
 
   // A card that ticks open on screen was rendered without its title, since the
   // server had no reason to send one yet. Ask the server again rather than
@@ -165,17 +166,23 @@ export default function ChallengeCard({
 
   // Only the countdowns have to wait for the client clock, so they alone are
   // blank on the first paint — everything else is already in its final state.
-  const label =
-    isLocked && now !== null
-      ? lockedLabel(submissionWindow, now, unlocksAt)
-      : null;
+  const unlockCountdown =
+    isUpcoming && now !== null ? unlockLabel(now, unlocksAt) : null;
 
-  // An open challenge counts down to its deadline instead. One without an
+  // The line under the mascot: an open challenge counts down to its deadline, a
+  // closed one just states that it's over. An open challenge without an
   // `ends_at` runs indefinitely, so it gets no line at all rather than an empty
   // one — there is no deadline to be counting towards.
-  const hasDeadline = !isLocked && endsAt !== null;
-  const deadline =
-    hasDeadline && now !== null ? formatCountdown(endsAt - now) : null;
+  const hasStatusLine =
+    isClosed || (submissionWindow === "open" && endsAt !== null);
+  const StatusIcon = isClosed ? Lock : Clock;
+  // "Closed" is a fact about the window, settled before the card ever renders,
+  // so unlike a countdown it doesn't have to wait for the client clock.
+  const statusLabel = isClosed
+    ? "Closed"
+    : endsAt !== null && now !== null
+      ? formatCountdown(endsAt - now)
+      : null;
 
   // The server withholds an upcoming challenge's title outright rather than
   // sending one for the card to hide, so there is nothing to decide here: the
@@ -194,8 +201,9 @@ export default function ChallengeCard({
     <div
       className={cn(
         "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
-        // Drains the department color out of the card art and the title too,
-        // not just the slot below — a locked card reads as inert at a glance.
+        // Drains the department color out of the card art, the title and the
+        // mascot too, not just the slot below — a locked card reads as inert at
+        // a glance.
         "transition-[filter] duration-500",
         isLocked && "grayscale",
       )}
@@ -218,12 +226,12 @@ export default function ChallengeCard({
       </h1>
 
 
-      {/* The card's one variable slot: the mascot over its deadline when open,
-          the lock over its countdown when not. `min-h-0` lets it shrink below
-          the mascot's intrinsic height, so a long title takes room from this
-          slot instead of overflowing. */}
+      {/* The card's one variable slot: the mascot over a status line once the
+          challenge has unlocked, the lock over its countdown before it has.
+          `min-h-0` lets it shrink below the mascot's intrinsic height, so a long
+          title takes room from this slot instead of overflowing. */}
       <div className="flex min-h-0 flex-1 items-center justify-center py-1">
-        {isLocked ? (
+        {isUpcoming ? (
           // `currentColor` on the wrapper is what makes both the icon and the
           // countdown track the department color (grayscaled by the parent).
           <div
@@ -235,7 +243,7 @@ export default function ChallengeCard({
             {/* A non-breaking space holds the line's height until the clock is
                 read, so the card doesn't reflow when the countdown appears. */}
             <span className="lg:text-xl font-hand font-bold">
-              {label ?? " "}
+              {unlockCountdown ?? " "}
             </span>
           </div>
         ) : (
@@ -246,27 +254,28 @@ export default function ChallengeCard({
               width={292}
               height={283}
               draggable={false}
-              // Takes the slack the deadline line leaves, so a card without one
+              // Takes the slack the status line leaves, so a card without one
               // gets a taller mascot rather than a gap under it.
               className="min-h-0 w-auto max-w-full flex-1 object-contain"
             />
 
-            {hasDeadline && (
+            {hasStatusLine && (
               // `currentColor` on the wrapper is what makes both the icon and
-              // the countdown track the department color.
+              // the label track the department color (grayscaled by the parent
+              // once the challenge is closed).
               <div
                 className="flex items-center gap-1.5"
                 style={{ color: textColor }}
               >
-                {/* Decorative: the countdown beside it says the same thing. */}
-                <Clock
+                {/* Decorative: the label beside it says the same thing. */}
+                <StatusIcon
                   className="size-4 md:size-5 xl:size-6 shrink-0"
                   aria-hidden
                 />
                 {/* A non-breaking space holds the line's height until the clock
                     is read, so the card doesn't reflow when it appears. */}
                 <span className="lg:text-xl font-hand font-bold">
-                  {deadline ?? " "}
+                  {statusLabel ?? " "}
                 </span>
               </div>
             )}

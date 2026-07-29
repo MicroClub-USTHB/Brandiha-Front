@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
+import { windowFor } from "@/lib/api/challenge-window";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
 import { ExportCsvButton } from "@/components/submissions/export-csv-button";
@@ -45,6 +46,19 @@ export default async function SubmissionsPage(props: Props) {
   }
 
   const { challenge, submissions } = result.data;
+
+  // An upcoming challenge bounces back to the picker, the same way `/submit`
+  // turns one away: there is nothing to review yet, and its title is still under
+  // wraps everywhere else. The card in the grid isn't a link either, so this
+  // only catches a typed or stale URL.
+  //
+  // A *closed* challenge deliberately stays reachable — the submissions it
+  // collected outlive its deadline. The window comes off the detail response
+  // rather than a second fetch, since `ChallengeWithFreeze` carries both
+  // timestamps.
+  if (windowFor(challenge.unlocks_at, challenge.ends_at) === "upcoming") {
+    redirect("/submissions");
+  }
 
   return (
     <main className="mx-auto max-w-4xl p-6 font-sans">
