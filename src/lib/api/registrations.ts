@@ -3,6 +3,7 @@
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
+import { splitList } from "@/lib/list-field";
 import type {
   PaginatedRegistrations,
   RegistrationDetail,
@@ -36,14 +37,6 @@ interface RegistrationPayload {
   additional_notes: string | null;
 }
 
-/** Split a free-text field ("Figma, Photoshop\nNotion") into a clean list. */
-function toList(value: string | undefined): string[] {
-  return (value ?? "")
-    .split(/[\n,]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 /** Empty/whitespace-only optional strings become `null` for the API. */
 function nullable(value: string | undefined): string | null {
   const trimmed = value?.trim();
@@ -64,9 +57,9 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     participated_before: data.HackathonExperience,
     previous_competitions: nullable(data.PreviousHackathons),
     skills: data.Skills.trim(),
-    tools: toList(data.Tools),
+    tools: splitList(data.Tools),
     portfolio_url: nullable(data.Portfolio),
-    other_links: toList(data.Links),
+    other_links: splitList(data.Links),
     motivation: data.Motivation.trim(),
     food_allergies: nullable(data.FoodAllergies),
     available_during_event: data.Availability.toLowerCase() as
