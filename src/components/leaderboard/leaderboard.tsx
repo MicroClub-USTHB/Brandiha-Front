@@ -1,12 +1,12 @@
 import LeaderboardRow from "./leaderboard-row";
-import { getGlobalLeaderboard, LeaderboardEntry } from "@/lib/api/leaderboard";
+import { getGlobalLeaderboard, PublicLeaderboardEntry } from "@/lib/api/public-leaderboard";
 
-export function sortLeaderboardByScore(data: LeaderboardEntry[]): LeaderboardEntry[] {
+export function sortLeaderboardByScore(data: PublicLeaderboardEntry[]): PublicLeaderboardEntry[] {
   return [...data].sort((a, b) => b.total_score - a.total_score);
 }
 
 export default async function LeaderboardComponent() {
-  const leaderboardData: LeaderboardEntry[] = await getGlobalLeaderboard();
+  const leaderboardData: PublicLeaderboardEntry[] = await getGlobalLeaderboard();
   const sortedLeaderboardData = sortLeaderboardByScore(leaderboardData);
   console.log("Leaderboard Data:", leaderboardData);
 
