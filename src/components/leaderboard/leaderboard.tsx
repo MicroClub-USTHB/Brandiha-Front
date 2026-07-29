@@ -1,5 +1,5 @@
 import LeaderboardRow from "./leaderboard-row";
-import { getGlobalLeaderboard, PublicLeaderboardEntry, AdminLeaderboardEntry } from "@/lib/api/public-leaderboard";
+import { getGlobalLeaderboard, PublicLeaderboardEntry, AdminLeaderboardEntry } from "@/lib/api/leaderboard";
 
 export type  LeaderboardProps = {
   leaderboardData: PublicLeaderboardEntry[] | AdminLeaderboardEntry[] ;

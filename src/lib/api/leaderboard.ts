@@ -65,5 +65,13 @@ export async function getAdminLeaderboard(): Promise<AdminLeaderboardEntry[]> {
   if (!res.ok) throw new Error("Error retrieving the admin leaderboard");
   
   const data: AdminLeaderboardEntry[] = await res.json();
-  return data.sort((a, b) => b.total_score - a.total_score);
+  if(data.length === 0) {
+    return dummyLeaderboardData.map(entry => ({
+      team_id: "dummy",
+      team_name: entry.team_name,   
+      per_challenge: [],
+      total_score: entry.total_score,
+    }));
+  }
+  return data;
 }

@@ -2,7 +2,7 @@ import LeaderboardComponent from "@/components/leaderboard/leaderboard";
 import {
   getGlobalLeaderboard,
   PublicLeaderboardEntry,
-} from "@/lib/api/public-leaderboard";
+} from "@/lib/api/leaderboard";
 
 export function sortLeaderboardByScore(
   data: PublicLeaderboardEntry[],

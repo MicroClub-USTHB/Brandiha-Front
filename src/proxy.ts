@@ -9,7 +9,7 @@ import {
 import { refreshSession } from "@/lib/auth/refresh";
 
 /** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr"];
+const PROTECTED_PREFIXES = ["/hr", "/super-admin-leaderboard"];
 
 /** Where to send unauthenticated users, and where to bounce already-authed ones. */
 const LOGIN_PATH = "/login";
@@ -99,6 +99,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // `/hr/:path*` matches the board and every registration detail page under it.
-  matcher: ["/login", "/hr/:path*"],
+  // Matches the protected dashboard pages and the login page.
+  matcher: ["/login", "/hr/:path*", "/super-admin-leaderboard", "/super-admin-leaderboard/:path*"],
 };
