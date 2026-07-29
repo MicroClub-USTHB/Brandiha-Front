@@ -1,9 +1,9 @@
 import "server-only";
 
-export const API_BASE_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
+import { API_BASE_URL } from "@/lib/api/base-url";
+
+export { API_BASE_URL };
+
 export async function publicApiFetch(
   path: string,
   init: RequestInit = {},
