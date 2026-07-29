@@ -8,6 +8,7 @@ import { submitVote } from "@/lib/api/voting";
 import type { Team } from "@/lib/api/team-types";
 import { BallotRow } from "@/components/vote/ballot-row";
 import { ActionButton } from "@/components/action-button";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -98,7 +99,10 @@ export function VoteBallot({
         </p>
       )}
 
-      <div className="mt-8">
+      {/* The button sits at the end of the ballot, under the last row it acts
+          on. The recorded-vote notice is a statement, not an action, so it stays
+          at the left edge with the rest of the copy. */}
+      <div className={cn("mt-8 flex", !voted && "justify-end")}>
         {voted ? (
           <p role="status" className="flex items-center gap-2 text-sm text-white/70">
             <CircleCheckBig className="size-4 text-primary" aria-hidden />
