@@ -64,5 +64,8 @@ export function downloadCsv(csv: string, filename: string): void {
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // Revoked on a later task, not right after `click()`. Firefox starts the
+  // download asynchronously and reads the blob after the current task ends, so
+  // revoking synchronously can race it and save an empty file.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

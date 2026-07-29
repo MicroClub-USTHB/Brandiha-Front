@@ -35,7 +35,6 @@ export const useRegistrationPersist = create<{
 export function useRegistrationForm() {
   const [step, setStep] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
@@ -96,7 +95,6 @@ export function useRegistrationForm() {
     setSubmitError(null);
     const result = await submitRegistration(data);
     if (result.ok) {
-      setIsSubmitted(true);
       // Don't restore a form the user already submitted.
       useRegistrationPersist.getState().reset();
       usePopupStore.getState().openPopup("success");
@@ -129,6 +127,5 @@ export function useRegistrationForm() {
     submit,
     isSubmitting: form.formState.isSubmitting,
     submitError,
-    isSubmitted,
   };
 }
