@@ -14,6 +14,7 @@ export default async function LeaderboardComponent({ leaderboardData }: Leaderbo
           rank={index + 1}
           teamName={team.team_name}
           score={team.total_score}
+          delay={index * 0.1}
         />
       ))}
     </div>
