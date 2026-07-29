@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 const links = [
@@ -32,14 +32,14 @@ function getActiveEffectImage(theme?: string) {
 } 
 
 
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+
 export function NavBar() {
   const [active, setActive] = useState("/");
-  const [mounted, setMounted] = useState(false);
   const scrollingRef = useRef(false);
   const {theme} = useTheme();
+  const isClient = useIsClient();
   const activeImage = getActiveEffectImage(theme);
-
-  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -86,7 +86,7 @@ export function NavBar() {
             }`}
           >
             {label}
-            {mounted && isActive && (
+            {isClient && isActive && (
               <Image
                 src={activeImage}
                 alt=""
