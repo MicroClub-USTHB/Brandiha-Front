@@ -1,11 +1,11 @@
-# `apiFetch` cannot recover from a mid-flight token expiry
+# `backendFetch` cannot recover from a mid-flight token expiry
 
-**Where:** `src/lib/api/client.ts` — `apiFetch`
+**Where:** `src/lib/api/fetch.ts` — `backendFetch`
 **Status:** accepted trade-off in 129787d, recorded for review
 
 ## What happens
 
-`apiFetch` never refreshes. It checks the token is fresh, sends it, and lets a
+`backendFetch` never refreshes. It checks the token is fresh, sends it, and lets a
 401 surface to the caller as "You're not signed in." The proxy owns refreshing.
 
 That leaves one uncovered case: a request whose token is fresh when sent but
@@ -17,7 +17,7 @@ The window is now small — the pre-flight freshness check removed the much larg
 
 ## Why it was left
 
-Refreshing inside `apiFetch` is worse than the problem. Under strict rotation
+Refreshing inside `backendFetch` is worse than the problem. Under strict rotation
 the backend deletes the presented token the moment it accepts it, so a refresh
 whose result cannot be persisted permanently strands the browser. And it often
 cannot be persisted: Next.js forbids writing cookies during a Server Component
@@ -28,7 +28,7 @@ bundle from the server runtime, so the two do not share module state.
 
 ## What to do (if it proves to matter)
 
-Do **not** add a blanket refresh-and-retry to `apiFetch`. The narrow version
+Do **not** add a blanket refresh-and-retry to `backendFetch`. The narrow version
 that is safe: a separate helper used *only* from Server Actions, which can write
 cookies, that on a 401 refreshes, persists both cookies, and retries once. Leave
 Server Component reads failing fast as they do now.
