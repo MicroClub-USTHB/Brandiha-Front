@@ -34,9 +34,12 @@ function getActiveEffectImage(theme?: string) {
 
 export function NavBar() {
   const [active, setActive] = useState("/");
+  const [mounted, setMounted] = useState(false);
   const scrollingRef = useRef(false);
   const {theme} = useTheme();
   const activeImage = getActiveEffectImage(theme);
+
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,7 +73,7 @@ export function NavBar() {
   };
 
   return (
-    <nav className="flex h-14.75 w-169.25 items-center justify-around">
+    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
       {links.map(({ href, label }) => {
         const isActive = active === href;
         return (
@@ -83,7 +86,7 @@ export function NavBar() {
             }`}
           >
             {label}
-            {isActive && (
+            {mounted && isActive && (
               <Image
                 src={activeImage}
                 alt=""
