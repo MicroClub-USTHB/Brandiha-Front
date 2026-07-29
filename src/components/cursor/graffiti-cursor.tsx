@@ -6,8 +6,21 @@ import { useGraffitiCursor } from "@/hooks/use-graffiti-cursor";
 import { GraffitiTrail } from "./graffiti-trail";
 import { SpraySplatter } from "./spray-splatter";
 
-/** Routes where the native cursor is kept (e.g. drag-and-drop needs it). */
-const CURSOR_DISABLED_PREFIXES = ["/hr"];
+/**
+ * Routes that keep the native cursor: the whole authenticated dashboard.
+ *
+ * It started as `/hr` alone, for the drag-and-drop there — but the ballot on
+ * `/vote` drags too, and none of these pages is the graffiti wall the effect was
+ * drawn for. A spray can trailing paint over a table of registrations is a
+ * working tool wearing the wrong costume.
+ *
+ * Listed by hand rather than read from the route group, which `usePathname`
+ * can't see. Deliberately not shared with the proxy's `PROTECTED_PREFIXES`
+ * either, though the two happen to match today: "needs a session" and "is a
+ * working tool, not a poster" are different questions, and a page can be the
+ * second without being the first.
+ */
+const CURSOR_DISABLED_PREFIXES = ["/hr", "/submissions", "/vote"];
 
 /**
  * Graffiti paint-splash cursor. Mounted once in the root layout. Renders via a
