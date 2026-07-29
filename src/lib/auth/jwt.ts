@@ -50,8 +50,27 @@ export function isTokenPair(value: unknown): value is TokenPair {
   );
 }
 
-/** Roles the backend encodes. Only `admin` may call protected endpoints. */
-export type Role = "admin" | "alumni";
+/**
+ * Roles the backend encodes in the token, mirroring its `StaffRole` enum. These
+ * are disjoint sets, not a ladder — `super_admin` is not a superset of `admin`,
+ * and the backend gates registrations and teams on `admin` alone. Guard with
+ * `requireRole()` by naming every role that may pass, never by seniority.
+ */
+export type Role = "admin" | "super_admin" | "alumni";
+
+/**
+ * Why a page-level access check failed — selects which notice renders in the
+ * page's place. `unauthenticated` is "no resolvable session" (the backend
+ * couldn't confirm who you are), `forbidden` is "signed in, wrong role".
+ */
+export type AccessDenialReason = "unauthenticated" | "forbidden";
+
+/** Display labels for `Role`, so raw enum values never reach the UI. */
+export const ROLE_LABELS: Record<Role, string> = {
+  admin: "Admin",
+  super_admin: "Super Admin",
+  alumni: "Alumni",
+};
 
 /** The current authenticated user, as resolved by `getSession()` via `/auth/me`. */
 export interface Session {
