@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { apiFetch } from "@/lib/api/client";
+import { backendFetch } from "@/lib/api/fetch";
 import {
   SESSION_COOKIE,
   type AccessDenialReason,
@@ -23,7 +23,7 @@ export async function getSession(): Promise<Session | null> {
 
   let res: Response;
   try {
-    res = await apiFetch("/auth/me");
+    res = await backendFetch("/auth/me", { auth: true });
   } catch {
     // Network/unreachable backend — treat as no session rather than crashing.
     return null;

@@ -1,8 +1,7 @@
 "use server";
 
-import { publicApiFetch } from "@/lib/api/publicApiFetch";
 import { windowFor } from "@/lib/api/challenge-window";
-import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type {
@@ -36,7 +35,7 @@ export async function getPublicChallenges(): Promise<FetchResult<PublicChallenge
   let response: Response;
 
   try {
-    response = await publicApiFetch("/challenges", { cache: "no-store" });
+    response = await backendFetch("/challenges", { cache: "no-store" });
   } catch {
     return { ok: false, error: "Couldn't reach the server. Please try again in a moment." };
   }
@@ -123,7 +122,7 @@ export async function submitChallenge(
 ): Promise<SubmitResult> {
   let response: Response;
   try {
-    response = await publicApiFetch(`/challenges/${challengeId}`, {
+    response = await backendFetch(`/challenges/${challengeId}`, {
       method: "POST",
       body: JSON.stringify({
         team_code: data.TeamCode.trim(),
@@ -185,7 +184,7 @@ export async function getChallengeDetail(
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/challenges/${id}`);
+    const res = await backendFetch(`/challenges/${id}`, { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to view this." };
     if (res.status === 404) return { ok: false, error: "That challenge doesn't exist." };

@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { ActionResult } from "@/lib/api/teams";
@@ -18,7 +18,7 @@ export async function getVotingStatus(): Promise<FetchResult<VotingStatus>> {
   if (denied) return denied;
 
   try {
-    const res = await apiFetch("/alumni/voting");
+    const res = await backendFetch("/alumni/voting", { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to vote." };
     if (!res.ok) return { ok: false, error: "Something went wrong loading the ballot." };
@@ -45,7 +45,8 @@ export async function submitVote(rankedTeamIds: string[]): Promise<ActionResult>
   if (denied) return denied;
 
   try {
-    const res = await apiFetch("/alumni/voting", {
+    const res = await backendFetch("/alumni/voting", {
+      auth: true,
       method: "POST",
       body: JSON.stringify({ ranked_team_ids: rankedTeamIds }),
     });

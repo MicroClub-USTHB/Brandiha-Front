@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
+import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
@@ -9,7 +9,7 @@ import type { TeamStats } from "@/lib/api/team-types";
 
 /**
  * Server Action: fetch all teams with their members (Admin). Optionally filter
- * by team status. The bearer token is attached by `apiFetch` from the session.
+ * by team status. The bearer token is attached by `backendFetch` from the session.
  */
 export async function listTeams(
   status?: RegistrationStatus,
@@ -19,7 +19,7 @@ export async function listTeams(
 
   const query = status ? `?status=${status}` : "";
   try {
-    const res = await apiFetch(`/teams${query}`);
+    const res = await backendFetch(`/teams${query}`, { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to view this." };
     if (!res.ok) return { ok: false, error: "Something went wrong loading teams." };
@@ -38,7 +38,7 @@ export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
   if (denied) return denied;
 
   try {
-    const res = await apiFetch("/teams/stats");
+    const res = await backendFetch("/teams/stats", { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to view this." };
     if (!res.ok) return { ok: false, error: "Something went loading stats." };
@@ -61,7 +61,8 @@ export async function updateTeamStatus(
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/teams/${id}`, {
+    const res = await backendFetch(`/teams/${id}`, {
+      auth: true,
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
@@ -90,7 +91,10 @@ export async function deleteTeam(id: string): Promise<ActionResult> {
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/teams/${id}`, { method: "DELETE" });
+    const res = await backendFetch(`/teams/${id}`, {
+      auth: true,
+      method: "DELETE",
+    });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to do this." };
     if (res.status === 404) return { ok: false, error: "Team not found." };
