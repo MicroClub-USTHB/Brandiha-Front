@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { backendFetch } from "@/lib/api/fetch";
 import {
@@ -16,8 +17,18 @@ export { SESSION_COOKIE, type Session, type Role } from "@/lib/auth/jwt";
  * Resolve the current session by asking the backend who the caller is via
  * `GET /auth/me` (the backend verifies the token's signature, expiry, and role).
  * Returns `null` when unauthenticated. Server-side only.
+ *
+ * Wrapped in React's `cache`, so the many guards on one page share a single
+ * round-trip. Rendering `/hr` asked four times over: the dashboard layout, the
+ * page's `checkAccess`, and the `requireRole` inside each of `getTeamStats` and
+ * `listTeams` — four sequential requests before either piece of data was
+ * fetched. The cache is per-request, so it dedupes without ever letting one
+ * user's session leak into another's render.
+ *
+ * This does not weaken the guards: they each still check, they just stop
+ * re-asking the backend the same question within one render.
  */
-export async function getSession(): Promise<Session | null> {
+export const getSession = cache(async function getSession(): Promise<Session | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
@@ -38,7 +49,7 @@ export async function getSession(): Promise<Session | null> {
   } catch {
     return null;
   }
-}
+});
 
 /** Denial returned by `requireRole`, shaped to short-circuit an action result. */
 export type RoleDenial = { ok: false; error: string };
