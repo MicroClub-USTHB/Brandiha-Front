@@ -2,7 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import Image from "next/image";
-import { Lock, LockOpen } from "lucide-react";
+import { Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
 
 export enum Department {
@@ -120,12 +121,15 @@ function useNow() {
   );
 }
 
-function statusLabel(
-  submissionWindow: ChallengeWindow,
+/**
+ * Only locked cards carry a label — an open one says so by being in color,
+ * with its mascot showing, so there is nothing left to spell out.
+ */
+function lockedLabel(
+  submissionWindow: Exclude<ChallengeWindow, "open">,
   now: number,
   unlocksAt: number | null,
 ) {
-  if (submissionWindow === "open") return "Unlocked";
   if (submissionWindow === "closed") return "Closed";
 
   return unlocksAt === null ? "TBD" : formatCountdown(unlocksAt - now);
@@ -138,8 +142,8 @@ export default function ChallengeCard({
   unlocks_at,
   ends_at,
 }: ChallengeCardProps) {
-  // One clock feeds both the icon and the label, so they can't disagree about
-  // whether the challenge is open.
+  // One clock decides the whole card's look, so the color, the mascot and the
+  // countdown can't disagree about whether the challenge is open.
   const now = useNow();
 
   const textColor =
@@ -152,13 +156,14 @@ export default function ChallengeCard({
     now === null ? null : resolveWindow(now, unlocksAt, endsAt);
 
   // Shut until the clock says otherwise — a closed challenge is locked again.
-  const LockIcon = submissionWindow === "open" ? LockOpen : Lock;
-  // A non-breaking space holds the line's height for the render before the
-  // clock is read, so the card doesn't reflow when the label appears.
+  // Until then the card is in neither state, so it commits to neither look:
+  // showing the wrong one for a frame would flash a mascot onto a locked card,
+  // or drain the color out of an open one.
+  const isLocked = submissionWindow !== null && submissionWindow !== "open";
   const label =
-    now === null || submissionWindow === null
-      ? " "
-      : statusLabel(submissionWindow, now, unlocksAt);
+    now === null || !isLocked
+      ? null
+      : lockedLabel(submissionWindow, now, unlocksAt);
 
   const cardImage =
     DEPARTMENT_CARDS[department] ||
@@ -170,7 +175,13 @@ export default function ChallengeCard({
 
   return (
     <div
-      className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8"
+      className={cn(
+        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
+        // Drains the department color out of the card art and the title too,
+        // not just the slot below — a locked card reads as inert at a glance.
+        "transition-[filter] duration-500",
+        isLocked && "grayscale",
+      )}
       style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
     >
       <h1
@@ -190,30 +201,37 @@ export default function ChallengeCard({
       </h1>
 
 
-      {/* `min-h-0` lets this slot shrink below the mascot's intrinsic height,
-          so a long title takes room from the mascot instead of overflowing. */}
+      {/* The card's one variable slot: the mascot when open, the lock and its
+          countdown when not. `min-h-0` lets it shrink below the mascot's
+          intrinsic height, so a long title takes room from this slot instead
+          of overflowing. */}
       <div className="flex min-h-0 flex-1 items-center justify-center py-1">
-        <Image
-          src={`/department-mascots/${mascot}`}
-          alt={`${department} mascot`}
-          width={292}
-          height={283}
-          draggable={false}
-          className="h-[80%] object-contain"
-        />
-      </div>
-
-      <div className="flex flex-col items-center w-full">
-        {/* `currentColor` on the wrapper is what makes both the icon and the
-            countdown track the department color. */}
-        <div
-          className="flex flex-col items-center gap-1"
-          style={{ color: textColor }}
-        >
-          {/* Decorative: the label below already states the same thing. */}
-          <LockIcon className="size-4 md:size-5 xl:size-6 shrink-0" aria-hidden />
-          <span className="lg:text-xl font-hand font-bold">{label}</span>
-        </div>
+        {isLocked ? (
+          // `currentColor` on the wrapper is what makes both the icon and the
+          // countdown track the department color (grayscaled by the parent).
+          <div
+            className="flex flex-col items-center gap-2"
+            style={{ color: textColor }}
+          >
+            {/* Decorative: the countdown below already states the same thing. */}
+            <Lock className="size-6 md:size-8 xl:size-10 shrink-0" aria-hidden />
+            <span className="lg:text-xl font-hand font-bold">{label}</span>
+          </div>
+        ) : (
+          <Image
+            src={`/department-mascots/${mascot}`}
+            alt={`${department} mascot`}
+            width={292}
+            height={283}
+            draggable={false}
+            // Held in the layout but unseen until the clock says the challenge
+            // is open, so an open card doesn't have to reflow to show it.
+            className={cn(
+              "h-[80%] object-contain",
+              submissionWindow === null && "invisible",
+            )}
+          />
+        )}
       </div>
     </div>
   );
