@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { AdminLeaderboardEntry, ChallengeScore } from "@/lib/api/leaderboard";
-import { bulkUpdateScores, BulkScoreUpdatePayload } from "@/lib/api/leaderboard";
+import  bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
