@@ -1,6 +1,7 @@
 "use server";
 
 import { publicApiFetch } from "@/lib/api/publicApiFetch";
+import { windowFor } from "@/lib/api/challenge-window";
 import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
 import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
@@ -8,7 +9,7 @@ import type {
   Challenge,
   ChallengeDetail,
   ChallengeStatus,
-  ChallengeWindow,
+  PublicChallenge,
 } from "@/lib/api/challenge-types";
 import type { SubmissionFormData } from "@/lib/validators/submission-schema";
 
@@ -24,8 +25,14 @@ export type SubmitResult = { ok: true } | { ok: false; error: string };
  *
  * Uncached on purpose: `unlocks_at`/`ends_at` decide whether a challenge is
  * open, and a cached list would keep reporting "closed" past the unlock time.
+ *
+ * Sorted by unlock time here rather than in each page, so the two grids can't
+ * present the same list in two different orders.
+ *
+ * The titles of upcoming challenges never leave this function — see
+ * `withoutUpcomingTitles`.
  */
-export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
+export async function getPublicChallenges(): Promise<FetchResult<PublicChallenge[]>> {
   let response: Response;
 
   try {
@@ -39,17 +46,44 @@ export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
 
   try {
     const data = await response.json() as Challenge[];
-    return { ok: true, data };
+    return { ok: true, data: withoutUpcomingTitles(byUnlockTime(data)) };
   } catch {
     return { ok: false, error: "Something went wrong loading the challenges." };
   }
 }
 
-/** Resolve a challenge's submission window against the current clock. */
-function resolveWindow(challenge: Challenge, now: number): ChallengeWindow {
-  if (new Date(challenge.unlocks_at).getTime() > now) return "upcoming";
-  if (challenge.ends_at && new Date(challenge.ends_at).getTime() <= now) return "closed";
-  return "open";
+/**
+ * Earliest unlock first, so a grid reads as a timeline: what is already open,
+ * then what unlocks next. The backend returns no particular order.
+ *
+ * An unparseable `unlocks_at` sorts last instead of poisoning the comparison
+ * with NaN, which would leave the whole list in an arbitrary order.
+ */
+function byUnlockTime(challenges: Challenge[]): Challenge[] {
+  const unlockTime = (challenge: Challenge) => {
+    const time = new Date(challenge.unlocks_at).getTime();
+    return Number.isFinite(time) ? time : Infinity;
+  };
+
+  return [...challenges].sort((a, b) => unlockTime(a) - unlockTime(b));
+}
+
+/**
+ * Strips the title of every challenge that hasn't unlocked yet.
+ *
+ * The redaction lives here, at the one place the public endpoint is fetched,
+ * so no caller can leak a title by forgetting to mask it — and none of them
+ * ever holds the real one to leak. A component that renders "Coming Soon..."
+ * over a title it was handed still ships that title in the page source.
+ */
+function withoutUpcomingTitles(challenges: Challenge[]): PublicChallenge[] {
+  return challenges.map((challenge) => ({
+    ...challenge,
+    title:
+      windowFor(challenge.unlocks_at, challenge.ends_at) === "upcoming"
+        ? null
+        : challenge.title,
+  }));
 }
 
 /**
@@ -67,7 +101,10 @@ export async function getChallenge(id: number): Promise<FetchResult<ChallengeSta
   const challenge = result.data.find((c) => c.id === id);
   if (!challenge) return { ok: false, error: "That challenge doesn't exist." };
 
-  return { ok: true, data: { challenge, window: resolveWindow(challenge, Date.now()) } };
+  return {
+    ok: true,
+    data: { challenge, window: windowFor(challenge.unlocks_at, challenge.ends_at) },
+  };
 }
 
 /**

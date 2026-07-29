@@ -25,6 +25,19 @@ export interface Challenge {
   updated_at: string;
 }
 
+/**
+ * A challenge as the *public* list hands it out, with `title` withheld while
+ * the challenge is upcoming.
+ *
+ * The title hints at the brief, so it is redacted at the fetch rather than
+ * masked in the UI: a component that renders a placeholder still receives the
+ * real one as a prop, and props are readable in the page source. Null here
+ * means the server declined to say — the only way it can't be read early.
+ */
+export interface PublicChallenge extends Omit<Challenge, "title"> {
+  title: string | null;
+}
+
 /** Where the current moment sits relative to a challenge's submission window. */
 export type ChallengeWindow = "upcoming" | "open" | "closed";
 
@@ -34,7 +47,7 @@ export type ChallengeWindow = "upcoming" | "open" | "closed";
  * clock, and reading the clock during render is impure.
  */
 export interface ChallengeStatus {
-  challenge: Challenge;
+  challenge: PublicChallenge;
   window: ChallengeWindow;
 }
 

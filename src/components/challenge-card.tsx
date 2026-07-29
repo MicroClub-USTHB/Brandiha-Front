@@ -1,8 +1,11 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
-import { Lock, LockOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Clock, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
 
 export enum Department {
@@ -18,6 +21,12 @@ interface ChallengeCardProps {
   title?: string;
   unlocks_at?: Date | string;
   ends_at?: Date | string;
+  /**
+   * The window as the server saw it, used for the first paint. Without it the
+   * card would have to guess before the client clock is readable, and a locked
+   * card would flash its real title in full color on every load.
+   */
+  initialWindow: ChallengeWindow;
 }
 
 const DEPARTMENT_COLORS: Record<Department, string> = {
@@ -42,7 +51,7 @@ const DEPARTMENT_MASCOTS: Record<Department, string> = {
 };
 
 
-/** Time left until unlock, as `1d 2h 3m 4s`. */
+/** Time left, as `1d 2h 3m 4s` — to the unlock when locked, the deadline when open. */
 function formatCountdown(remaining: number) {
   const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
   const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
@@ -50,29 +59,6 @@ function formatCountdown(remaining: number) {
   const seconds = Math.floor((remaining / 1000) % 60);
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
-
-/** `null` for a missing or unparseable timestamp, so NaN never reaches the UI. */
-function toTime(value?: Date | string) {
-  if (!value) return null;
-
-  const time = new Date(value).getTime();
-  return Number.isFinite(time) ? time : null;
-}
-
-/**
- * Mirrors `resolveWindow` in `lib/api/challenges.ts`, which is what the detail
- * page behind this card uses — a card and the page it links to shouldn't
- * disagree about whether a challenge is open. No unlock time reads as upcoming.
- */
-function resolveWindow(
-  now: number,
-  unlocksAt: number | null,
-  endsAt: number | null,
-): ChallengeWindow {
-  if (unlocksAt === null || unlocksAt > now) return "upcoming";
-  if (endsAt !== null && endsAt <= now) return "closed";
-  return "open";
 }
 
 /**
@@ -111,6 +97,10 @@ function subscribeToClock(onTick: () => void) {
  * bake the server's clock into the HTML down to the second, and the client's
  * first render would immediately disagree with it — a hydration mismatch on
  * every card, every load.
+ *
+ * Which is why the window itself arrives as a prop instead: it only changes at
+ * the unlock boundary, so the server can resolve it safely. Only the countdown
+ * has to wait for this.
  */
 function useNow() {
   return useSyncExternalStore(
@@ -120,12 +110,15 @@ function useNow() {
   );
 }
 
-function statusLabel(
-  submissionWindow: ChallengeWindow,
+/**
+ * Only locked cards carry a label — an open one says so by being in color,
+ * with its mascot showing, so there is nothing left to spell out.
+ */
+function lockedLabel(
+  submissionWindow: Exclude<ChallengeWindow, "open">,
   now: number,
   unlocksAt: number | null,
 ) {
-  if (submissionWindow === "open") return "Unlocked";
   if (submissionWindow === "closed") return "Closed";
 
   return unlocksAt === null ? "TBD" : formatCountdown(unlocksAt - now);
@@ -137,9 +130,10 @@ export default function ChallengeCard({
   title,
   unlocks_at,
   ends_at,
+  initialWindow,
 }: ChallengeCardProps) {
-  // One clock feeds both the icon and the label, so they can't disagree about
-  // whether the challenge is open.
+  // One clock decides the whole card's look, so the color, the mascot and the
+  // countdown can't disagree about whether the challenge is open.
   const now = useNow();
 
   const textColor =
@@ -148,17 +142,45 @@ export default function ChallengeCard({
 
   const unlocksAt = toTime(unlocks_at);
   const endsAt = toTime(ends_at);
+  // The server's answer holds the first paint; the client clock takes over on
+  // mount and from then on ticks the card open the moment it unlocks.
   const submissionWindow =
-    now === null ? null : resolveWindow(now, unlocksAt, endsAt);
+    now === null ? initialWindow : resolveWindow(now, unlocksAt, endsAt);
 
   // Shut until the clock says otherwise — a closed challenge is locked again.
-  const LockIcon = submissionWindow === "open" ? LockOpen : Lock;
-  // A non-breaking space holds the line's height for the render before the
-  // clock is read, so the card doesn't reflow when the label appears.
+  const isLocked = submissionWindow !== "open";
+
+  // A card that ticks open on screen was rendered without its title, since the
+  // server had no reason to send one yet. Ask the server again rather than
+  // leave "Coming Soon..." over an unlocked card until the next reload.
+  //
+  // Can't loop: the refresh only clears this once the server agrees the
+  // challenge is open, and until it does the condition is unchanged.
+  const awaitingTitle = submissionWindow === "open" && title === undefined;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (awaitingTitle) router.refresh();
+  }, [awaitingTitle, router]);
+
+  // Only the countdowns have to wait for the client clock, so they alone are
+  // blank on the first paint — everything else is already in its final state.
   const label =
-    now === null || submissionWindow === null
-      ? " "
-      : statusLabel(submissionWindow, now, unlocksAt);
+    isLocked && now !== null
+      ? lockedLabel(submissionWindow, now, unlocksAt)
+      : null;
+
+  // An open challenge counts down to its deadline instead. One without an
+  // `ends_at` runs indefinitely, so it gets no line at all rather than an empty
+  // one — there is no deadline to be counting towards.
+  const hasDeadline = !isLocked && endsAt !== null;
+  const deadline =
+    hasDeadline && now !== null ? formatCountdown(endsAt - now) : null;
+
+  // The server withholds an upcoming challenge's title outright rather than
+  // sending one for the card to hide, so there is nothing to decide here: the
+  // placeholder stands in whenever the title is absent.
+  const heading = title ?? "Coming Soon...";
 
   const cardImage =
     DEPARTMENT_CARDS[department] ||
@@ -170,7 +192,13 @@ export default function ChallengeCard({
 
   return (
     <div
-      className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8"
+      className={cn(
+        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
+        // Drains the department color out of the card art and the title too,
+        // not just the slot below — a locked card reads as inert at a glance.
+        "transition-[filter] duration-500",
+        isLocked && "grayscale",
+      )}
       style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
     >
       <h1
@@ -179,7 +207,7 @@ export default function ChallengeCard({
       >
         {/* One word per line: `block` on each word rather than a width
             constraint, so wrapping doesn't depend on the card's size. */}
-        {title
+        {heading
           ?.trim()
           .split(/\s+/)
           .map((word, i) => (
@@ -190,30 +218,60 @@ export default function ChallengeCard({
       </h1>
 
 
-      {/* `min-h-0` lets this slot shrink below the mascot's intrinsic height,
-          so a long title takes room from the mascot instead of overflowing. */}
+      {/* The card's one variable slot: the mascot over its deadline when open,
+          the lock over its countdown when not. `min-h-0` lets it shrink below
+          the mascot's intrinsic height, so a long title takes room from this
+          slot instead of overflowing. */}
       <div className="flex min-h-0 flex-1 items-center justify-center py-1">
-        <Image
-          src={`/department-mascots/${mascot}`}
-          alt={`${department} mascot`}
-          width={292}
-          height={283}
-          draggable={false}
-          className="h-[80%] object-contain"
-        />
-      </div>
+        {isLocked ? (
+          // `currentColor` on the wrapper is what makes both the icon and the
+          // countdown track the department color (grayscaled by the parent).
+          <div
+            className="flex flex-col items-center gap-2"
+            style={{ color: textColor }}
+          >
+            {/* Decorative: the countdown below already states the same thing. */}
+            <Lock className="size-6 md:size-8 xl:size-10 shrink-0" aria-hidden />
+            {/* A non-breaking space holds the line's height until the clock is
+                read, so the card doesn't reflow when the countdown appears. */}
+            <span className="lg:text-xl font-hand font-bold">
+              {label ?? " "}
+            </span>
+          </div>
+        ) : (
+          <div className="flex h-full min-h-0 flex-col items-center justify-center gap-1">
+            <Image
+              src={`/department-mascots/${mascot}`}
+              alt={`${department} mascot`}
+              width={292}
+              height={283}
+              draggable={false}
+              // Takes the slack the deadline line leaves, so a card without one
+              // gets a taller mascot rather than a gap under it.
+              className="min-h-0 w-auto max-w-full flex-1 object-contain"
+            />
 
-      <div className="flex flex-col items-center w-full">
-        {/* `currentColor` on the wrapper is what makes both the icon and the
-            countdown track the department color. */}
-        <div
-          className="flex flex-col items-center gap-1"
-          style={{ color: textColor }}
-        >
-          {/* Decorative: the label below already states the same thing. */}
-          <LockIcon className="size-4 md:size-5 xl:size-6 shrink-0" aria-hidden />
-          <span className="lg:text-xl font-hand font-bold">{label}</span>
-        </div>
+            {hasDeadline && (
+              // `currentColor` on the wrapper is what makes both the icon and
+              // the countdown track the department color.
+              <div
+                className="flex items-center gap-1.5"
+                style={{ color: textColor }}
+              >
+                {/* Decorative: the countdown beside it says the same thing. */}
+                <Clock
+                  className="size-4 md:size-5 xl:size-6 shrink-0"
+                  aria-hidden
+                />
+                {/* A non-breaking space holds the line's height until the clock
+                    is read, so the card doesn't reflow when it appears. */}
+                <span className="lg:text-xl font-hand font-bold">
+                  {deadline ?? " "}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
