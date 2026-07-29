@@ -28,8 +28,16 @@ export default async function ChallengeGrid({
         <p className="font-sans text-destructive">{result.error}</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {result.data.map((challenge) => (
-            <Link key={challenge.id} href={`${hrefPrefix}/${challenge.id}`}>
+          {result.data.map((challenge) => {
+            // Resolved here so the card's first paint is already right. The
+            // page is `force-dynamic`, so this is the request's clock, not a
+            // stale build-time one.
+            const submissionWindow = windowFor(
+              challenge.unlocks_at,
+              challenge.ends_at,
+            );
+
+            const card = (
               <ChallengeCard
                 department={challenge.department as Department}
                 // Null for an upcoming challenge — the fetch withholds it, so
@@ -37,13 +45,22 @@ export default async function ChallengeGrid({
                 title={challenge.title ?? undefined}
                 unlocks_at={challenge.unlocks_at}
                 ends_at={challenge.ends_at ?? undefined}
-                // Resolved here so the card's first paint is already right.
-                // The page is `force-dynamic`, so this is the request's clock,
-                // not a stale build-time one.
-                initialWindow={windowFor(challenge.unlocks_at, challenge.ends_at)}
+                initialWindow={submissionWindow}
               />
-            </Link>
-          ))}
+            );
+
+            // A locked card leads nowhere — the page behind it redirects
+            // straight back here — so it isn't a link at all rather than one
+            // that bounces. Wrapped in a plain element either way, to keep it
+            // a grid item and the columns even.
+            return submissionWindow === "open" ? (
+              <Link key={challenge.id} href={`${hrefPrefix}/${challenge.id}`}>
+                {card}
+              </Link>
+            ) : (
+              <div key={challenge.id}>{card}</div>
+            );
+          })}
         </div>
       )}
     </div>
