@@ -39,7 +39,7 @@ export async function getGlobalLeaderboard(): Promise<LeaderboardEntry[]> {
     }
     return data;
   } catch (error) {
-    console.error("Impossible de récupérer le leaderboard :", error);
+    console.error("Unable to retrieve the leaderboard:", error);
     return [];
   }
 }
