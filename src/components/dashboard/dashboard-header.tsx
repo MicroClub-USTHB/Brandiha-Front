@@ -31,10 +31,7 @@ export function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/15 bg-black/40 backdrop-blur">
-      {/* Height comes from the layout's `--shell-offset` so the strip the pages
-          below subtract can't drift from the strip actually rendered here. The
-          fallback keeps this standalone if it's ever used outside that layout. */}
-      <div className="mx-auto flex h-[var(--shell-offset,3.5rem)] max-w-6xl items-center px-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center px-6">
         <span className="font-heading text-sm font-extrabold uppercase tracking-wide text-white">
           Brandiha Staff
         </span>
