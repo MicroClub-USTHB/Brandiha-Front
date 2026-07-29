@@ -9,8 +9,12 @@ Auth: `Authorization: Bearer <token>` (JWT from `POST /auth/login`).
 | Role | Who | Access |
 |------|-----|--------|
 | `admin` | Organisers | Registrations, teams |
-| `super_admin` | Head organisers | Everything admin can + challenges, leaderboards, scoring, alumni data |
+| `super_admin` | Head organisers | Leaderboards, scoring, freeze, alumni data — **not** registrations or teams |
 | `alumni` | Former members | Vote on team rankings |
+
+Roles are **disjoint, not hierarchical** — `super_admin` is not a superset of
+`admin`. Each guard below matches an exact set of roles, with no superuser
+bypass, so a `super_admin` calling an `admin`-only route is rejected.
 
 **Master password** (`.env` → `MASTER_ADMIN_PASSWORD`): a shared secret passed as header `password: xxx`. Used to bootstrap the first staff account and create/edit challenges (bypasses JWT entirely).
 
@@ -337,7 +341,7 @@ Auth: `get_current_alumni_only` (alumni only — super_admin cannot call this).
 
 Submit a Borda count vote. Alumni must rank **all** active (accepted) teams exactly once. Validation:
 1. Alumni hasn't already voted (`409` — no re-votes).
-2. The list contains exactly the same team IDs as currently active teams (`400` if wrong count, invalid/dulicate IDs, or missing teams).
+2. The list contains exactly the same team IDs as currently active teams (`400` if wrong count, invalid/duplicate IDs, or missing teams).
 
 Ranking stored as `rank` (1 = 1st preference, N = last). Borda score = `(N - rank + 1)` per voter. Auth: `get_current_alumni_only`.
 
