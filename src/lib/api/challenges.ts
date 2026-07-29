@@ -9,6 +9,7 @@ import type {
   Challenge,
   ChallengeDetail,
   ChallengeStatus,
+  PublicChallenge,
 } from "@/lib/api/challenge-types";
 import type { SubmissionFormData } from "@/lib/validators/submission-schema";
 
@@ -27,8 +28,11 @@ export type SubmitResult = { ok: true } | { ok: false; error: string };
  *
  * Sorted by unlock time here rather than in each page, so the two grids can't
  * present the same list in two different orders.
+ *
+ * The titles of upcoming challenges never leave this function — see
+ * `withoutUpcomingTitles`.
  */
-export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
+export async function getPublicChallenges(): Promise<FetchResult<PublicChallenge[]>> {
   let response: Response;
 
   try {
@@ -42,7 +46,7 @@ export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
 
   try {
     const data = await response.json() as Challenge[];
-    return { ok: true, data: byUnlockTime(data) };
+    return { ok: true, data: withoutUpcomingTitles(byUnlockTime(data)) };
   } catch {
     return { ok: false, error: "Something went wrong loading the challenges." };
   }
@@ -62,6 +66,24 @@ function byUnlockTime(challenges: Challenge[]): Challenge[] {
   };
 
   return [...challenges].sort((a, b) => unlockTime(a) - unlockTime(b));
+}
+
+/**
+ * Strips the title of every challenge that hasn't unlocked yet.
+ *
+ * The redaction lives here, at the one place the public endpoint is fetched,
+ * so no caller can leak a title by forgetting to mask it — and none of them
+ * ever holds the real one to leak. A component that renders "Coming Soon..."
+ * over a title it was handed still ships that title in the page source.
+ */
+function withoutUpcomingTitles(challenges: Challenge[]): PublicChallenge[] {
+  return challenges.map((challenge) => ({
+    ...challenge,
+    title:
+      windowFor(challenge.unlocks_at, challenge.ends_at) === "upcoming"
+        ? null
+        : challenge.title,
+  }));
 }
 
 /**

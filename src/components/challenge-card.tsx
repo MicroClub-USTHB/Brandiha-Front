@@ -1,7 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveWindow, toTime } from "@/lib/api/challenge-window";
@@ -148,6 +149,19 @@ export default function ChallengeCard({
 
   // Shut until the clock says otherwise — a closed challenge is locked again.
   const isLocked = submissionWindow !== "open";
+
+  // A card that ticks open on screen was rendered without its title, since the
+  // server had no reason to send one yet. Ask the server again rather than
+  // leave "Coming Soon..." over an unlocked card until the next reload.
+  //
+  // Can't loop: the refresh only clears this once the server agrees the
+  // challenge is open, and until it does the condition is unchanged.
+  const awaitingTitle = submissionWindow === "open" && title === undefined;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (awaitingTitle) router.refresh();
+  }, [awaitingTitle, router]);
   // Only the countdown has to wait for the client clock, so it alone is blank
   // on the first paint — everything else is already in its final state.
   const label =
@@ -155,11 +169,10 @@ export default function ChallengeCard({
       ? lockedLabel(submissionWindow, now, unlocksAt)
       : null;
 
-  // An unopened challenge keeps its brief to itself — the real title is a hint
-  // at the work, so it stays hidden until the card unlocks. A closed one has
-  // already been worked on, so there is nothing left to withhold.
-  const heading =
-    submissionWindow === "upcoming" ? "Coming Soon..." : title;
+  // The server withholds an upcoming challenge's title outright rather than
+  // sending one for the card to hide, so there is nothing to decide here: the
+  // placeholder stands in whenever the title is absent.
+  const heading = title ?? "Coming Soon...";
 
   const cardImage =
     DEPARTMENT_CARDS[department] ||

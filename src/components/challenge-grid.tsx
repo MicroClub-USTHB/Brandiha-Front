@@ -32,7 +32,9 @@ export default async function ChallengeGrid({
             <Link key={challenge.id} href={`${hrefPrefix}/${challenge.id}`}>
               <ChallengeCard
                 department={challenge.department as Department}
-                title={challenge.title}
+                // Null for an upcoming challenge — the fetch withholds it, so
+                // the real title isn't in this page's payload to begin with.
+                title={challenge.title ?? undefined}
                 unlocks_at={challenge.unlocks_at}
                 ends_at={challenge.ends_at ?? undefined}
                 // Resolved here so the card's first paint is already right.

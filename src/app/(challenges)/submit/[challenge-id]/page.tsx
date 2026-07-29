@@ -89,12 +89,15 @@ export default async function SubmitPage(props: Props) {
     // The backend rejects both edges of the window with a bare 400, so we act on
     // the resolved window to say which it is instead of letting the user submit
     // into an opaque error.
+    // Deliberately unnamed: `getPublicChallenges` withholds the title until the
+    // challenge unlocks, and naming it here would hand out from a direct URL
+    // exactly what the card takes care not to show.
     if (submissionWindow === "upcoming") {
       return (
         <Notice
           icon={CalendarClock}
           title="Not open yet"
-          message={`“${challenge.title}” opens for submissions on ${formatDate(challenge.unlocks_at)}.`}
+          message={`This challenge opens for submissions on ${formatDate(challenge.unlocks_at)}.`}
         />
       );
     }
@@ -113,7 +116,11 @@ export default async function SubmitPage(props: Props) {
       );
     }
 
-    return <SubmitForm challengeId={challenge.id} challengeTitle={challenge.title} />;
+    // Only an upcoming challenge has its title withheld, and this branch is
+    // past both of those — the fallback is unreachable, not a real empty state.
+    return (
+      <SubmitForm challengeId={challenge.id} challengeTitle={challenge.title ?? ""} />
+    );
   })();
 
   return (
