@@ -5,30 +5,63 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { registrationSchema, RegistrationFormData } from "@/lib/validators/registration-schema";
 import { REGISTRATION_STEPS, RegistrationField } from "@/lib/registration-fields";
+import {
+  isPersistExpired,
+  REGISTRATION_PERSIST_KEY,
+} from "@/lib/form-persistence";
 import { submitRegistration } from "@/lib/api/registrations";
 import { usePopupStore } from "@/components/pop-up";
 
 /**
  * Persists the in-progress form (values + current step) to localStorage so a
  * page reload doesn't wipe the applicant's answers. Restored on mount by
- * `RegistrationForm`, and cleared once a submission succeeds.
+ * `RegistrationForm`, cleared once a submission succeeds, and discarded on load
+ * once it is older than `REGISTRATION_PERSIST_TTL_MS` — see `lib/form-persistence.ts`
+ * for why answers this identifying shouldn't outlive the sitting.
  */
 export const useRegistrationPersist = create<{
   savedStep: number;
   setSavedStep: (step: number) => void;
   savedValues: Partial<RegistrationFormData>;
   setSavedValues: (values: Partial<RegistrationFormData>) => void;
+  /** When the saved copy was last written, as epoch ms. `null` when empty. */
+  savedAt: number | null;
   reset: () => void;
 }>()(
   persist(
     (set) => ({
       savedStep: 0,
-      setSavedStep: (savedStep) => set({ savedStep }),
+      // Every write re-stamps the copy, so the window is 24h of inactivity
+      // rather than 24h from when the form was first touched — someone filling
+      // it in slowly is never cut off mid-answer.
+      setSavedStep: (savedStep) => set({ savedStep, savedAt: Date.now() }),
       savedValues: {},
-      setSavedValues: (savedValues) => set({ savedValues }),
-      reset: () => set({ savedStep: 0, savedValues: {} }),
+      setSavedValues: (savedValues) => set({ savedValues, savedAt: Date.now() }),
+      savedAt: null,
+      reset: () => set({ savedStep: 0, savedValues: {}, savedAt: null }),
     }),
-    { name: "registration-form-storage" }
+    {
+      name: REGISTRATION_PERSIST_KEY,
+      /**
+       * Runs on rehydration, before anything reads the store, so an expired
+       * copy never reaches the form.
+       */
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<{ savedAt: number | null }> | undefined;
+
+        if (isPersistExpired(saved?.savedAt)) {
+          // Not just ignored — removed. Left in place, the stale answers would
+          // sit in localStorage waiting for a write that may never come,
+          // which is the whole thing the expiry is meant to prevent.
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem(REGISTRATION_PERSIST_KEY);
+          }
+          return current;
+        }
+
+        return { ...current, ...(persisted as object) };
+      },
+    }
   )
 );
 
