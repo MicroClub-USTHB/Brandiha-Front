@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     // wants to fill the viewport can subtract the strip the header already
     // occupies: the header is `sticky`, so it stays in flow and its height comes
     // out of what's left for the page.
-    <div className="[--shell-offset:3.5rem]">
+    <div className="min-h-screen flex flex-col">
       <DashboardHeader userName={session?.name} userRole={session?.role} />
       {children}
     </div>

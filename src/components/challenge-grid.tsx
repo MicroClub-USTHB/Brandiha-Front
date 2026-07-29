@@ -34,7 +34,7 @@ export default async function ChallengeGrid({
     // Without the subtraction a route with a header overflows by exactly the
     // header's height. `svh` rather than `vh` so mobile browser UI doesn't push
     // it over either.
-    <div className="flex min-h-[calc(100svh-var(--shell-offset,0px))] flex-col items-center justify-center">
+    <div className="flex flex-1 flex-col items-center justify-center">
       <h1 className="mb-4 font-heading text-5xl font-bold tracking-wider text-white">
         Challenges
       </h1>
