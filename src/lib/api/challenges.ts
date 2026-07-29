@@ -24,6 +24,9 @@ export type SubmitResult = { ok: true } | { ok: false; error: string };
  *
  * Uncached on purpose: `unlocks_at`/`ends_at` decide whether a challenge is
  * open, and a cached list would keep reporting "closed" past the unlock time.
+ *
+ * Sorted by unlock time here rather than in each page, so the two grids can't
+ * present the same list in two different orders.
  */
 export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
   let response: Response;
@@ -39,10 +42,26 @@ export async function getPublicChallenges(): Promise<FetchResult<Challenge[]>> {
 
   try {
     const data = await response.json() as Challenge[];
-    return { ok: true, data };
+    return { ok: true, data: byUnlockTime(data) };
   } catch {
     return { ok: false, error: "Something went wrong loading the challenges." };
   }
+}
+
+/**
+ * Earliest unlock first, so a grid reads as a timeline: what is already open,
+ * then what unlocks next. The backend returns no particular order.
+ *
+ * An unparseable `unlocks_at` sorts last instead of poisoning the comparison
+ * with NaN, which would leave the whole list in an arbitrary order.
+ */
+function byUnlockTime(challenges: Challenge[]): Challenge[] {
+  const unlockTime = (challenge: Challenge) => {
+    const time = new Date(challenge.unlocks_at).getTime();
+    return Number.isFinite(time) ? time : Infinity;
+  };
+
+  return [...challenges].sort((a, b) => unlockTime(a) - unlockTime(b));
 }
 
 /** Resolve a challenge's submission window against the current clock. */
