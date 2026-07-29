@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { CalendarClock, Lock } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { Lock } from "lucide-react";
 import SubmitForm from "@/components/submit/submit-form";
 import { getChallenge } from "@/lib/api/challenges";
 import { ThemePicker } from "@/components/theme-picker";
@@ -16,24 +16,6 @@ function parseChallengeId(raw: string): number | null {
   if (!/^\d+$/.test(raw)) return null;
   const id = Number(raw);
   return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
-/**
- * Fixed locale and time zone rather than the runtime's: this renders on the
- * server, so `undefined` would silently mean the deploy host's locale and zone
- * (UTC on most) and present it as if it were the reader's. Stating UTC outright
- * is the honest version, and it's the zone the deadline is actually kept in.
- */
-const TIMESTAMP = new Intl.DateTimeFormat("en-GB", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "UTC",
-});
-
-function formatDate(iso: string): string {
-  // The zone is appended rather than asked of `timeZoneName`, which Intl rejects
-  // alongside the `dateStyle`/`timeStyle` shorthands.
-  return `${TIMESTAMP.format(new Date(iso))} UTC`;
 }
 
 /** Stands in for the form when there's nothing to submit to (or not yet). */
@@ -78,43 +60,22 @@ export default async function SubmitPage(props: Props) {
 
   const result = await getChallenge(challengeId);
 
-  const body = (() => {
-    if (!result.ok) {
-      return <Notice icon={Lock} title="Unavailable" message={result.error} />;
-    }
+  // A locked challenge has no form to offer and no title to print, so there is
+  // nothing here to render — back to the picker, which says why it's locked
+  // (a countdown, or "Closed"). Also closes the direct-URL route to a title the
+  // cards take care not to show.
+  if (result.ok && result.data.window !== "open") redirect("/submit");
 
-    // Destructured under a different name: `window` would shadow the global.
-    const { challenge, window: submissionWindow } = result.data;
-
-    // The backend rejects both edges of the window with a bare 400, so we act on
-    // the resolved window to say which it is instead of letting the user submit
-    // into an opaque error.
-    if (submissionWindow === "upcoming") {
-      return (
-        <Notice
-          icon={CalendarClock}
-          title="Not open yet"
-          message={`“${challenge.title}” opens for submissions on ${formatDate(challenge.unlocks_at)}.`}
-        />
-      );
-    }
-
-    if (submissionWindow === "closed") {
-      return (
-        <Notice
-          icon={Lock}
-          title="Submissions closed"
-          message={
-            challenge.ends_at
-              ? `“${challenge.title}” closed on ${formatDate(challenge.ends_at)}.`
-              : `“${challenge.title}” is no longer accepting submissions.`
-          }
-        />
-      );
-    }
-
-    return <SubmitForm challengeId={challenge.id} challengeTitle={challenge.title} />;
-  })();
+  const body = result.ok ? (
+    // Reachable only when the window is open, and only an upcoming challenge
+    // has its title withheld — the fallback is unreachable, not an empty state.
+    <SubmitForm
+      challengeId={result.data.challenge.id}
+      challengeTitle={result.data.challenge.title ?? ""}
+    />
+  ) : (
+    <Notice icon={Lock} title="Unavailable" message={result.error} />
+  );
 
   return (
     <main className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 md:h-screen md:max-h-screen overflow-visible p-4">

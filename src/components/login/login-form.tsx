@@ -10,11 +10,10 @@ import { FormInput } from "@/components/form";
 import { ActionButton } from "@/components/action-button";
 import { loginSchema, LoginFormData } from "@/lib/validators/login-schema";
 import { loginStaff } from "@/lib/api/auth";
+import { HOME_BY_ROLE } from "@/lib/auth/home";
 import { cn } from "@/lib/utils";
 
 const LOGIN_PATH = "/login";
-/** Where to land after login when there's no `?from=` to return to. */
-const POST_LOGIN_HOME = "/hr";
 
 function LoginTitle() {
   return (
@@ -44,12 +43,14 @@ export default function LoginForm() {
     }
 
     // Return the user to wherever the proxy bounced them from (?from=…), else
-    // the default landing. Only accept internal paths to avoid open redirects.
+    // the home for their role — the roles are disjoint, so there is no single
+    // landing page that suits all three. Only accept internal paths for `from`,
+    // to avoid open redirects.
     const from = new URLSearchParams(window.location.search).get("from");
     const dest =
       from && from.startsWith("/") && !from.startsWith("//") && from !== LOGIN_PATH
         ? from
-        : POST_LOGIN_HOME;
+        : HOME_BY_ROLE[result.role];
 
     router.replace(dest);
     // Re-run Server Components so they observe the freshly-set session cookie.
