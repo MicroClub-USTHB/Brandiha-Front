@@ -6,14 +6,20 @@ import { listAllRegistrations } from "@/lib/api/registrations";
 import type { RegistrationDetail, RegistrationStatus } from "@/lib/api/registration-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
 
-/** CSV columns: [header, accessor]. Order defines the column order in the file. */
+/**
+ * CSV columns: [header, accessor]. Order defines the column order in the file.
+ *
+ * `team_secret_code` is on the row but deliberately left out, matching the
+ * submissions export: it is the credential that authorises a challenge
+ * submission, and a spreadsheet passed around between staff is not where it
+ * belongs. The team name identifies the team here.
+ */
 const COLUMNS: CsvColumns<RegistrationDetail> = [
   ["Full Name", (r) => r.user_full_name],
   ["Email", (r) => r.user_email],
   ["Phone", (r) => r.phone_number],
   ["Discord ID", (r) => r.discord_id],
   ["Team Name", (r) => r.team_name],
-  ["Team Code", (r) => r.team_secret_code],
   ["Department", (r) => r.department],
   ["Status", (r) => r.status],
   ["Participated Before", (r) => (r.participated_before ? "yes" : "no")],
