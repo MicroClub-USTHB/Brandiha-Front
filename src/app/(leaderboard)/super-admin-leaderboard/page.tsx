@@ -1,10 +1,10 @@
-import LeaderboardComponent from "@/components/leaderboard/leaderboard";
 import { AccessNotice } from "@/components/auth/access-notice";
 import {
   getAdminLeaderboard,
   AdminLeaderboardEntry,
 } from "@/lib/api/leaderboard";
 import { checkAccess } from "@/lib/auth/session";
+import { SuperAdminLeaderboardClient } from "@/components/leaderboard/super-admin-leaderboard-client";
 
 export function sortLeaderboardByScore(
   data: AdminLeaderboardEntry[],
@@ -29,11 +29,9 @@ export default async function SuperAdminLeaderboard() {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-start gap-2 min-h-screen">
-      <h1 className="text-8xl font-heading text-white font-bold mb-4">
-        Leaderboard
-      </h1>
-      <LeaderboardComponent leaderboardData={sortedLeaderboardData} />
+    <div className="flex min-h-screen flex-col items-center justify-start gap-2">
+      <h1 className="mb-4 text-8xl font-bold font-heading text-white">Leaderboard</h1>
+      <SuperAdminLeaderboardClient leaderboardData={sortedLeaderboardData} />
     </div>
   );
 }

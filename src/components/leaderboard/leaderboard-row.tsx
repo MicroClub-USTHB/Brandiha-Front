@@ -7,6 +7,7 @@ interface LeaderboardRowProps {
   teamName: string;
   score: number;
   delay?: number;
+  actions?: React.ReactNode;
 }
 
 export default function LeaderboardRow({
@@ -14,6 +15,7 @@ export default function LeaderboardRow({
   teamName,
   score,
   delay,
+  actions,
 }: LeaderboardRowProps) {
   return (
     <motion.div
@@ -55,7 +57,7 @@ export default function LeaderboardRow({
             />
           )}
           {rank > 3 && (
-            <span className="text-xl lg:text-5xl 2xl:text-7xl lg:mb-3 2xl:mb-3 h-22 w-22 2xl:w-35 2xl:h-35 flex items-center justify-center font-heading font-bold text-center text-black">
+            <span className="text-3xl lg:text-5xl 2xl:text-7xl lg:mb-3 2xl:mb-3 h-22 w-22 2xl:w-35 2xl:h-35 flex items-center justify-center font-heading font-bold text-center text-black">
               {rank}
             </span>
           )}
@@ -65,11 +67,22 @@ export default function LeaderboardRow({
             </span>
           </h1>
         </div>
-        <h1 className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35  text-center text-black bg-[url('/timer-default.svg')] bg-contain bg-center bg-no-repeat flex items-center justify-center">
-          <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-black font-bold ">
-            {score}
-          </span>
-        </h1>
+        {actions ? (
+          <div className="flex items-center justify-end gap-2">
+            {actions}
+            <h1 className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35  text-center text-black bg-[url('/timer-default.svg')] bg-contain bg-center bg-no-repeat flex items-center justify-center">
+              <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold ">
+                {score}
+              </span>
+            </h1>
+          </div>
+        ) : (
+          <h1 className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35  text-center text-black bg-[url('/timer-default.svg')] bg-contain bg-center bg-no-repeat flex items-center justify-center">
+            <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold ">
+              {score}
+            </span>
+          </h1>
+        )}
       </div>
     </motion.div>
   );
