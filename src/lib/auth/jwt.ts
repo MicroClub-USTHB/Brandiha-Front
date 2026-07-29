@@ -88,6 +88,28 @@ export interface MeResponse {
   role: Role;
 }
 
+/** Narrow the token's `role` claim, which is untrusted JSON like any other. */
+function isRole(value: unknown): value is Role {
+  return value === "admin" || value === "super_admin" || value === "alumni";
+}
+
+/**
+ * The role the backend encoded in the token, or `null` if it isn't one we know.
+ *
+ * Reads the claim rather than asking `/auth/me`, so callers that only need to
+ * route somewhere — the login form, the proxy's `/login` bounce — don't pay for
+ * a round-trip. Like `isTokenFresh` this is unverified: fine for choosing a
+ * destination, never for granting access, which the backend decides on its own.
+ */
+export function roleFromToken(token: string): Role | null {
+  try {
+    const { role } = decodeJwt(token);
+    return isRole(role) ? role : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Cheap client-side freshness check: token is well-formed and not expired.
  * No signature verification (the backend is the authority) — used by the proxy
