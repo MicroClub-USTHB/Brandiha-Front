@@ -3,7 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Lock } from "lucide-react";
+import { Clock, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
@@ -51,7 +51,7 @@ const DEPARTMENT_MASCOTS: Record<Department, string> = {
 };
 
 
-/** Time left until unlock, as `1d 2h 3m 4s`. */
+/** Time left, as `1d 2h 3m 4s` — to the unlock when locked, the deadline when open. */
 function formatCountdown(remaining: number) {
   const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
   const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
@@ -162,12 +162,20 @@ export default function ChallengeCard({
   useEffect(() => {
     if (awaitingTitle) router.refresh();
   }, [awaitingTitle, router]);
-  // Only the countdown has to wait for the client clock, so it alone is blank
-  // on the first paint — everything else is already in its final state.
+
+  // Only the countdowns have to wait for the client clock, so they alone are
+  // blank on the first paint — everything else is already in its final state.
   const label =
     isLocked && now !== null
       ? lockedLabel(submissionWindow, now, unlocksAt)
       : null;
+
+  // An open challenge counts down to its deadline instead. One without an
+  // `ends_at` runs indefinitely, so it gets no line at all rather than an empty
+  // one — there is no deadline to be counting towards.
+  const hasDeadline = !isLocked && endsAt !== null;
+  const deadline =
+    hasDeadline && now !== null ? formatCountdown(endsAt - now) : null;
 
   // The server withholds an upcoming challenge's title outright rather than
   // sending one for the card to hide, so there is nothing to decide here: the
@@ -210,10 +218,10 @@ export default function ChallengeCard({
       </h1>
 
 
-      {/* The card's one variable slot: the mascot when open, the lock and its
-          countdown when not. `min-h-0` lets it shrink below the mascot's
-          intrinsic height, so a long title takes room from this slot instead
-          of overflowing. */}
+      {/* The card's one variable slot: the mascot over its deadline when open,
+          the lock over its countdown when not. `min-h-0` lets it shrink below
+          the mascot's intrinsic height, so a long title takes room from this
+          slot instead of overflowing. */}
       <div className="flex min-h-0 flex-1 items-center justify-center py-1">
         {isLocked ? (
           // `currentColor` on the wrapper is what makes both the icon and the
@@ -231,14 +239,38 @@ export default function ChallengeCard({
             </span>
           </div>
         ) : (
-          <Image
-            src={`/department-mascots/${mascot}`}
-            alt={`${department} mascot`}
-            width={292}
-            height={283}
-            draggable={false}
-            className="h-[80%] object-contain"
-          />
+          <div className="flex h-full min-h-0 flex-col items-center justify-center gap-1">
+            <Image
+              src={`/department-mascots/${mascot}`}
+              alt={`${department} mascot`}
+              width={292}
+              height={283}
+              draggable={false}
+              // Takes the slack the deadline line leaves, so a card without one
+              // gets a taller mascot rather than a gap under it.
+              className="min-h-0 w-auto max-w-full flex-1 object-contain"
+            />
+
+            {hasDeadline && (
+              // `currentColor` on the wrapper is what makes both the icon and
+              // the countdown track the department color.
+              <div
+                className="flex items-center gap-1.5"
+                style={{ color: textColor }}
+              >
+                {/* Decorative: the countdown beside it says the same thing. */}
+                <Clock
+                  className="size-4 md:size-5 xl:size-6 shrink-0"
+                  aria-hidden
+                />
+                {/* A non-breaking space holds the line's height until the clock
+                    is read, so the card doesn't reflow when it appears. */}
+                <span className="lg:text-xl font-hand font-bold">
+                  {deadline ?? " "}
+                </span>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
