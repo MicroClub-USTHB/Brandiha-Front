@@ -14,6 +14,9 @@ Opened from the review of PR #42 (`feat/refresh-token-integration`), 2026-07-27.
 | [04](./04-backend-rotation-atomicity.md) | Refresh rotation is not atomic | backend | **yes** |
 | [05](./05-backend-reuse-detection.md) | No refresh-token reuse detection | backend | no |
 | [06](./06-pr-closes-link.md) | PR #42 body is missing its `Closes #` line | process | no |
+| [07](./07-alumni-ballot-ui.md) | `/vote` renders a placeholder, not the ballot | frontend | no |
 
 Items 04 and 05 live in `../brandiha-back` and are recorded here only so they
 are not lost — they need raising on that repo's PR #28.
+
+Item 07 opened with the `/vote` route itself (`feat/voting-system`), 2026-07-29.
