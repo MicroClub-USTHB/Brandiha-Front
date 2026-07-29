@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { Check, RotateCcw, Trash2, X } from "lucide-react";
 import { deleteTeam, updateTeamStatus } from "@/lib/api/teams";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
+import type { TeamMember } from "@/lib/api/team-types";
+import { canDeleteTeam } from "@/lib/team-status";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,13 +33,14 @@ export function TeamActions({
   teamId,
   teamName,
   currentStatus,
-  memberCount,
+  members,
   onDone,
 }: {
   teamId: string;
   teamName: string;
   currentStatus: RegistrationStatus;
-  memberCount: number;
+  /** The team's members, to decide whether a delete is even permitted. */
+  members: TeamMember[];
   onDone: () => void | Promise<void>;
 }) {
   const [pending, startTransition] = useTransition();
@@ -45,8 +48,7 @@ export function TeamActions({
   const [confirming, setConfirming] = useState<RegistrationStatus | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  // A team can be deleted if it has no members or if it's been rejected.
-  const canDelete = memberCount === 0 || currentStatus === "rejected";
+  const canDelete = canDeleteTeam(members);
 
   const run = (status: RegistrationStatus) => {
     setConfirming(null);
@@ -104,7 +106,11 @@ export function TeamActions({
         type="button"
         onClick={() => setConfirmingDelete(true)}
         disabled={pending || !canDelete}
-        title={canDelete ? undefined : "Only empty or rejected teams can be deleted"}
+        title={
+          canDelete
+            ? undefined
+            : "A team can only be deleted once every member is rejected"
+        }
         className={cn(
           BTN_BASE,
           "mt-2 w-full bg-destructive/10 text-destructive hover:bg-destructive/20",
