@@ -165,6 +165,12 @@ export default function ChallengeCard({
       ? null
       : lockedLabel(submissionWindow, now, unlocksAt);
 
+  // An unopened challenge keeps its brief to itself — the real title is a hint
+  // at the work, so it stays hidden until the card unlocks. A closed one has
+  // already been worked on, so there is nothing left to withhold.
+  const heading =
+    submissionWindow === "upcoming" ? "Coming Soon..." : title;
+
   const cardImage =
     DEPARTMENT_CARDS[department] ||
     "marketing-card.svg";
@@ -190,7 +196,7 @@ export default function ChallengeCard({
       >
         {/* One word per line: `block` on each word rather than a width
             constraint, so wrapping doesn't depend on the card's size. */}
-        {title
+        {heading
           ?.trim()
           .split(/\s+/)
           .map((word, i) => (
