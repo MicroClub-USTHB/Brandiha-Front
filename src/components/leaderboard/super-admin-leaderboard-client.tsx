@@ -18,18 +18,18 @@ export function SuperAdminLeaderboardClient({
 
   const sortedTeams = useMemo(() => sortLeaderboardByScore(teams), [teams]);
 
-  const handleSave = async (updatedTeam: AdminLeaderboardEntry) => {
+  const handleSaveSuccess = (updatedTeam: AdminLeaderboardEntry) => {
     setTeams((current) =>
       current.map((team) => (team.team_id === updatedTeam.team_id ? updatedTeam : team)),
     );
   };
 
   return (
-      <LeaderboardComponent
-        leaderboardData={sortedTeams}
-        renderAction={(team) => (
-          <ChallengeScoreSheet team={team} onSave={handleSave} />
-        )}
-      />
-    );
+    <LeaderboardComponent
+      leaderboardData={sortedTeams}
+      renderAction={(team) => (
+        <ChallengeScoreSheet team={team} onSaveSuccess={handleSaveSuccess} />
+      )}
+    />
+  );
 }

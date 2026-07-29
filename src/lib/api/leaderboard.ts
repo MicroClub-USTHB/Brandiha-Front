@@ -20,6 +20,10 @@ export type AdminLeaderboardEntry = {
   total_score: number;
 };
 
+export type BulkScoreUpdatePayload = {
+  submission_id: string;
+  score: number;
+};
 
 export const dummyLeaderboardData: PublicLeaderboardEntry[] = [
   {
@@ -74,4 +78,23 @@ export async function getAdminLeaderboard(): Promise<AdminLeaderboardEntry[]> {
     }));
   }
   return data;
+}
+
+export async function bulkUpdateScores(
+  payload: BulkScoreUpdatePayload[]
+): Promise<void> {
+  const res = await apiFetch("/admin/challenge-submissions", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    throw new Error(
+      errorData?.detail?.[0]?.msg || "Failed to update challenge scores"
+    );
+  }
 }
