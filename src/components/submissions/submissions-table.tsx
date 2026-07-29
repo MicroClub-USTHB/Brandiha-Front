@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
  */
 const TIMESTAMP = new Intl.DateTimeFormat("en-GB", {
   dateStyle: "medium",
-  timeStyle: "short",
+  timeStyle: "medium",
   timeZone: "UTC",
 });
 
