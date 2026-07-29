@@ -7,9 +7,8 @@ import { useTheme } from "next-themes";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "#about", label: "About" },
   { href: "#agenda", label: "Agenda" },
-  { href: "#authors", label: "Authors" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 function getActiveEffectImage(theme?: string) {
