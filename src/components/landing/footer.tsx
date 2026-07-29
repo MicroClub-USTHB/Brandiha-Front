@@ -55,9 +55,8 @@ function GitHubIcon(props: SVGProps<SVGSVGElement>) {
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "#about", label: "About" },
   { href: "#agenda", label: "Agenda" },
-  { href: "#authors", label: "Authors" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 const socialLinks = [
@@ -73,15 +72,6 @@ export function Footer() {
   const activeLogo = getActiveEffectLogo(isClient ? theme : undefined);
   return (
     <footer className="relative overflow-hidden bg-black">
-      <Image
-        src="/footer-splash.svg"
-        alt=""
-        width={337}
-        height={125}
-        draggable={false}
-        className="absolute top-0 left-0 w-full h-auto z-10"
-      />
-
       <Gekko className="absolute left-[4%] bottom-[10%] h-[clamp(80px,12vh,150px)] w-auto opacity-[0.15] pointer-events-none select-none -rotate-[2deg]" />
 
       <div className="relative z-20 mx-auto max-w-7xl px-[clamp(1.5rem,4vw,4rem)] pt-16 pb-12 sm:pt-20 sm:pb-14 lg:pt-28 lg:pb-16">
