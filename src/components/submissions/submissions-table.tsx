@@ -23,16 +23,14 @@ import {
 import type { ChallengeSubmission } from "@/lib/api/challenge-types";
 import { cn } from "@/lib/utils";
 
-/**
- * Fixed locale and time zone rather than the viewer's: this table is server-
- * rendered first, and a locale-dependent format would disagree with the client
- * pass and mismatch on hydration. UTC is also the honest unit for judging a
- * deadline, so the column says so in its header.
- */
 const TIMESTAMP = new Intl.DateTimeFormat("en-GB", {
-  dateStyle: "medium",
-  timeStyle: "medium",
-  timeZone: "UTC",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  fractionalSecondDigits: 3,
 });
 
 function SortableHeader({
@@ -66,7 +64,7 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
     accessorKey: "team_name",
     header: ({ column }) => <SortableHeader column={column}>Team</SortableHeader>,
     cell: ({ row }) => (
-      <span className={cn("font-medium")}>{row.original.team_name}</span>
+      <span className={cn("block w-40 truncate font-medium")}>{row.original.team_name}</span>
     ),
   },
   {
@@ -79,7 +77,7 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
-          "inline-flex max-w-xs items-center gap-1.5 text-primary underline underline-offset-2 hover:no-underline",
+          "inline-flex w-full items-center gap-1.5 text-primary underline underline-offset-2 hover:no-underline",
         )}
       >
         <span className={cn("truncate")}>{row.original.link}</span>
@@ -90,12 +88,12 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
   {
     accessorKey: "submitted_at",
     header: ({ column }) => (
-      <SortableHeader column={column}>Submitted (UTC)</SortableHeader>
+      <SortableHeader column={column}>Submitted</SortableHeader>
     ),
     cell: ({ row }) => (
       <time
         dateTime={row.original.submitted_at}
-        className={cn("tabular-nums text-muted-foreground")}
+        className={cn("block w-56 tabular-nums text-muted-foreground")}
       >
         {TIMESTAMP.format(new Date(row.original.submitted_at))}
       </time>
@@ -119,7 +117,7 @@ export function SubmissionsTable({ data }: { data: ChallengeSubmission[] }) {
   });
 
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>

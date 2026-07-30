@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import type { Department } from "@/lib/api/registration-types";
 import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
 import { ExportCsvButton } from "@/components/submissions/export-csv-button";
+
+const DEPARTMENT_LABEL: Record<Department, string> = {
+  marketing: "Marketing",
+  communication: "Communication",
+  multimedia: "Multimedia",
+  design: "Design",
+};
 
 type Props = {
   params: Promise<{ "challenge-id": string }>;
@@ -61,7 +69,7 @@ export default async function SubmissionsPage(props: Props) {
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-6 font-sans">
+    <main className="mx-auto max-w-7xl p-6 font-sans">
       <div className="mb-10 flex items-center justify-between gap-4">
         <div>
           <Link
@@ -70,11 +78,18 @@ export default async function SubmissionsPage(props: Props) {
           >
             &larr; All challenges
           </Link>
-          <h1 className="font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
-            {challenge.title}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
+              {challenge.title}
+            </h1>
+            <span
+              className="rounded-full px-3 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-black"
+              style={{ backgroundColor: `var(--brand-${challenge.department})` }}
+            >
+              {DEPARTMENT_LABEL[challenge.department]}
+            </span>
+          </div>
           <p className="text-sm text-muted-foreground">
-            {challenge.department} &middot;{" "}
             {submissions.length === 1 ? "1 submission" : `${submissions.length} submissions`}
           </p>
         </div>
