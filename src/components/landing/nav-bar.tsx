@@ -9,6 +9,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "#agenda", label: "Agenda" },
   { href: "#faq", label: "FAQ" },
+  { href: "/submit", label: "challenges" },
 ];
 
 function getActiveEffectImage(theme?: string) {
