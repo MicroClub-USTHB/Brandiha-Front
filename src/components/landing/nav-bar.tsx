@@ -16,65 +16,74 @@ function getActiveEffectImage(theme?: string) {
   switch (theme) {
     case "design":
       return "/activeLink-Design.svg";
-
     case "multimedia":
       return "/activeLink-Multi.svg";
-
     case "communication":
       return "/activeLink-Comm.svg";
-
     case "marketing":
       return "/activeLink-Marketing.svg";
-
     case "chameleon":
     default:
       return "/activeLink-Default.svg";
   }
-} 
-
+}
 
 const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+
+/** Distance from the viewport top at which a section is considered "active". */
+const ACTIVE_THRESHOLD = 120;
 
 export function NavBar() {
   const pathname = usePathname();
   const isLanding = pathname === "/";
-  const [active, setActive] = useState<string | null>(null);
-  const scrollingRef = useRef(false);
-  const {theme} = useTheme();
+  const [active, setActive] = useState<string | null>("/");
+  const lockRef = useRef(false);
+  const { theme } = useTheme();
   const isClient = useIsClient();
   const activeImage = getActiveEffectImage(theme);
+
   useEffect(() => {
     if (!isLanding) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (scrollingRef.current) return;
+    const update = () => {
+      if (lockRef.current) return;
 
-        let best: Element | null = null;
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          if (!best || entry.boundingClientRect.top < best.getBoundingClientRect().top) {
-            best = entry.target;
-          }
+      const sections = document.querySelectorAll<HTMLElement>("section[id]");
+      // The last section whose top has crossed the threshold wins — that's the
+      // one the user most recently scrolled into view.
+      let current: string = "/";
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= ACTIVE_THRESHOLD) {
+          current = section.id === "hero" ? "/" : `/#${section.id}`;
         }
-        if (best) {
-          const id = best.id;
-          setActive(id ? `/#${id}` : "/");
-        }
-      },
-      { rootMargin: "-40% 0px -40% 0px" }
-    );
+      }
+      setActive(current);
+    };
 
-    document.querySelectorAll("section[id]").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    let rafId: number | null = null;
+    const onScroll = () => {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          update();
+          rafId = null;
+        });
+      }
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [isLanding]);
 
   const handleClick = (href: string) => {
-    scrollingRef.current = true;
     setActive(href);
+    lockRef.current = true;
     setTimeout(() => {
-      scrollingRef.current = false;
-    }, 800);
+      lockRef.current = false;
+    }, 1000);
   };
 
   const shouldShow = isLanding ? active : null;

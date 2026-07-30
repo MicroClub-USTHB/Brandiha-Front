@@ -9,6 +9,7 @@ export function Hero() {
   return (
     <Section
       as="section"
+      id="hero"
       className="relative flex min-h-screen w-full max-w-none flex-col items-center justify-center overflow-hidden px-[5%] py-[12vh]"
     >
       <PaintWall />
