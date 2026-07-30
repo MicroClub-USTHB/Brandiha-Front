@@ -8,10 +8,16 @@ import {
   REFRESH_COOKIE,
   AUTH_COOKIE_OPTIONS,
   isTokenPair,
+  roleFromToken,
+  type Role,
 } from "@/lib/auth/jwt";
 
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type LoginResult = { ok: true } | { ok: false; error: string };
+/**
+ * Result returned to the client — errors are serialized, never thrown across
+ * the boundary. The role comes back so the caller can route by it; it is the
+ * token's own claim, not a grant, and the backend re-checks it on every call.
+ */
+export type LoginResult = { ok: true; role: Role } | { ok: false; error: string };
 
 /**
  * Server Action: authenticate a staff member against the backend. Runs on the
@@ -65,11 +71,22 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
+  // Checked before the cookies are written, for the same reason as the shape
+  // above: a token whose role we can't read is a session with nowhere to land,
+  // and storing it would leave the user signed in on a page that rejects them.
+  const role = roleFromToken(body.access_token);
+  if (role === null) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
   cookieStore.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
 
-  return { ok: true };
+  return { ok: true, role };
 }
 
 /** Server Action: clear the session cookies and notify backend, logging the user out. */

@@ -1,5 +1,5 @@
 export const THEMES = [
-  { value: "chameleon", label: "Chameleon", swatch: "oklch(0.205 0 0)" },
+  { value: "chameleon", label: "Fruiti", swatch: "oklch(0.205 0 0)" },
   { value: "marketing", label: "Marketing", swatch: "oklch(0.6734 0.1841 45.03)" },
   { value: "multimedia", label: "Multimedia", swatch: "oklch(0.6298 0.2193 3.49)" },
   { value: "communication", label: "Communication", swatch: "oklch(0.6747 0.1787 250.27)" },

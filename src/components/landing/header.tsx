@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { ThemePicker } from "../theme-picker";
+import { NavBar } from "./nav-bar";
 import { useTheme } from "next-themes";
 
 const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
@@ -66,6 +67,9 @@ export function Header() {
             priority
           />
         </Link>
+        <div className="hidden md:flex flex-1 items-center justify-center">
+          <NavBar />
+        </div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <ThemePicker />
           <Link href="/register">

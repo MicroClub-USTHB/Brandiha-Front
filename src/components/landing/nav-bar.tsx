@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "#about", label: "About" },
   { href: "#agenda", label: "Agenda" },
-  { href: "#authors", label: "Authors" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 function getActiveEffectImage(theme?: string) {
@@ -33,10 +32,13 @@ function getActiveEffectImage(theme?: string) {
 } 
 
 
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+
 export function NavBar() {
   const [active, setActive] = useState("/");
   const scrollingRef = useRef(false);
   const {theme} = useTheme();
+  const isClient = useIsClient();
   const activeImage = getActiveEffectImage(theme);
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -71,7 +73,7 @@ export function NavBar() {
   };
 
   return (
-    <nav className="flex h-14.75 w-169.25 items-center justify-around">
+    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
       {links.map(({ href, label }) => {
         const isActive = active === href;
         return (
@@ -84,7 +86,7 @@ export function NavBar() {
             }`}
           >
             {label}
-            {isActive && (
+            {isClient && isActive && (
               <Image
                 src={activeImage}
                 alt=""
