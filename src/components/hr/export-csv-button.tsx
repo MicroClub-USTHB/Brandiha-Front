@@ -9,10 +9,16 @@ import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv
 /**
  * CSV columns: [header, accessor]. Order defines the column order in the file.
  *
- * `team_secret_code` is on the row but deliberately left out, matching the
- * submissions export: it is the credential that authorises a challenge
- * submission, and a spreadsheet passed around between staff is not where it
- * belongs. The team name identifies the team here.
+ * `Team Code` is here on purpose, and deliberately differs from the submissions
+ * export, which leaves the same field out. This is the admin roster the codes
+ * are handed out *from* — an organiser needs each team's code to give it to
+ * them, and going back to the API row-by-row for that is not a workflow. The
+ * submissions page only reviews what was already submitted, so it has no reason
+ * to surface the credential at all.
+ *
+ * So: the asymmetry is the decision, not an oversight. Treat an export of this
+ * file as carrying live credentials — it authorises challenge submissions on
+ * behalf of every team in it.
  */
 const COLUMNS: CsvColumns<RegistrationDetail> = [
   ["Full Name", (r) => r.user_full_name],
@@ -20,6 +26,7 @@ const COLUMNS: CsvColumns<RegistrationDetail> = [
   ["Phone", (r) => r.phone_number],
   ["Discord ID", (r) => r.discord_id],
   ["Team Name", (r) => r.team_name],
+  ["Team Code", (r) => r.team_secret_code],
   ["Department", (r) => r.department],
   ["Status", (r) => r.status],
   ["Participated Before", (r) => (r.participated_before ? "yes" : "no")],

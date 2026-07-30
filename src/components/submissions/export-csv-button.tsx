@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
  *
  * `team_code` is available on the row but deliberately left out: it is the
  * credential that authorises a submission, and this page never surfaces it.
+ * The HR export *does* include it — that is the roster the codes are
+ * distributed from, whereas this page only reviews what already came in. The
+ * difference is intended on both sides; don't "align" them.
  * `submitted_at` goes out as the raw ISO string — same as the HR export does
  * with `created_at`, and the form spreadsheets sort correctly on.
  */
