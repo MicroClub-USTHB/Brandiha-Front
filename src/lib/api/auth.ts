@@ -54,7 +54,6 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   let body: unknown;
   try {
     body = await response.json();
-    console.log("LOGIN RESPONSE BODY:", body);
   } catch {
     return {
       ok: false,

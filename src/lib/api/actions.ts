@@ -10,7 +10,6 @@ export type BulkScoreUpdatePayload = {
 export default async function bulkUpdateScoresAction(
   payload: BulkScoreUpdatePayload[]
 ): Promise<{ success: boolean; error?: string }> {
-  console.log("bulkUpdateScoresAction called with payload:", payload);
   try {
     const res = await apiFetch("/admin/challenge-submissions", {
       method: "PATCH",
@@ -20,7 +19,6 @@ export default async function bulkUpdateScoresAction(
       body: JSON.stringify(payload),
     });
 
-    console.log("bulkUpdateScoresAction response:", res);
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => null);
