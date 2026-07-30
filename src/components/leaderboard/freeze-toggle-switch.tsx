@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Snowflake } from "lucide-react";
 import { toggleLeaderboardFreezeAction } from "@/lib/api/freezeAction";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -64,6 +65,7 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
           htmlFor="freeze-mode"
           className="flex cursor-pointer items-center gap-2 text-sm font-medium text-white"
         >
+          {frozen && <Snowflake className="size-4 text-white" />}
           <span className="font-heading">{frozen ? "frozen" : "unfrozen"}</span>
           {loading && <span className="text-xs text-neutral-400">(Updating...)</span>}
         </Label>

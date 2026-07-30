@@ -1,12 +1,31 @@
 "use client";
-import { motion } from "motion/react";
+
 import Image from "next/image";
+import { useSyncExternalStore } from "react";
+import { useTheme } from "next-themes";
+
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+
+function getTimerBackground(theme?: string) {
+  switch (theme) {
+    case "design":
+      return "/timer-Design.svg";
+    case "multimedia":
+      return "/timer-Multimedia.svg";
+    case "communication":
+      return "/timer-Communication.svg";
+    case "marketing":
+      return "/timer-Marketing.svg";
+    case "chameleon":
+    default:
+      return "/timer-Default.svg";
+  }
+}
 
 interface LeaderboardRowProps {
   rank: number;
   teamName: string;
   score: number;
-  delay?: number;
   actions?: React.ReactNode;
 }
 
@@ -14,20 +33,22 @@ export default function LeaderboardRow({
   rank,
   teamName,
   score,
-  delay,
   actions,
 }: LeaderboardRowProps) {
+  const { theme } = useTheme();
+  const isClient = useIsClient();
+  const timerBg = getTimerBackground(isClient ? theme : undefined);
+
   return (
-    <motion.div
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{
-        duration: 0.5,
-        delay: delay ?? 0,
-        ease: "easeOut",
-      }}
-    >
-      <div className="w-90 h-15 lg:w-250 lg:h-15 2xl:w-290 2xl:h-25  bg-[#E9DFD4] py-2 px-4 flex  items-center justify-between mb-2">
+    <div>
+      <div
+        className="w-90 h-15 lg:w-250 lg:h-15 2xl:w-290 2xl:h-25 py-2 px-4 flex items-center justify-between mb-2"
+        style={{
+          backgroundImage: "url('/paper.svg')",
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <div className="flex flex-row items-center justify-start gap-4">
           {rank === 1 && (
             <Image
@@ -61,8 +82,8 @@ export default function LeaderboardRow({
               {rank}
             </span>
           )}
-          <h1 className=" ml-2 flex items-center justify-center">
-            <span className="text-xl lg:text-5xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-black font-bold ">
+          <h1 className="flex items-center justify-center">
+            <span className="text-xl lg:text-5xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-black font-bold">
               {teamName}
             </span>
           </h1>
@@ -70,20 +91,26 @@ export default function LeaderboardRow({
         {actions ? (
           <div className="flex items-center justify-end gap-2">
             {actions}
-            <h1 className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35  text-center text-black bg-[url('/timer-default.svg')] bg-contain bg-center bg-no-repeat flex items-center justify-center">
-              <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold ">
+            <h1
+              className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35 text-center text-black bg-contain bg-center bg-no-repeat flex items-center justify-center"
+              style={{ backgroundImage: `url('${timerBg}')` }}
+            >
+              <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold">
                 {score}
               </span>
             </h1>
           </div>
         ) : (
-          <h1 className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35  text-center text-black bg-[url('/timer-default.svg')] bg-contain bg-center bg-no-repeat flex items-center justify-center">
-            <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold ">
+          <h1
+            className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35 text-center text-black bg-contain bg-center bg-no-repeat flex items-center justify-center"
+            style={{ backgroundImage: `url('${timerBg}')` }}
+          >
+            <span className="text-xl lg:text-4xl 2xl:text-7xl lg:mb-3 2xl:mb-3 font-heading text-white font-bold">
               {score}
             </span>
           </h1>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -19,7 +19,6 @@ export default function LeaderboardComponent<T extends PublicLeaderboardEntry>({
           rank={index + 1}
           teamName={team.team_name}
           score={team.total_score}
-          delay={index * 0.1}
           actions={renderAction ? renderAction(team) : undefined}
         />
       ))}
