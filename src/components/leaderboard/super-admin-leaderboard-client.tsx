@@ -9,12 +9,18 @@ function sortLeaderboardByScore(data: AdminLeaderboardEntry[]): AdminLeaderboard
   return [...data].sort((a, b) => b.total_score - a.total_score);
 }
 
+interface SuperAdminLeaderboardClientProps {
+  initialLeaderboard: AdminLeaderboardEntry[];
+  isFrozen?: boolean;
+  frozenAt?: string | null;
+}
+
 export function SuperAdminLeaderboardClient({
-  leaderboardData,
-}: {
-  leaderboardData: AdminLeaderboardEntry[];
-}) {
-  const [teams, setTeams] = useState(leaderboardData);
+  initialLeaderboard,
+  isFrozen,
+  frozenAt,
+}: SuperAdminLeaderboardClientProps) {
+  const [teams, setTeams] = useState(initialLeaderboard);
 
   const sortedTeams = useMemo(() => sortLeaderboardByScore(teams), [teams]);
 

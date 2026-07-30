@@ -64,13 +64,11 @@ export function ChallengeScoreSheet({
     try {
       const payload: BulkScoreUpdatePayload[] = [];
       
-      // 1. Détection des éléments modifiés & génération de l'objet mis à jour
       const updatedChallenges = team.per_challenge.map((challenge) => {
         const rawDraft = drafts[challenge.challenge_id];
         const parsed = Number(rawDraft);
         const newScore = Number.isFinite(parsed) && parsed >= 0 ? parsed : challenge.score;
 
-        // Si le score a changé, on l'ajoute au payload
         if (challenge.score !== newScore) {
           payload.push({
             submission_id: challenge.submission_id,
@@ -81,23 +79,19 @@ export function ChallengeScoreSheet({
         return { ...challenge, score: newScore };
       });
 
-      // Si rien n'a changé, on ferme directement
       if (payload.length === 0) {
         setOpen(false);
         return;
       }
 
-      // 2. Appel du backend PATCH
       await bulkUpdateScores(payload);
 
-      // 3. Recalcul du total pour l'équipe
       const updatedTeam: AdminLeaderboardEntry = {
         ...team,
         per_challenge: updatedChallenges,
         total_score: updatedChallenges.reduce((sum, c) => sum + c.score, 0),
       };
 
-      // 4. Notification au composant parent + fermeture du modal
       onSaveSuccess(updatedTeam);
       setOpen(false);
     } catch (err: any) {
