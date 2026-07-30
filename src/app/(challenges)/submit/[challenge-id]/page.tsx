@@ -76,7 +76,7 @@ export default async function SubmitPage(props: Props) {
   );
 
   return (
-    <main className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 md:h-screen md:max-h-screen overflow-visible p-4 pt-24">
+    <main className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 md:h-screen md:max-h-screen overflow-visible p-4 pt-32 lg:pt-24">
       <Header />
       <div className="flex w-full flex-col items-center gap-6">
         {body}

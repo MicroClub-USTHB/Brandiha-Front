@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 /** Picks a challenge to submit against. Public — anyone with a team code. */
 export default function SubmitIndexPage() {
   return (
-    <div id="challenges" className="h-screen flex">
+    <div id="challenges" className="h-screen flex pt-32 lg:pt-24">
       <Header />
       <ChallengeGrid hrefPrefix="/submit" />
     </div>

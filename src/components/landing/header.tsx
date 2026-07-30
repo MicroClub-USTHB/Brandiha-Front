@@ -89,7 +89,7 @@ export function Header() {
         width={337}
         height={125}
         draggable={false}
-        className="absolute top-[99%] left-0"
+        className="absolute top-[99%] left-0 w-44 sm:w-[337px] h-auto"
       />
     </header>
   );
