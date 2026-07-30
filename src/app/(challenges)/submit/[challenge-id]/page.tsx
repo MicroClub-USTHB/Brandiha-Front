@@ -1,10 +1,8 @@
-import Link from "next/link";
-import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { Lock } from "lucide-react";
 import SubmitForm from "@/components/submit/submit-form";
 import { getChallenge } from "@/lib/api/challenges";
-import { ThemePicker } from "@/components/theme-picker";
+import { Header } from "@/components/landing/header";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -78,32 +76,10 @@ export default async function SubmitPage(props: Props) {
   );
 
   return (
-    <main className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 md:h-screen md:max-h-screen overflow-visible p-4">
-      {/* On mobile the logo sits in normal flow, centered above the form; from
-          md up it returns to its pinned top-left corner. */}
-      <Link href="/" className="static mb-6 md:mb-0 md:absolute md:left-6 md:top-6 z-50">
-        <Image
-          src="/brandiha-logo.svg"
-          alt="Brandiha"
-          width={253}
-          height={63}
-          className="w-44 md:w-[clamp(5rem,9vw,9rem)] h-auto"
-        />
-      </Link>
-      {/* Theme selector pinned to the top-right corner, mirroring the header. */}
-      <div className="absolute right-4 top-4 md:right-6 md:top-6 z-50">
-        <ThemePicker />
-      </div>
+    <main className="relative flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 md:h-screen md:max-h-screen overflow-visible p-4 pt-24">
+      <Header />
       <div className="flex w-full flex-col items-center gap-6">
         {body}
-        {/* The challenge picker this page is reached from — without it the page
-            is a dead end, since there is no header here. */}
-        <Link
-          href="/submit"
-          className="font-sans text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
-        >
-          &larr; All challenges
-        </Link>
       </div>
     </main>
   );

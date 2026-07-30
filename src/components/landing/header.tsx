@@ -72,7 +72,7 @@ export function Header() {
         </div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <ThemePicker />
-          <Link href="/register">
+          <Link href="/submit">
             <Image
               src={activeButton}
               alt="Join"
