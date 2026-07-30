@@ -5,7 +5,8 @@ import {
   PublicLeaderboardResponse,
 } from "@/lib/api/leaderboard";
 import LeaderboardComponent from "@/components/leaderboard/leaderboard";
-import { Snowflake } from "lucide-react";
+import { Snowflake, Table2 } from "lucide-react";
+import { Notice } from "@/components/notice";
 
 
 export function sortLeaderboardByScore(
@@ -27,9 +28,15 @@ export default async function Leaderboard() {
         {leaderboardResponse.frozen && <Snowflake className="size-8 lg:size-12 text-white/80" />}
       </h1>
 
-      <LeaderboardComponent
-        leaderboardData={sortedLeaderboardData}
-      />
+      {sortedLeaderboardData.length === 0 ? (
+        <Notice
+          icon={Table2}
+          title="No entries yet"
+          message="Scores will appear here once teams start submitting."
+        />
+      ) : (
+        <LeaderboardComponent leaderboardData={sortedLeaderboardData} />
+      )}
       <div className="h-12" />
     </div>
   );

@@ -38,13 +38,6 @@ export type BulkScoreUpdatePayload = {
   score: number;
 };
 
-export const dummyLeaderboardData: PublicLeaderboardEntry[] = [
-  { team_name: "mouss w yakuza", total_score: 2 },
-  { team_name: "berbochi", total_score: 8999 },
-  { team_name: "mottenmenschen", total_score: 2015 },
-  { team_name: "los galacticos", total_score: 140 },
-];
-
 /**
  * Uncached on purpose, which also opts `/leaderboard` out of static generation.
  * Prerendered, the public board froze at whatever the backend answered during
@@ -64,11 +57,11 @@ export async function getGlobalLeaderboard(): Promise<PublicLeaderboardResponse>
 
     const data: PublicLeaderboardResponse = await response.json();
     
-    if (!data.leaderboard || data.leaderboard.length === 0) {
+    if (!data.leaderboard) {
       return {
         frozen: data.frozen ?? false,
         frozen_at: data.frozen_at ?? null,
-        leaderboard: dummyLeaderboardData,
+        leaderboard: [],
       };
     }
 
@@ -88,16 +81,11 @@ export async function getAdminLeaderboard(): Promise<AdminLeaderboardResponse> {
   if (!res.ok) throw new Error("Error retrieving the admin leaderboard");
 
   const data: AdminLeaderboardResponse = await res.json();
-  if (!data.leaderboard || data.leaderboard.length === 0) {
+  if (!data.leaderboard) {
     return {
       frozen: data.frozen ?? false,
       frozen_at: data.frozen_at ?? null,
-      leaderboard: dummyLeaderboardData.map((entry) => ({
-        team_id: "dummy",
-        team_name: entry.team_name,
-        per_challenge: [],
-        total_score: entry.total_score,
-      })),
+      leaderboard: [],
     };
   }
 
