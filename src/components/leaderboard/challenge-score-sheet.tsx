@@ -13,6 +13,18 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 type ScoreDrafts = Record<number, string>;
 
 function buildDrafts(perChallenge: ChallengeScore[]): ScoreDrafts {
@@ -207,9 +219,26 @@ export function ChallengeScoreSheet({
             >
               Reset
             </Button>
-            <Button type="button" onClick={handleSave} disabled={!isDirty || loading}>
-              {loading ? "Saving..." : "Save changes"}
-            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" disabled={!isDirty || loading}>
+                  {loading ? "Saving..." : "Save changes"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Save these score changes?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will update the selected challenge scores and recalculate the team total.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSave}>Save changes</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </SheetContent>
