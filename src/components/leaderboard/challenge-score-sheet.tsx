@@ -50,8 +50,11 @@ export function ChallengeScoreSheet({
 
   const currentTotal = useMemo(() => computeTotal(drafts), [drafts]);
 
+  // On vérifie les modifications uniquement pour les challenges ayant un submission_id valide
   const isDirty = team.per_challenge.some(
-    (challenge) => String(challenge.score) !== drafts[challenge.challenge_id],
+    (challenge) =>
+      Boolean(challenge.submission_id) &&
+      String(challenge.score) !== drafts[challenge.challenge_id],
   );
 
   const updateScore = (challengeId: number, value: string) => {
@@ -66,6 +69,11 @@ export function ChallengeScoreSheet({
       const payload: BulkScoreUpdatePayload[] = [];
 
       const updatedChallenges = team.per_challenge.map((challenge) => {
+        // Si pas de submission_id, on conserve le challenge tel quel sans modif ni payload
+        if (!challenge.submission_id) {
+          return challenge;
+        }
+
         const rawDraft = drafts[challenge.challenge_id];
         const parsed = Number(rawDraft);
         const newScore = Number.isFinite(parsed) && parsed >= 0 ? parsed : challenge.score;
@@ -80,12 +88,17 @@ export function ChallengeScoreSheet({
         return { ...challenge, score: newScore };
       });
 
+      // S'il n'y a aucun changement à envoyer
       if (payload.length === 0) {
         handleOpenChange(false);
         return;
       }
 
-      await bulkUpdateScores(payload);
+      const res = await bulkUpdateScores(payload);
+
+      if (!res.success) {
+        throw new Error(res.error || "Failed to update challenge scores");
+      }
 
       const updatedTeam: AdminLeaderboardEntry = {
         ...team,
@@ -138,35 +151,53 @@ export function ChallengeScoreSheet({
             </p>
           ) : (
             <div className="space-y-3">
-              {team.per_challenge.map((challenge) => (
-                <article key={challenge.challenge_id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="truncate font-heading text-base font-bold text-foreground">
-                        {challenge.challenge_title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Challenge #{challenge.challenge_id} · Submission {challenge.submission_id}
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                      Score: {challenge.score}
-                    </div>
-                  </div>
+              {team.per_challenge.map((challenge) => {
+                const hasSubmission = Boolean(challenge.submission_id);
 
-                  <label className="block space-y-2 text-sm font-medium text-foreground">
-                    <span>Update score</span>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1"
-                      disabled={loading}
-                      value={drafts[challenge.challenge_id] ?? String(challenge.score)}
-                      onChange={(e) => updateScore(challenge.challenge_id, e.target.value)}
-                    />
-                  </label>
-                </article>
-              ))}
+                return (
+                  <article
+                    key={challenge.challenge_id}
+                    className={`rounded-xl border border-border p-4 shadow-sm ${
+                      hasSubmission ? "bg-card" : "bg-muted/40 opacity-75"
+                    }`}
+                  >
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate font-heading text-base font-bold text-foreground">
+                          {challenge.challenge_title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Challenge #{challenge.challenge_id} ·{" "}
+                          {hasSubmission
+                            ? `Submission ${challenge.submission_id}`
+                            : "No submission"}
+                        </p>
+                      </div>
+                      <div className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+                        Score: {challenge.score}
+                      </div>
+                    </div>
+
+                    <label className="block space-y-2 text-sm font-medium text-foreground">
+                      <span>Update score</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="1"
+                        disabled={loading || !hasSubmission}
+                        value={drafts[challenge.challenge_id] ?? String(challenge.score)}
+                        onChange={(e) => updateScore(challenge.challenge_id, e.target.value)}
+                        placeholder={!hasSubmission ? "No submission available" : undefined}
+                      />
+                    </label>
+                    {!hasSubmission && (
+                      <p className="mt-1 text-xs text-amber-500/90">
+                        Cette soumission n'a pas encore été effectuée et ne peut pas être notée.
+                      </p>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           )}
 

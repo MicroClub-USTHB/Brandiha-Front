@@ -74,7 +74,7 @@ export async function getAdminLeaderboard(): Promise<AdminLeaderboardResponse> {
   if (!res.ok) throw new Error("Error retrieving the admin leaderboard");
 
   const data: AdminLeaderboardResponse = await res.json();
-
+  console.log("Admin leaderboard data:", data);
   if (!data.leaderboard || data.leaderboard.length === 0) {
     return {
       frozen: data.frozen ?? false,
