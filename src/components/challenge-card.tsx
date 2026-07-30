@@ -198,20 +198,22 @@ export default function ChallengeCard({
     "marketing-mascot.png";
 
   return (
-    <div
-      className={cn(
-        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
-        // Drains the department color out of the card art, the title and the
-        // mascot too, not just the slot below — a locked card reads as inert at
-        // a glance.
-        "transition-[filter] duration-500",
-        isLocked && "grayscale",
-      )}
-      style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
-    >
+      <div
+        className={cn(
+          "relative w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
+          "transition-[filter] duration-500",
+        )}
+        style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
+      >
+        {isLocked && (
+          <div className="absolute inset-0 rounded-2xl bg-black/55 z-10" />
+        )}
       <h1
-        className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize"
-        style={{ color: textColor }}
+        className={cn(
+          "text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize z-20",
+          isLocked && "text-white/80",
+        )}
+        style={isLocked ? undefined : { color: textColor }}
       >
         {/* One word per line: `block` on each word rather than a width
             constraint, so wrapping doesn't depend on the card's size. */}
@@ -233,10 +235,10 @@ export default function ChallengeCard({
       <div className="flex min-h-0 flex-1 items-center justify-center py-1">
         {isUpcoming ? (
           // `currentColor` on the wrapper is what makes both the icon and the
-          // countdown track the department color (grayscaled by the parent).
+          // countdown track the department color (light overlay neutralizes it).
           <div
-            className="flex flex-col items-center gap-2"
-            style={{ color: textColor }}
+            className="z-20 flex flex-col items-center gap-2"
+            style={{ color: isLocked ? "white" : textColor }}
           >
             {/* Decorative: the countdown below already states the same thing. */}
             <Lock className="size-6 md:size-8 xl:size-10 shrink-0" aria-hidden />
@@ -247,7 +249,7 @@ export default function ChallengeCard({
             </span>
           </div>
         ) : (
-          <div className="flex h-full min-h-0 flex-col items-center justify-center gap-1">
+          <div className="z-20 flex h-full min-h-0 flex-col items-center justify-center gap-1">
             <Image
               src={`/department-mascots/${mascot}`}
               alt={`${department} mascot`}
@@ -261,11 +263,10 @@ export default function ChallengeCard({
 
             {hasStatusLine && (
               // `currentColor` on the wrapper is what makes both the icon and
-              // the label track the department color (grayscaled by the parent
-              // once the challenge is closed).
+              // the label track the department color (light overlay neutralizes it).
               <div
                 className="flex items-center gap-1.5"
-                style={{ color: textColor }}
+                style={{ color: isLocked ? "white" : textColor }}
               >
                 {/* Decorative: the label beside it says the same thing. */}
                 <StatusIcon
