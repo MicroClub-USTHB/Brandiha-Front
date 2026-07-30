@@ -50,7 +50,6 @@ export function ChallengeScoreSheet({
 
   const currentTotal = useMemo(() => computeTotal(drafts), [drafts]);
 
-  // On vérifie les modifications uniquement pour les challenges ayant un submission_id valide
   const isDirty = team.per_challenge.some(
     (challenge) =>
       Boolean(challenge.submission_id) &&
@@ -69,7 +68,6 @@ export function ChallengeScoreSheet({
       const payload: BulkScoreUpdatePayload[] = [];
 
       const updatedChallenges = team.per_challenge.map((challenge) => {
-        // Si pas de submission_id, on conserve le challenge tel quel sans modif ni payload
         if (!challenge.submission_id) {
           return challenge;
         }
@@ -88,7 +86,6 @@ export function ChallengeScoreSheet({
         return { ...challenge, score: newScore };
       });
 
-      // S'il n'y a aucun changement à envoyer
       if (payload.length === 0) {
         handleOpenChange(false);
         return;
