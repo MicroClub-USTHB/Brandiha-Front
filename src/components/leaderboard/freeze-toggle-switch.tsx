@@ -50,21 +50,22 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+      <div className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-black p-3 shadow-sm text-white">
         <AlertDialogTrigger asChild>
           <Switch
             id="freeze-mode"
             checked={frozen}
             onCheckedChange={(checked) => requestToggle(checked)}
             disabled={loading}
+            className="data-[state=checked]:bg-white data-[state=unchecked]:bg-neutral-800 border border-neutral-700"
           />
         </AlertDialogTrigger>
         <Label
           htmlFor="freeze-mode"
-          className="flex cursor-pointer items-center gap-2 text-sm font-medium"
+          className="flex cursor-pointer items-center gap-2 text-sm font-medium text-white"
         >
           <span className="font-heading">{frozen ? "frozen" : "unfrozen"}</span>
-          {loading && <span className="text-xs text-muted-foreground">(Updating...)</span>}
+          {loading && <span className="text-xs text-neutral-400">(Updating...)</span>}
         </Label>
       </div>
 
