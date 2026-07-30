@@ -129,7 +129,7 @@ export function ChallengeScoreSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
+      <Button type="button" variant="outline" size="lg" className="font-heading text-xl" onClick={() => handleOpenChange(true)}>
         Edit scores
       </Button>
       <SheetContent className="overflow-y-auto sm:max-w-2xl">
