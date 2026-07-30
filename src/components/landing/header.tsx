@@ -72,16 +72,14 @@ export function Header() {
         </div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <ThemePicker />
-          <Link href="/submit">
-            <Image
-              src={activeButton}
-              alt="Join"
-              width={211}
-              height={69}
-              draggable={false}
-              className="h-15"
-              priority
-            />
+          <Link
+            href="/submit"
+            className="flex h-15 w-[211px] items-center justify-center bg-contain bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${activeButton})` }}
+          >
+            <span className="font-heading text-xl text-black">
+              Challenges
+            </span>
           </Link>
         </div>
       </div>
