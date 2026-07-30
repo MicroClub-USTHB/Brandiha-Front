@@ -16,6 +16,8 @@ const NAV_LINKS: Partial<Record<Role, { href: string; label: string }[]>> = {
   super_admin: [
     { href: "/super-admin-leaderboard", label: "Leaderboard" },
     { href: "/submissions", label: "Submissions" },
+    { href: "/vote-leaderboard", label: "Vote board" },
+    { href: "/vote-results", label: "Ballots" },
   ],
 };
 
