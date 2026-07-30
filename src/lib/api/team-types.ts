@@ -23,6 +23,7 @@ export interface Team {
   created_at: string;
   updated_at: string;
   name: string;
+  secret_code: string;
   status: RegistrationStatus;
   members: TeamMember[];
 }
