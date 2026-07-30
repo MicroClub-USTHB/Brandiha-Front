@@ -47,17 +47,18 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!response.ok) {
     return {
       ok: false,
-      error: "Something went wrong on our side. Please try again in a moment.",
+      error: "1 Something went wrong on our side. Please try again in a moment.",
     };
   }
 
   let body: unknown;
   try {
     body = await response.json();
+    console.log("LOGIN RESPONSE BODY:", body);
   } catch {
     return {
       ok: false,
-      error: "Something went wrong on our side. Please try again in a moment.",
+      error: "2 Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -66,7 +67,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!isTokenPair(body)) {
     return {
       ok: false,
-      error: "Something went wrong on our side. Please try again in a moment.",
+      error: "3Something went wrong on our side. Please try again in a moment.",
     };
   }
 

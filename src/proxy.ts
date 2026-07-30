@@ -11,7 +11,7 @@ import { HOME_BY_ROLE } from "@/lib/auth/home";
 import { refreshSession } from "@/lib/auth/refresh";
 
 /** Route prefixes that require an authenticated session, whatever the role. */
-const PROTECTED_PREFIXES = ["/hr", "/submissions", "/vote"];
+const PROTECTED_PREFIXES = ["/hr", "/super-admin-leaderboard", "/submissions", "/vote"];
 
 /** Where to send unauthenticated users. */
 const LOGIN_PATH = "/login";
@@ -118,5 +118,5 @@ export const config = {
   // `/submissions/:path*` covers the per-challenge submission tables; `/vote` is
   // the alumni ballot. The public `/submit/:id` page is deliberately absent — a
   // team authenticates there with its secret code, not a session.
-  matcher: ["/login", "/hr/:path*", "/submissions/:path*", "/vote/:path*"],
+  matcher: ["/login", "/hr/:path*", "/super-admin-leaderboard/:path*", "/submissions/:path*", "/vote/:path*"],
 };
