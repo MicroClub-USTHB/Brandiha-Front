@@ -120,7 +120,7 @@ export function ChallengeScoreSheet({
     } catch (err: unknown) {
       console.error("Failed to update scores:", err);
       setErrorMsg(
-        err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.",
+        err instanceof Error ? err.message : "An error occurred while saving changes.",
       );
     } finally {
       setLoading(false);
@@ -201,7 +201,7 @@ export function ChallengeScoreSheet({
                     </label>
                     {!hasSubmission && (
                       <p className="mt-1 text-xs text-amber-500/90">
-                        Cette soumission n'a pas encore été effectuée et ne peut pas être notée.
+                        This submission has not been submitted yet and cannot be graded.
                       </p>
                     )}
                   </article>
