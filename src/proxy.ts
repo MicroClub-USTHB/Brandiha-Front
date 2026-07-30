@@ -4,15 +4,23 @@ import {
   REFRESH_COOKIE,
   AUTH_COOKIE_OPTIONS,
   isTokenFresh,
+  roleFromToken,
   type TokenPair,
 } from "@/lib/auth/jwt";
+import { HOME_BY_ROLE } from "@/lib/auth/home";
 import { refreshSession } from "@/lib/auth/refresh";
 
-/** Route prefixes that require an authenticated staff session. */
-const PROTECTED_PREFIXES = ["/hr", "/super-admin-leaderboard"];
+/** Route prefixes that require an authenticated session, whatever the role. */
+const PROTECTED_PREFIXES = ["/hr", "/super-admin-leaderboard", "/submissions", "/vote"];
 
-/** Where to send unauthenticated users, and where to bounce already-authed ones. */
+/** Where to send unauthenticated users. */
 const LOGIN_PATH = "/login";
+
+/**
+ * Where an already-authed visitor to `/login` goes when the token's role can't
+ * be read — which `isTokenFresh` has effectively ruled out by decoding it
+ * already. Present so the bounce always has somewhere to land.
+ */
 const AUTHED_HOME = "/hr";
 
 /**
@@ -68,10 +76,12 @@ export async function proxy(request: NextRequest) {
       res.cookies.set(SESSION_COOKIE, refreshed.access_token, AUTH_COOKIE_OPTIONS);
       res.cookies.set(REFRESH_COOKIE, refreshed.refresh_token, AUTH_COOKIE_OPTIONS);
     }
+
     if (clearCookies) {
       res.cookies.delete(SESSION_COOKIE);
       res.cookies.delete(REFRESH_COOKIE);
     }
+
     return res;
   };
 
@@ -87,10 +97,15 @@ export async function proxy(request: NextRequest) {
     return withAuthCookies(NextResponse.redirect(url));
   }
 
-  // Valid session sitting on /login → send them into the app.
+  // Valid session sitting on /login → send them into the app, at the home for
+  // their role. Read off the refreshed token when there is one: the original
+  // cookie is spent by then, and its role claim is the stale copy.
   if (pathname === LOGIN_PATH && hasSession) {
+    const activeToken = refreshed?.access_token ?? token;
+    const role = activeToken ? roleFromToken(activeToken) : null;
+
     const url = request.nextUrl.clone();
-    url.pathname = AUTHED_HOME;
+    url.pathname = role ? HOME_BY_ROLE[role] : AUTHED_HOME;
     url.search = "";
     return withAuthCookies(NextResponse.redirect(url));
   }
@@ -99,6 +114,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Matches the protected dashboard pages and the login page.
-  matcher: ["/login", "/hr/:path*", "/super-admin-leaderboard", "/super-admin-leaderboard/:path*"],
+  // `/hr/:path*` matches the board and every registration detail page under it;
+  // `/submissions/:path*` covers the per-challenge submission tables; `/vote` is
+  // the alumni ballot. The public `/submit/:id` page is deliberately absent — a
+  // team authenticates there with its secret code, not a session.
+  matcher: ["/login", "/hr/:path*", "/super-admin-leaderboard/:path*", "/submissions/:path*", "/vote/:path*"],
 };
