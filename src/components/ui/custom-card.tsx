@@ -133,7 +133,7 @@ export function CustomCard({ card }: CustomCardProps) {
                     </div>
                   )}
                   {item.note && (
-                    <p className="font-hand mt-1 text-sm text-gray-400">{item.note}</p>
+                    <p className="font-hand mt-1 text-sm text-muted-foreground">{item.note}</p>
                   )}
                 </div>
               </div>

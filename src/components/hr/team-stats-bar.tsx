@@ -16,22 +16,22 @@ const CARDS: CardDef[] = [
     key: "pending",
     label: "Pending",
     countKey: "pending_teams",
-    bg: "bg-amber-600 text-white",
-    ring: "ring-amber-400",
+    bg: "bg-warning text-warning-foreground",
+    ring: "ring-warning/50",
   },
   {
     key: "accepted",
     label: "Accepted",
     countKey: "accepted_teams",
-    bg: "bg-emerald-600 text-white",
-    ring: "ring-emerald-400",
+    bg: "bg-success text-success-foreground",
+    ring: "ring-success/50",
   },
   {
     key: "rejected",
     label: "Rejected",
     countKey: "rejected_teams",
-    bg: "bg-red-600 text-white",
-    ring: "ring-red-400",
+    bg: "bg-destructive text-white",
+    ring: "ring-destructive/50",
   },
 ];
 

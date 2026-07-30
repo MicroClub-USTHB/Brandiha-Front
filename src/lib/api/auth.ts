@@ -2,20 +2,22 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
-import { SESSION_COOKIE } from "@/lib/auth/jwt";
+import { backendFetch } from "@/lib/api/fetch";
+import {
+  SESSION_COOKIE,
+  REFRESH_COOKIE,
+  AUTH_COOKIE_OPTIONS,
+  isTokenPair,
+  roleFromToken,
+  type Role,
+} from "@/lib/auth/jwt";
 
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
-
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type LoginResult = { ok: true } | { ok: false; error: string };
-
-/** Body returned by `POST /auth/login` on the backend. */
-interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
+/**
+ * Result returned to the client — errors are serialized, never thrown across
+ * the boundary. The role comes back so the caller can route by it; it is the
+ * token's own claim, not a grant, and the backend re-checks it on every call.
+ */
+export type LoginResult = { ok: true; role: Role } | { ok: false; error: string };
 
 /**
  * Server Action: authenticate a staff member against the backend. Runs on the
@@ -24,11 +26,18 @@ interface LoginResponse {
  * map to user-facing messages.
  */
 export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
+  // Four paths below return the same "something went wrong on our side" copy: a
+  // non-OK status, an unparseable body, a body missing a token, and a token
+  // whose role we can't read. That is deliberate — which of our own internals
+  // broke is not the visitor's problem, and naming it leaks backend shape.
+  //
+  // They were briefly numbered ("1 Something went wrong…") to tell them apart
+  // while debugging, which shipped. If you need to distinguish them again, log
+  // server-side rather than editing the copy the user reads.
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/auth/login`, {
+    response = await backendFetch("/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: data.Email.trim(), password: data.Password }),
     });
   } catch {
@@ -49,7 +58,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
-  let body: LoginResponse;
+  let body: unknown;
   try {
     body = await response.json();
   } catch {
@@ -59,19 +68,55 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
     };
   }
 
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, body.access_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+  // A 200 missing either token would otherwise be stored as a cookie reading
+  // "undefined" and pass for a live session until the first protected call.
+  if (!isTokenPair(body)) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
 
-  return { ok: true };
+  // Checked before the cookies are written, for the same reason as the shape
+  // above: a token whose role we can't read is a session with nowhere to land,
+  // and storing it would leave the user signed in on a page that rejects them.
+  const role = roleFromToken(body.access_token);
+  if (role === null) {
+    return {
+      ok: false,
+      error: "Something went wrong on our side. Please try again in a moment.",
+    };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, body.access_token, AUTH_COOKIE_OPTIONS);
+  cookieStore.set(REFRESH_COOKIE, body.refresh_token, AUTH_COOKIE_OPTIONS);
+
+  return { ok: true, role };
 }
 
-/** Server Action: clear the session cookie, logging the user out. */
+/** Server Action: clear the session cookies and notify backend, logging the user out. */
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
+  const accessToken = cookieStore.get(SESSION_COOKIE)?.value;
+  const refreshToken = cookieStore.get(REFRESH_COOKIE)?.value;
+
+  if (refreshToken) {
+    try {
+      // Not `auth: true`: that would refresh an expired token purely to spend
+      // it on the call that ends the session, and throw when there is nothing
+      // to refresh — where here a missing token is simply nothing to revoke.
+      await backendFetch("/auth/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+        timeoutMs: 5_000,
+      });
+    } catch {
+      // Ignore network errors on logout, proceed to clear local cookies
+    }
+  }
+
   cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete(REFRESH_COOKIE);
 }

@@ -1,7 +1,7 @@
 const STATUS_STYLES: Record<string, string> = {
-  accepted: "bg-green-500/15 text-green-700",
-  rejected: "bg-red-500/15 text-red-700",
-  pending: "bg-yellow-500/15 text-yellow-700",
+  accepted: "bg-success/15 text-success",
+  rejected: "bg-destructive/15 text-destructive",
+  pending: "bg-warning/15 text-warning",
 };
 
 /** Small pill showing a registration/team status. Presentational (no hooks). */

@@ -1,7 +1,7 @@
 "use server";
 
-import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
+import { requireRole } from "@/lib/auth/session";
 import type { FetchResult } from "@/lib/api/registrations";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { Team } from "@/lib/api/team-types";
@@ -9,17 +9,17 @@ import type { TeamStats } from "@/lib/api/team-types";
 
 /**
  * Server Action: fetch all teams with their members (Admin). Optionally filter
- * by team status. The bearer token is attached by `apiFetch` from the session.
+ * by team status. The bearer token is attached by `backendFetch` from the session.
  */
 export async function listTeams(
   status?: RegistrationStatus,
 ): Promise<FetchResult<Team[]>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   const query = status ? `?status=${status}` : "";
   try {
-    const res = await apiFetch(`/teams${query}`);
+    const res = await backendFetch(`/teams${query}`, { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to view this." };
     if (!res.ok) return { ok: false, error: "Something went wrong loading teams." };
@@ -34,11 +34,11 @@ export async function listTeams(
  * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
  */
 export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
-    const res = await apiFetch("/teams/stats");
+    const res = await backendFetch("/teams/stats", { auth: true });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to view this." };
     if (!res.ok) return { ok: false, error: "Something went loading stats." };
@@ -57,11 +57,12 @@ export async function updateTeamStatus(
   id: string,
   status: RegistrationStatus,
 ): Promise<FetchResult<Team>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/teams/${id}`, {
+    const res = await backendFetch(`/teams/${id}`, {
+      auth: true,
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
@@ -80,22 +81,29 @@ export async function updateTeamStatus(
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Server Action: delete an (empty) team (Admin) via `DELETE /teams/{id}`. The
- * backend only allows deleting a team with no members and rejects a non-empty
- * one with `400 Bad Request`, which we surface as a user-facing error even
- * though the UI also disables the button in that case.
+ * Server Action: soft-delete a team (Admin) via `DELETE /teams/{id}`. The
+ * backend allows this for a team with no registrations or with all of them
+ * rejected, and answers `400 Bad Request` when one is still pending or
+ * accepted — surfaced as a user-facing error even though `canDeleteTeam` also
+ * disables the button in that case.
  */
 export async function deleteTeam(id: string): Promise<ActionResult> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/teams/${id}`, { method: "DELETE" });
+    const res = await backendFetch(`/teams/${id}`, {
+      auth: true,
+      method: "DELETE",
+    });
     if (res.status === 401 || res.status === 403)
       return { ok: false, error: "You're not authorized to do this." };
     if (res.status === 404) return { ok: false, error: "Team not found." };
     if (res.status === 400)
-      return { ok: false, error: "Only empty teams can be deleted." };
+      return {
+        ok: false,
+        error: "This team still has pending or accepted members, so it can't be deleted.",
+      };
     if (!res.ok) return { ok: false, error: "Something went wrong deleting the team." };
     return { ok: true };
   } catch (e) {

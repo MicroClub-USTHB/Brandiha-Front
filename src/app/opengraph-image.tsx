@@ -8,10 +8,10 @@ export const alt = "Brandiha — one virage away from your brand!";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-async function svgToPng(svg: string, width: number): Promise<string> {
-  const sharp = (await import("sharp")).default;
-  const buf = await sharp(Buffer.from(svg)).resize(width).png().toBuffer();
-  return buf.toString("base64");
+// Plus besoin de sharp ! Encode directement le SVG en base64 Data URI pour Satori
+function svgToDataUri(svg: string): string {
+  const base64 = Buffer.from(svg).toString("base64");
+  return `data:image/svg+xml;base64,${base64}`;
 }
 
 interface TagItem {
@@ -80,22 +80,20 @@ export default async function Image() {
     "utf8",
   );
   logoSvg = logoSvg.replace(/fill="#111111"/g, 'fill="#FFFFFF"');
-  const logoBase64 = await svgToPng(logoSvg, 800);
+  const logoDataUri = svgToDataUri(logoSvg);
 
-  // Dev tag: pure vector, render with sharp
+  // Dev tag
   const devSvg = readFileSync(
     join(process.cwd(), "public", "dev-tag.svg"),
     "utf8",
   );
-  const devBase64 = await svgToPng(devSvg, 100);
+  const devDataUri = svgToDataUri(devSvg);
 
   // Render each tag from its own SVG file
-  const tagsBase64 = await Promise.all(
-    tagLayout.map(async (tag) => {
-      const svg = readFileSync(join(process.cwd(), "public", tag.file), "utf8");
-      return svgToPng(svg, 200);
-    }),
-  );
+  const tagsDataUri = tagLayout.map((tag) => {
+    const svg = readFileSync(join(process.cwd(), "public", tag.file), "utf8");
+    return svgToDataUri(svg);
+  });
 
   const fontBuf = readFileSync(
     join(process.cwd(), "src", "app", "fonts", "SEEKUW.otf"),
@@ -127,8 +125,9 @@ export default async function Image() {
             key={tag.file}
             style={{
               ...tag.style,
-              backgroundImage: `url(data:image/png;base64,${tagsBase64[i]})`,
-              backgroundSize: "cover",
+              backgroundImage: `url(${tagsDataUri[i]})`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
             }}
           />
         ))}
@@ -145,7 +144,7 @@ export default async function Image() {
           }}
         >
           <img
-            src={`data:image/png;base64,${devBase64}`}
+            src={devDataUri}
             alt=""
             width={100}
             height={51}
@@ -155,7 +154,7 @@ export default async function Image() {
 
         {/* Logo with black drop shadow */}
         <img
-          src={`data:image/png;base64,${logoBase64}`}
+          src={logoDataUri}
           alt="Brandiha"
           width={800}
           height={197}

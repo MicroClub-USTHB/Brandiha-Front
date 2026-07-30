@@ -28,6 +28,10 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -66,6 +70,17 @@
   --brand-communication: oklch(0.6747 0.1787 250.27); /* #249AFF */
   --brand-multimedia: oklch(0.6298 0.2193 3.49); /* #EB367B */
   --brand-design: oklch(0.8971 0.1605 180.46); /* #15FFE2 */
+
+  /* Outcome hues, theme-independent like the brand ones above: an accepted
+     member reads the same green whichever theme is on, and a warning the same
+     amber. Declared only here, so every [data-theme] block inherits them.
+     Rejections and errors reuse --destructive rather than adding a third red.
+     Pitched to match --destructive's weight so the three sit together in a
+     badge or a stat card. */
+  --success: oklch(0.627 0.194 149.214);
+  --success-foreground: var(--white);
+  --warning: oklch(0.681 0.162 75.834);
+  --warning-foreground: var(--white);
 
   --background: var(--white);
   --foreground: var(--black);
@@ -321,6 +336,7 @@
 
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
 }
 
@@ -443,3 +459,4 @@
     display: none;
   }
 }
+

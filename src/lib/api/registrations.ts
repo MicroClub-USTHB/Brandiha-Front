@@ -1,17 +1,14 @@
 "use server";
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
-import { apiFetch, UnauthenticatedError } from "@/lib/api/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
+import { requireRole } from "@/lib/auth/session";
+import { splitList } from "@/lib/list-field";
 import type {
   PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
 } from "@/lib/api/registration-types";
-
-const API_BASE_URL =
-  (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
-    .replace(/\/$/, "");
 
 /** Result returned to the client — errors are serialized, never thrown across the boundary. */
 export type RegistrationResult = { ok: true } | { ok: false; error: string };
@@ -40,14 +37,6 @@ interface RegistrationPayload {
   additional_notes: string | null;
 }
 
-/** Split a free-text field ("Figma, Photoshop\nNotion") into a clean list. */
-function toList(value: string | undefined): string[] {
-  return (value ?? "")
-    .split(/[\n,]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 /** Empty/whitespace-only optional strings become `null` for the API. */
 function nullable(value: string | undefined): string | null {
   const trimmed = value?.trim();
@@ -68,9 +57,9 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     participated_before: data.HackathonExperience,
     previous_competitions: nullable(data.PreviousHackathons),
     skills: data.Skills.trim(),
-    tools: toList(data.Tools),
+    tools: splitList(data.Tools),
     portfolio_url: nullable(data.Portfolio),
-    other_links: toList(data.Links),
+    other_links: splitList(data.Links),
     motivation: data.Motivation.trim(),
     food_allergies: nullable(data.FoodAllergies),
     available_during_event: data.Availability.toLowerCase() as
@@ -94,9 +83,8 @@ export async function submitRegistration(
 ): Promise<RegistrationResult> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/registrations`, {
+    response = await backendFetch("/registrations", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(toPayload(data)),
     });
   } catch {
@@ -143,7 +131,7 @@ function readError(status: number): string {
 export async function listAllRegistrations(
   status?: RegistrationStatus,
 ): Promise<FetchResult<RegistrationDetail[]>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   const limit = 100;
@@ -156,7 +144,7 @@ export async function listAllRegistrations(
       const q = status
         ? `/registrations?page=${page}&limit=${limit}&status=${status}`
         : `/registrations?page=${page}&limit=${limit}`;
-      const res = await apiFetch(q);
+      const res = await backendFetch(q, { auth: true });
       if (!res.ok) return { ok: false, error: readError(res.status) };
       const body = (await res.json()) as PaginatedRegistrations;
       all.push(...body.data);
@@ -175,11 +163,11 @@ export async function listAllRegistrations(
 export async function getRegistration(
   id: string,
 ): Promise<FetchResult<RegistrationDetail>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/registrations/${id}`);
+    const res = await backendFetch(`/registrations/${id}`, { auth: true });
     if (!res.ok) return { ok: false, error: readError(res.status) };
     return { ok: true, data: (await res.json()) as RegistrationDetail };
   } catch (e) {
@@ -204,11 +192,12 @@ export async function updateRegistration(
   id: string,
   patch: RegistrationPatch,
 ): Promise<FetchResult<RegistrationDetail>> {
-  const denied = await requireAdmin();
+  const denied = await requireRole("admin");
   if (denied) return denied;
 
   try {
-    const res = await apiFetch(`/registrations/${id}`, {
+    const res = await backendFetch(`/registrations/${id}`, {
+      auth: true,
       method: "PATCH",
       body: JSON.stringify(patch),
     });

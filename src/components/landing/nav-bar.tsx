@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 const links = [
   { href: "/", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#agenda", label: "Agenda" },
-  { href: "#authors", label: "Authors" },
+  { href: "/#agenda", label: "Agenda" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 function getActiveEffectImage(theme?: string) {
@@ -33,12 +33,19 @@ function getActiveEffectImage(theme?: string) {
 } 
 
 
+const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+
 export function NavBar() {
-  const [active, setActive] = useState("/");
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
+  const [active, setActive] = useState<string | null>(null);
   const scrollingRef = useRef(false);
   const {theme} = useTheme();
+  const isClient = useIsClient();
   const activeImage = getActiveEffectImage(theme);
   useEffect(() => {
+    if (!isLanding) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (scrollingRef.current) return;
@@ -52,7 +59,7 @@ export function NavBar() {
         }
         if (best) {
           const id = best.id;
-          setActive(id ? `#${id}` : "/");
+          setActive(id ? `/#${id}` : "/");
         }
       },
       { rootMargin: "-40% 0px -40% 0px" }
@@ -60,7 +67,7 @@ export function NavBar() {
 
     document.querySelectorAll("section[id]").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [isLanding]);
 
   const handleClick = (href: string) => {
     scrollingRef.current = true;
@@ -70,21 +77,23 @@ export function NavBar() {
     }, 800);
   };
 
+  const shouldShow = isLanding ? active : null;
+
   return (
-    <nav className="flex h-14.75 w-169.25 items-center justify-around">
+    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
       {links.map(({ href, label }) => {
-        const isActive = active === href;
+        const isActive = shouldShow === href;
         return (
           <Link
             key={href}
             href={href}
-            onClick={() => handleClick(href)}
+            onClick={() => isLanding && handleClick(href)}
             className={`relative font-hand text-[28px] text-white/70 hover:text-white ${
               isActive ? "text-white" : ""
             }`}
           >
             {label}
-            {isActive && (
+            {isClient && isActive && (
               <Image
                 src={activeImage}
                 alt=""

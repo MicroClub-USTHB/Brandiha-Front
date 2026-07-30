@@ -4,11 +4,11 @@ import { BRANDIHA_AGENDA_DATA } from "@/lib/agenda-data";
 
 export function Agenda() {
   return (
-    <Section as="section" id="agenda" className="w-full py-16">
+    <Section as="section" id="agenda" className="w-full py-16 scroll-mt-24">
       <div className="mx-auto max-w-[1500px] px-6">
         <div className="text-center mb-16">
-          <h2 className="font-heading text-6xl md:text-8xl font-black uppercase tracking-wider text-white drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]">
-            BRANDIHA AGENDA
+          <h2 className="font-heading text-4xl lg:text-8xl font-bold text-white drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]">
+            Agenda
           </h2>
         </div>
 

@@ -6,7 +6,6 @@ import { Info } from "lucide-react";
 import { updateRegistration } from "@/lib/api/registrations";
 import { listTeams } from "@/lib/api/teams";
 import type { Team, TeamMember } from "@/lib/api/team-types";
-import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
 import { MemberDetail } from "@/components/hr/member-detail";
@@ -21,27 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { teamStatus } from "@/lib/team-status";
 import { cn } from "@/lib/utils";
-
-/**
- * A team's status is the majority of its members' statuses. Ties (no clear
- * majority, including an empty team) resolve to `pending`. Replaces the
- * backend's arbitrary single-member value.
- */
-function teamStatus(members: TeamMember[]): RegistrationStatus {
-  const counts: Record<RegistrationStatus, number> = {
-    pending: 0,
-    accepted: 0,
-    rejected: 0,
-  };
-  for (const m of members) counts[m.status]++;
-
-  const max = Math.max(counts.pending, counts.accepted, counts.rejected);
-  const leaders = (["accepted", "rejected", "pending"] as const).filter(
-    (s) => counts[s] === max,
-  );
-  return leaders.length === 1 ? leaders[0] : "pending";
-}
 
 type PendingMove = { member: TeamMember; fromTeam: Team; toTeam: Team };
 
@@ -203,7 +183,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                   <p className="text-xs text-muted-foreground">
                     {team.members.length} member{team.members.length === 1 ? "" : "s"}
                     {" · "}
-                    <span className="font-mono">{team.id.slice(0, 8)}</span>
+                    <span className="font-mono">{team.secret_code}</span>
                   </p>
                 </div>
                 <StatusBadge status={teamStatus(team.members)} />
@@ -230,7 +210,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 teamId={team.id}
                 teamName={team.name}
                 currentStatus={teamStatus(team.members)}
-                memberCount={team.members.length}
+                members={team.members}
                 onDone={refreshBoard}
               />
             </section>

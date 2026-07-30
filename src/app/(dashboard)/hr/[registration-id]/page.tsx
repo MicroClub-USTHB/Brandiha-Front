@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
+import { checkAccess } from "@/lib/auth/session";
 import { getRegistration } from "@/lib/api/registrations";
+import { AccessNotice } from "@/components/auth/access-notice";
 import { RegistrationDetails } from "@/components/hr/registration-details";
 import { ShareButton } from "@/components/hr/share-button";
 
 type Props = {
-  searchParams: Promise<{ "registration-id"?: string }>;
+  params: Promise<{ "registration-id": string }>;
 };
 
-export default async function RhPage(props: Props) {
-  const session = await getSession();
-  if (!session) redirect("/login?from=/rh");
+/** Detail view for one registration, deep-linked from the HR board and shareable. */
+export default async function RegistrationPage(props: Props) {
+  // `/registrations` is admin-only on the backend (`get_current_admin`).
+  const access = await checkAccess("admin");
+  if (!access.ok) return <AccessNotice reason={access.reason} />;
 
-  const searchParams = await props.searchParams;
-  const registrationId = searchParams["registration-id"];
-  if (!registrationId) redirect("/hr");
+  const { "registration-id": registrationId } = await props.params;
 
   const result = await getRegistration(registrationId);
   if (!result.ok) {
