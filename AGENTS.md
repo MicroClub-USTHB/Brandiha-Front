@@ -61,6 +61,7 @@ src/
     page.tsx               # Landing page
     register/              # Registration page
     login/                 # Staff login page
+    leaderboard/           # Public leaderboard — read-only, no session
     not-found.tsx          # 404
     error.tsx              # Error boundary below the root layout
     global-error.tsx       # Error boundary for the root layout itself
@@ -71,6 +72,7 @@ src/
       hr/                  #   Admin: team board + registration detail
       submissions/         #   Staff: challenge list + per-challenge submissions
       vote/                #   Alumni: Borda ballot
+      super-admin-leaderboard/  # Super admin: score editing + leaderboard freeze
     (challenges)/
       submit/              # Public: challenge list + submission form (team code, no session)
   components/
@@ -82,6 +84,7 @@ src/
     hr/                    # Team board, member rows, status badge, team actions, CSV export
     submissions/           # Submissions table + CSV export
     vote/                  # Ballot and ballot rows
+    leaderboard/           # Public board, score sheet, freeze toggle
     submit/                # Public submission form
     auth/access-notice.tsx # Rendered in place of a page a role may not see
     cursor/                # Graffiti cursor, trail, splatter
@@ -104,6 +107,9 @@ src/
       teams.ts             # Team reads, bulk status, delete
       challenges.ts        # Public challenge list, submission, staff detail
       voting.ts            # Alumni ballot read + vote
+      leaderboard.ts       # Public + admin leaderboard, freeze toggle
+      actions.ts           # Bulk score update Server Action
+      freezeAction.ts      # Freeze toggle Server Action
       challenge-window.ts  # upcoming / open / closed, shared server and client
       *-types.ts           # Backend response shapes
     auth/

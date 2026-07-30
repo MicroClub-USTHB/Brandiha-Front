@@ -183,7 +183,7 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                   <p className="text-xs text-muted-foreground">
                     {team.members.length} member{team.members.length === 1 ? "" : "s"}
                     {" · "}
-                    <span className="font-mono">{team.id.slice(0, 8)}</span>
+                    <span className="font-mono">{team.secret_code}</span>
                   </p>
                 </div>
                 <StatusBadge status={teamStatus(team.members)} />

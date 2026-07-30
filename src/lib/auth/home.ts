@@ -13,6 +13,6 @@ import type { Role } from "@/lib/auth/jwt";
  */
 export const HOME_BY_ROLE: Record<Role, string> = {
   admin: "/hr",
-  super_admin: "/leaderboard",
+  super_admin: "/super-admin-leaderboard",
   alumni: "/vote",
 };

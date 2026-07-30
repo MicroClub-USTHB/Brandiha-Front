@@ -16,11 +16,20 @@ import { SpraySplatter } from "./spray-splatter";
  *
  * Listed by hand rather than read from the route group, which `usePathname`
  * can't see. Deliberately not shared with the proxy's `PROTECTED_PREFIXES`
- * either, though the two happen to match today: "needs a session" and "is a
- * working tool, not a poster" are different questions, and a page can be the
- * second without being the first.
+ * either, though the two hold the same four routes today: "needs a session" and
+ * "is a working tool, not a poster" are different questions, and a page can be
+ * the second without being the first.
+ *
+ * The public `/leaderboard` is that case, and is left *on* for now — it is a
+ * score table, so there's an argument either way, but it is a public-facing page
+ * rather than staff tooling. Add it here if it reads wrong in practice.
  */
-const CURSOR_DISABLED_PREFIXES = ["/hr", "/submissions", "/vote"];
+const CURSOR_DISABLED_PREFIXES = [
+  "/hr",
+  "/submissions",
+  "/vote",
+  "/super-admin-leaderboard",
+];
 
 /**
  * Graffiti paint-splash cursor. Mounted once in the root layout. Renders via a
