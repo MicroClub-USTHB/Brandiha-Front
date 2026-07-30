@@ -13,7 +13,7 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
   const [frozen, setFrozen] = useState(initialFrozen);
   const [loading, setLoading] = useState(false);
 
-  const handleToggle = async (checked: boolean) => {
+  const handleToggle = async () => {
     setLoading(true);
 
     const res = await toggleLeaderboardFreezeAction();
@@ -31,7 +31,7 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
       <Switch
         id="freeze-mode"
         checked={frozen}
-        onCheckedChange={handleToggle}
+        onCheckedChange={() => handleToggle()}
         disabled={loading}
       />
       <Label

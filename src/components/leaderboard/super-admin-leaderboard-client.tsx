@@ -17,8 +17,6 @@ interface SuperAdminLeaderboardClientProps {
 
 export function SuperAdminLeaderboardClient({
   initialLeaderboard,
-  isFrozen,
-  frozenAt,
 }: SuperAdminLeaderboardClientProps) {
   const [teams, setTeams] = useState(initialLeaderboard);
 

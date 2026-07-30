@@ -7,7 +7,6 @@ export type BulkScoreUpdatePayload = {
   score: number;
 };
 
-
 export default async function bulkUpdateScoresAction(
   payload: BulkScoreUpdatePayload[]
 ): Promise<{ success: boolean; error?: string }> {
@@ -29,10 +28,10 @@ export default async function bulkUpdateScoresAction(
     }
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
       success: false,
-      error: err?.message || "An unexpected error occurred",
+      error: err instanceof Error ? err.message : "An unexpected error occurred",
     };
   }
 }

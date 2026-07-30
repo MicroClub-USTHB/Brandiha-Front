@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { AdminLeaderboardEntry, ChallengeScore } from "@/lib/api/leaderboard";
-import  bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
+import bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,12 +40,13 @@ export function ChallengeScoreSheet({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<ScoreDrafts>(() => buildDrafts(team.per_challenge));
 
-  useEffect(() => {
-    if (!open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
       setDrafts(buildDrafts(team.per_challenge));
       setErrorMsg(null);
     }
-  }, [open, team.per_challenge]);
+  };
 
   const currentTotal = useMemo(() => computeTotal(drafts), [drafts]);
 
@@ -63,7 +64,7 @@ export function ChallengeScoreSheet({
 
     try {
       const payload: BulkScoreUpdatePayload[] = [];
-      
+
       const updatedChallenges = team.per_challenge.map((challenge) => {
         const rawDraft = drafts[challenge.challenge_id];
         const parsed = Number(rawDraft);
@@ -80,7 +81,7 @@ export function ChallengeScoreSheet({
       });
 
       if (payload.length === 0) {
-        setOpen(false);
+        handleOpenChange(false);
         return;
       }
 
@@ -93,18 +94,20 @@ export function ChallengeScoreSheet({
       };
 
       onSaveSuccess(updatedTeam);
-      setOpen(false);
-    } catch (err: any) {
+      handleOpenChange(false);
+    } catch (err: unknown) {
       console.error("Failed to update scores:", err);
-      setErrorMsg(err.message || "Une erreur est survenue lors de la sauvegarde.");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Une erreur est survenue lors de la sauvegarde.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
         Edit scores
       </Button>
       <SheetContent className="overflow-y-auto sm:max-w-2xl">
@@ -115,7 +118,7 @@ export function ChallengeScoreSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-4 px-4 pb-4 mt-4">
+        <div className="mt-4 space-y-4 px-4 pb-4">
           {errorMsg && (
             <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
               {errorMsg}
