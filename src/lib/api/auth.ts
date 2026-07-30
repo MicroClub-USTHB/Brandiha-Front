@@ -26,6 +26,14 @@ export type LoginResult = { ok: true; role: Role } | { ok: false; error: string 
  * map to user-facing messages.
  */
 export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
+  // Four paths below return the same "something went wrong on our side" copy: a
+  // non-OK status, an unparseable body, a body missing a token, and a token
+  // whose role we can't read. That is deliberate — which of our own internals
+  // broke is not the visitor's problem, and naming it leaks backend shape.
+  //
+  // They were briefly numbered ("1 Something went wrong…") to tell them apart
+  // while debugging, which shipped. If you need to distinguish them again, log
+  // server-side rather than editing the copy the user reads.
   let response: Response;
   try {
     response = await backendFetch("/auth/login", {
@@ -46,7 +54,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!response.ok) {
     return {
       ok: false,
-      error: "1 Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -56,7 +64,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   } catch {
     return {
       ok: false,
-      error: "2 Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -65,7 +73,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!isTokenPair(body)) {
     return {
       ok: false,
-      error: "3Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
