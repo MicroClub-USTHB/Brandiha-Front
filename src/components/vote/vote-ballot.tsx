@@ -73,12 +73,12 @@ export function VoteBallot({
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 w-full max-w-4xl">
       <Reorder.Group
         axis="y"
         values={order}
         onReorder={setOrder}
-        className="flex flex-col gap-2"
+        className="flex w-full flex-col gap-3"
       >
         {order.map((team, i) => (
           <BallotRow
@@ -94,30 +94,25 @@ export function VoteBallot({
       </Reorder.Group>
 
       {error && (
-        <p role="alert" className="mt-6 text-sm font-semibold text-destructive">
+        <p role="alert" className="mt-6 text-center text-sm font-semibold text-destructive">
           {error}
         </p>
       )}
 
-      {/* The button sits at the end of the ballot, under the last row it acts
-          on. The recorded-vote notice is a statement, not an action, so it stays
-          at the left edge with the rest of the copy. */}
-      <div className={cn("mt-8 flex", !voted && "justify-end")}>
+      <div className={cn("mt-8 flex w-full", !voted && "justify-center")}>
         {voted ? (
           <p role="status" className="flex items-center gap-2 text-sm text-white/70">
             <CircleCheckBig className="size-4 text-primary" aria-hidden />
             Vote recorded. Your ranking is final and can&apos;t be changed.
           </p>
         ) : (
-          // A vote can't be taken back, so the button opens a confirmation
-          // rather than casting straight away.
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <ActionButton
                 variant="primary"
                 type="button"
                 disabled={busy}
-                className="h-12"
+                className="h-12 w-full max-w-xs"
               >
                 Submit vote
                 <Send className="size-4 stroke-[2.5]" />
