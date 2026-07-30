@@ -31,14 +31,14 @@ export default async function VoteLeaderboardPage() {
     );
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start gap-2 pt-8">
-      <h1 className="mb-4 font-heading text-4xl lg:text-8xl font-bold text-white">
+    <main className="mx-auto flex w-full max-w-5xl flex-col items-center p-6">
+      <h1 className="mb-2 text-4xl lg:text-8xl font-bold font-heading text-white">
         Vote leaderboard
       </h1>
-      <p className="mb-6 max-w-2xl px-6 text-center text-sm text-white/70">
-        Borda points from the alumni ballots — a team earns{" "}
+      <p className="mb-4 max-w-2xl text-center text-base text-white/85">
+        Borda points from the alumni ballots. A team earns{" "}
         <span className="font-semibold text-white">(N − rank + 1)</span> per vote,
-        N being the number of teams ranked. These are preference points, not
+        where N is the number of teams ranked. These are preference points, not
         challenge scores.
       </p>
 
@@ -50,7 +50,6 @@ export default async function VoteLeaderboardPage() {
           total_score: entry.borda_score,
         }))}
       />
-      <div className="h-12" />
-    </div>
+    </main>
   );
 }

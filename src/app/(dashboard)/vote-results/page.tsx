@@ -30,16 +30,18 @@ export default async function VoteResultsPage() {
     );
 
   return (
-    <main className="mx-auto w-full max-w-3xl p-6 pt-8 font-sans">
-      <h1 className="font-heading text-4xl lg:text-8xl font-bold text-white">
+    <main className="mx-auto flex w-full max-w-5xl flex-col items-center p-6">
+      <h1 className="mb-2 text-4xl lg:text-8xl font-bold font-heading text-white">
         Vote results
       </h1>
-      <p className="mt-2 text-sm text-white/70">
-        Every alumni&apos;s ballot, first preference at the top — the breakdown
+      <p className="mb-4 max-w-2xl text-center text-base text-white/85">
+        Every alumni&apos;s ballot, first preference at the top. This is the breakdown
         the vote leaderboard is tallied from.
       </p>
 
-      <VoteResultsList votes={result.data} />
+      <div className="w-full">
+        <VoteResultsList votes={result.data} />
+      </div>
     </main>
   );
 }
