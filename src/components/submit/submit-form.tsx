@@ -4,12 +4,22 @@ import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, CircleCheckBig, KeyRound, Link2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, CircleCheckBig, KeyRound, Link2 } from "lucide-react";
 import { FormInput } from "@/components/form";
 import { ActionButton } from "@/components/action-button";
 import { submissionSchema, SubmissionFormData } from "@/lib/validators/submission-schema";
 import { submitChallenge } from "@/lib/api/challenges";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function SubmitTitle({ challengeTitle }: { challengeTitle: string }) {
   return (
@@ -33,6 +43,7 @@ export default function SubmitForm({
 }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const form = useForm<SubmissionFormData>({
     resolver: zodResolver(submissionSchema),
@@ -41,24 +52,30 @@ export default function SubmitForm({
     defaultValues: { TeamCode: "", Link: "" },
   });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onValid = () => {
+    setSubmitError(null);
+    setShowConfirm(true);
+  };
+
+  const confirmSubmit = async () => {
+    const data = form.getValues();
     setSubmitError(null);
     const result = await submitChallenge(challengeId, data);
     if (!result.ok) {
       setSubmitError(result.error);
+      setShowConfirm(false);
       return;
     }
-    // A team gets one submission per challenge (the backend rejects a second
-    // with 409), so there's nothing to return to — swap the fields for a receipt.
     setSubmitted(true);
-  });
+    setShowConfirm(false);
+  };
 
   const isSubmitting = form.formState.isSubmitting;
 
   return (
     <div className={cn("relative mx-auto flex w-full max-w-md flex-col items-center px-4 overflow-visible")}>
       <form
-        onSubmit={onSubmit}
+        onSubmit={form.handleSubmit(onValid)}
         style={{
           backgroundImage: "url('/paper.svg')",
           backgroundSize: "100% 100%",
@@ -142,6 +159,27 @@ export default function SubmitForm({
               Submit
               <ArrowRight className={cn("size-5 stroke-[2.5]")} />
             </ActionButton>
+
+            <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="size-5 text-warning" />
+                    Submit your entry?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Each team gets one submission per challenge. This entry is final
+                    once it&rsquo;s in.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmSubmit}>
+                    Submit entry
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </form>
