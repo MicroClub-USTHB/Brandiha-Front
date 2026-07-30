@@ -46,8 +46,8 @@ const variantConfig: Record<PopupVariant, PopupVariantConfig> = {
     primaryBtnText: "HOME PAGE",
     showSecondary: false,
     icon: Check,
-    iconBg: "bg-[#00e676]",
-    glowColor: "shadow-[0_0_25px_rgba(0,230,118,0.7)]",
+    iconBg: "bg-success",
+    glowColor: "shadow-[0_0_25px] shadow-success/70",
   },
   error: {
     imageSrc: "/red-popup.png",
@@ -57,8 +57,8 @@ const variantConfig: Record<PopupVariant, PopupVariantConfig> = {
     showSecondary: true,
     secondaryBtnText: "TRY AGAIN",
     icon: XCircle,
-    iconBg: "bg-red-500",
-    glowColor: "shadow-[0_0_25px_rgba(239,68,68,0.7)]",
+    iconBg: "bg-destructive",
+    glowColor: "shadow-[0_0_25px] shadow-destructive/70",
   },
   warning: {
     imageSrc: "/yellow-popup.png",
@@ -68,8 +68,8 @@ const variantConfig: Record<PopupVariant, PopupVariantConfig> = {
     showSecondary: true,
     secondaryBtnText: "TRY AGAIN",
     icon: AlertTriangle,
-    iconBg: "bg-yellow-500",
-    glowColor: "shadow-[0_0_25px_rgba(234,179,8,0.7)]",
+    iconBg: "bg-warning",
+    glowColor: "shadow-[0_0_25px] shadow-warning/70",
   },
 };
 

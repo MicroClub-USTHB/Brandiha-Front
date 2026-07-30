@@ -6,7 +6,20 @@ import { listAllRegistrations } from "@/lib/api/registrations";
 import type { RegistrationDetail, RegistrationStatus } from "@/lib/api/registration-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
 
-/** CSV columns: [header, accessor]. Order defines the column order in the file. */
+/**
+ * CSV columns: [header, accessor]. Order defines the column order in the file.
+ *
+ * `Team Code` is here on purpose, and deliberately differs from the submissions
+ * export, which leaves the same field out. This is the admin roster the codes
+ * are handed out *from* — an organiser needs each team's code to give it to
+ * them, and going back to the API row-by-row for that is not a workflow. The
+ * submissions page only reviews what was already submitted, so it has no reason
+ * to surface the credential at all.
+ *
+ * So: the asymmetry is the decision, not an oversight. Treat an export of this
+ * file as carrying live credentials — it authorises challenge submissions on
+ * behalf of every team in it.
+ */
 const COLUMNS: CsvColumns<RegistrationDetail> = [
   ["Full Name", (r) => r.user_full_name],
   ["Email", (r) => r.user_email],

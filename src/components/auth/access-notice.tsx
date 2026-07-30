@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { LockKeyhole, ShieldAlert, type LucideIcon } from "lucide-react";
 import type { AccessDenialReason } from "@/lib/auth/jwt";
+import { Notice, NoticeLink } from "@/components/notice";
 
 /** Copy and affordance per denial reason, keyed by `AccessDenialReason`. */
 const VARIANTS: Record<
@@ -35,25 +35,11 @@ const VARIANTS: Record<
  * 200 and each page renders this itself.
  */
 export function AccessNotice({ reason }: { reason: AccessDenialReason }) {
-  const { icon: Icon, status, title, message, href, label } = VARIANTS[reason];
+  const { icon, status, title, message, href, label } = VARIANTS[reason];
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 p-6 text-center font-sans">
-      {/* The dashboard shell sits on the dark paint wall, so this follows the
-          header and HR pages in using explicit white rather than `foreground`,
-          which resolves dark in every theme. */}
-      <Icon className="size-10 text-white/60" aria-hidden />
-      <p className="font-mono text-sm text-white/50">{status}</p>
-      <h1 className="font-heading text-2xl font-extrabold uppercase tracking-wide text-white">
-        {title}
-      </h1>
-      <p className="text-white/70">{message}</p>
-      <Link
-        href={href}
-        className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-      >
-        {label}
-      </Link>
-    </main>
+    <Notice icon={icon} status={status} title={title} message={message}>
+      <NoticeLink href={href}>{label}</NoticeLink>
+    </Notice>
   );
 }

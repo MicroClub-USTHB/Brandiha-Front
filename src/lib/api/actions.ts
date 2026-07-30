@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch } from "@/lib/api/client";
+import { backendFetch } from "@/lib/api/fetch";
 
 export type BulkScoreUpdatePayload = {
   submission_id: string;
@@ -11,11 +11,9 @@ export default async function bulkUpdateScoresAction(
   payload: BulkScoreUpdatePayload[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await apiFetch("/admin/challenge-submissions", {
+    const res = await backendFetch("/admin/challenge-submissions", {
+      auth: true,
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify(payload),
     });
 

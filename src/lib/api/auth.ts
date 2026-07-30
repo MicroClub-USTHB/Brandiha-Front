@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { LoginFormData } from "@/lib/validators/login-schema";
-import { API_BASE_URL } from "@/lib/api/base-url";
+import { backendFetch } from "@/lib/api/fetch";
 import {
   SESSION_COOKIE,
   REFRESH_COOKIE,
@@ -26,11 +26,18 @@ export type LoginResult = { ok: true; role: Role } | { ok: false; error: string 
  * map to user-facing messages.
  */
 export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
+  // Four paths below return the same "something went wrong on our side" copy: a
+  // non-OK status, an unparseable body, a body missing a token, and a token
+  // whose role we can't read. That is deliberate — which of our own internals
+  // broke is not the visitor's problem, and naming it leaks backend shape.
+  //
+  // They were briefly numbered ("1 Something went wrong…") to tell them apart
+  // while debugging, which shipped. If you need to distinguish them again, log
+  // server-side rather than editing the copy the user reads.
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/auth/login`, {
+    response = await backendFetch("/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: data.Email.trim(), password: data.Password }),
     });
   } catch {
@@ -47,7 +54,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!response.ok) {
     return {
       ok: false,
-      error: "1 Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -57,7 +64,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   } catch {
     return {
       ok: false,
-      error: "2 Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -66,7 +73,7 @@ export async function loginStaff(data: LoginFormData): Promise<LoginResult> {
   if (!isTokenPair(body)) {
     return {
       ok: false,
-      error: "3Something went wrong on our side. Please try again in a moment.",
+      error: "Something went wrong on our side. Please try again in a moment.",
     };
   }
 
@@ -96,14 +103,14 @@ export async function logout(): Promise<void> {
 
   if (refreshToken) {
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      // Not `auth: true`: that would refresh an expired token purely to spend
+      // it on the call that ends the session, and throw when there is nothing
+      // to refresh — where here a missing token is simply nothing to revoke.
+      await backendFetch("/auth/logout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ refresh_token: refreshToken }),
-        signal: AbortSignal.timeout(5_000),
+        timeoutMs: 5_000,
       });
     } catch {
       // Ignore network errors on logout, proceed to clear local cookies

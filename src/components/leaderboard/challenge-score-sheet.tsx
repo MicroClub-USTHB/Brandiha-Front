@@ -200,7 +200,7 @@ export function ChallengeScoreSheet({
                       />
                     </label>
                     {!hasSubmission && (
-                      <p className="mt-1 text-xs text-amber-500/90">
+                      <p className="mt-1 text-xs text-warning/90">
                         This submission has not been submitted yet and cannot be graded.
                       </p>
                     )}

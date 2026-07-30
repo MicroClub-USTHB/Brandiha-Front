@@ -1,4 +1,3 @@
-"use me";
 "use server";
 
 import { toggleLeaderboardFreezeApi } from "@/lib/api/leaderboard";

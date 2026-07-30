@@ -11,10 +11,31 @@
  */
 export type CsvColumns<T> = [string, (row: T) => string | null | undefined][];
 
-/** Quote a value per RFC 4180 — wrap in quotes and double any embedded quotes. */
+/**
+ * Characters that make a spreadsheet read a cell as a formula rather than text.
+ * `=` and `+` are the obvious ones; `-` starts a negation, `@` is Excel's
+ * legacy function-call sigil, and a leading tab or carriage return can carry a
+ * formula past a filter that only checks the first four (OWASP lists all six).
+ */
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
+/**
+ * Quote a value per RFC 4180 — wrap in quotes and double any embedded quotes —
+ * and defuse anything a spreadsheet would evaluate.
+ *
+ * Every field in these exports is free text an untrusted public registrant
+ * typed, and it lands in an admin's Excel. `=HYPERLINK(...)` in a Motivation
+ * box is a live formula on open, so a leading formula character gets a `'`
+ * ahead of it: Excel and LibreOffice both read that as "the rest is text" and
+ * hide the quote, while a plain reader (or `git diff`) still shows the value.
+ *
+ * Note that RFC 4180 quoting alone does *not* prevent this — a spreadsheet
+ * strips the surrounding quotes and then evaluates what's inside.
+ */
 function csvCell(value: string | null | undefined): string {
   const text = value ?? "";
-  return `"${text.replace(/"/g, '""')}"`;
+  const safe = FORMULA_PREFIX.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 /**
@@ -43,5 +64,8 @@ export function downloadCsv(csv: string, filename: string): void {
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // Revoked on a later task, not right after `click()`. Firefox starts the
+  // download asynchronously and reads the blob after the current task ends, so
+  // revoking synchronously can race it and save an empty file.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

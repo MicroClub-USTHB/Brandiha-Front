@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+import { splitList } from "@/lib/list-field";
+
+/**
+ * "Other Links" is a list field — `splitList` turns it into `other_links[]` for
+ * the backend — so every entry has to be a URL, not the whole string. Validated
+ * as one `z.url()` it rejected the very input the label asks for ("Other
+ * Links", plural), because `https://a.com, https://b.com` is not a single URL.
+ */
+const urlList = (message: string) =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => splitList(value).every((entry) => z.url().safeParse(entry).success),
+      message,
+    );
+
 export const registrationSchema = z.object({
   FullName: z.string().trim().min(1, "Please enter your full name."),
   Email: z.email("Please enter a valid email address, e.g. you@example.com."),
@@ -24,10 +42,9 @@ export const registrationSchema = z.object({
     .url("Please enter a valid URL, including https://.")
     .optional()
     .or(z.literal("")),
-  Links: z
-    .url("Please enter a valid URL, including https://.")
-    .optional()
-    .or(z.literal("")),
+  Links: urlList(
+    "Please enter valid URLs, including https://, separated by commas or new lines.",
+  ),
   Motivation: z.string().trim().min(1, "Please tell us why you want to participate."),
 
   Availability: z.enum(["Yes", "No", "Other"], {
