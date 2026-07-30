@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     // without knowing the header's height — the header is `sticky`, so it stays
     // in flow and really does take that space.
     <div className="min-h-screen flex flex-col">
-      <DashboardHeader userName={session?.name} userRole={session?.role} />
+      <DashboardHeader userName={session?.name} userEmail={session?.email} userRole={session?.role} />
       {children}
     </div>
   );

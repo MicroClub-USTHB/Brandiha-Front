@@ -5,9 +5,6 @@ import { VoteBallot } from "@/components/vote/vote-ballot";
 
 /** The alumni landing page: rank every accepted team into a Borda vote. */
 export default async function VotePage() {
-  // `/alumni/voting` is `get_current_alumni_only` on the backend — alumni and
-  // nobody else. `super_admin` is deliberately absent: the roles are disjoint,
-  // and it reads the results (`/alumni/leaderboard`) rather than casting a vote.
   const access = await checkAccess("alumni");
   if (!access.ok) return <AccessNotice reason={access.reason} />;
 
