@@ -18,7 +18,7 @@ export function Faq() {
       className="flex w-full items-center justify-center py-16 scroll-mt-24"
     >
       <div className="flex w-full max-w-4xl flex-col items-center px-4">
-        <h2 className="mb-4 font-heading text-8xl font-black uppercase tracking-wider text-white drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)] md:text-[11rem]">
+        <h2 className="mb-4 font-heading text-4xl lg:text-8xl font-bold text-white drop-shadow-[0_6px_6px_rgba(0,0,0,0.6)]">
           FAQ
         </h2>
 
