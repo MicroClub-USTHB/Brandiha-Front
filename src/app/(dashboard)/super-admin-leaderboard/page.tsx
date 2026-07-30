@@ -30,7 +30,7 @@ export default async function SuperAdminLeaderboard() {
     );
   }
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start gap-2">
+    <div className="flex min-h-screen flex-col items-center justify-start gap-2 pt-8">
       {leaderboardResponse.frozen ? (
         <h1 className="mb-4 text-4xl lg:text-8xl font-bold font-heading text-white">Leaderboard (frozen)</h1>
       ) :(
