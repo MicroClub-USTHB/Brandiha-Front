@@ -214,19 +214,10 @@ export default function ChallengeCard({
     >
 
       <h1
-        className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize"
+        className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize mt-6"
         style={{ color: textColor }}
       >
-        {/* One word per line: `block` on each word rather than a width
-            constraint, so wrapping doesn't depend on the card's size. */}
-        {heading
-          ?.trim()
-          .split(/\s+/)
-          .map((word, i) => (
-            <span key={`${word}-${i}`} className="block">
-              {word}
-            </span>
-          ))}
+        {heading}
       </h1>
 
 
