@@ -43,6 +43,13 @@ const DEPARTMENT_CARDS: Record<Department, string> = {
   [Department.DESIGN]: "design-card.svg",
 };
 
+const DEPARTMENT_CARDS_GRAY: Record<Department, string> = {
+  [Department.MARKETING]: "marketing-card-gray.svg",
+  [Department.COMMUNICATION]: "communication-card-gray.svg",
+  [Department.MULTIMEDIA]: "multimedia-card-gray.svg",
+  [Department.DESIGN]: "design-card-gray.svg",
+};
+
 const DEPARTMENT_MASCOTS: Record<Department, string> = {
   [Department.MARKETING]: "marketing-mascot.png",
   [Department.COMMUNICATION]: "communication-mascot.png",
@@ -130,10 +137,6 @@ export default function ChallengeCard({
   // countdown can't disagree about whether the challenge is open.
   const now = useNow();
 
-  const textColor =
-    DEPARTMENT_COLORS[department] ||
-    "var(--brand-marketing)";
-
   const unlocksAt = toTime(unlocks_at);
   const endsAt = toTime(ends_at);
   // The server's answer holds the first paint; the client clock takes over on
@@ -144,6 +147,10 @@ export default function ChallengeCard({
   // Shut until the clock says otherwise — a closed challenge is locked again,
   // and drained of its color the same way.
   const isLocked = submissionWindow !== "open";
+
+  const textColor = isLocked
+    ? "#888888"
+    : DEPARTMENT_COLORS[department] || "var(--brand-marketing)";
 
   // Only a challenge that hasn't unlocked hides its mascot: there is nothing to
   // show off yet, and a lock is the whole message. A closed one keeps the
@@ -190,8 +197,9 @@ export default function ChallengeCard({
   const heading = title ?? "Coming Soon...";
 
   const cardImage =
-    DEPARTMENT_CARDS[department] ||
-    "marketing-card.svg";
+    (isLocked
+      ? DEPARTMENT_CARDS_GRAY[department]
+      : DEPARTMENT_CARDS[department]) || "marketing-card.svg";
 
   const mascot =
     DEPARTMENT_MASCOTS[department] ||
@@ -201,14 +209,10 @@ export default function ChallengeCard({
     <div
       className={cn(
         "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
-        // Drains the department color out of the card art, the title and the
-        // mascot too, not just the slot below — a locked card reads as inert at
-        // a glance.
-        "transition-[filter] duration-500",
-        isLocked && "grayscale",
       )}
       style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
     >
+
       <h1
         className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize"
         style={{ color: textColor }}
