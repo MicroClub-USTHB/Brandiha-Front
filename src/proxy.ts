@@ -11,7 +11,16 @@ import { HOME_BY_ROLE } from "@/lib/auth/home";
 import { refreshSession } from "@/lib/auth/refresh";
 
 /** Route prefixes that require an authenticated session, whatever the role. */
-const PROTECTED_PREFIXES = ["/hr", "/super-admin-leaderboard", "/submissions", "/vote"];
+const PROTECTED_PREFIXES = [
+  "/hr",
+  "/super-admin-leaderboard",
+  "/submissions",
+  "/vote",
+  // Siblings of `/vote` by name only — the prefix match is exact-or-slash, so
+  // neither is covered by the `/vote` entry above and both need naming here.
+  "/vote-leaderboard",
+  "/vote-results",
+];
 
 /** Where to send unauthenticated users. */
 const LOGIN_PATH = "/login";
@@ -116,7 +125,17 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // `/hr/:path*` matches the board and every registration detail page under it;
   // `/submissions/:path*` covers the per-challenge submission tables; `/vote` is
-  // the alumni ballot. The public `/submit/:id` page is deliberately absent — a
-  // team authenticates there with its secret code, not a session.
-  matcher: ["/login", "/hr/:path*", "/super-admin-leaderboard/:path*", "/submissions/:path*", "/vote/:path*"],
+  // the alumni ballot, and `/vote-leaderboard` / `/vote-results` are the super
+  // admin's tally and per-ballot audit of it. The public `/submit/:id` page is
+  // deliberately absent — a team authenticates there with its secret code, not a
+  // session.
+  matcher: [
+    "/login",
+    "/hr/:path*",
+    "/super-admin-leaderboard/:path*",
+    "/submissions/:path*",
+    "/vote/:path*",
+    "/vote-leaderboard/:path*",
+    "/vote-results/:path*",
+  ],
 };

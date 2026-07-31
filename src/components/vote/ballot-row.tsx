@@ -6,19 +6,6 @@ import { Button } from "@/components/ui/button";
 import type { Team } from "@/lib/api/team-types";
 import { cn } from "@/lib/utils";
 
-/**
- * One team on the ballot, as a `Reorder.Item` inside the ballot's group. Drag
- * starts from the grip only (`dragListener={false}` + `dragControls`, following
- * `hr/member-row.tsx`) so the arrow buttons stay clickable, and `Reorder` swaps
- * the neighbours as the row passes them.
- *
- * The arrows are not a nicety: dragging is pointer-only, and they're the whole
- * of the keyboard and screen-reader path through the ranking.
- *
- * `readOnly` drops both — a submitted vote can't be changed, so the row shows
- * the ranking without offering a way to move it. `disabled` is the transient
- * version of that, held while a submit is in flight.
- */
 export function BallotRow({
   team,
   rank,
@@ -32,7 +19,6 @@ export function BallotRow({
   total: number;
   disabled: boolean;
   readOnly: boolean;
-  /** Move this team to `to` (a 1-based rank), reordering the ballot around it. */
   onMove: (to: number) => void;
 }) {
   const controls = useDragControls();
@@ -50,7 +36,12 @@ export function BallotRow({
         cursor: "grabbing",
         boxShadow: "0 12px 28px rgba(0, 0, 0, 0.25)",
       }}
-      className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-card-foreground"
+      className="flex items-center gap-4 rounded-xl px-6 py-5 lg:px-8 lg:py-6"
+      style={{
+        backgroundImage: "url('/paper.svg')",
+        backgroundSize: "100% 100%",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       {!readOnly && (
         <button
@@ -63,20 +54,22 @@ export function BallotRow({
             disabled ? "opacity-40" : "cursor-grab active:cursor-grabbing",
           )}
         >
-          <GripVertical className="size-4" />
+          <GripVertical className="size-5 lg:size-6" />
         </button>
       )}
 
       <span
         aria-hidden
-        className="w-7 shrink-0 text-center font-mono text-sm font-bold text-primary"
+        className="w-8 shrink-0 text-center font-heading text-lg font-bold text-primary lg:text-xl"
       >
         {rank}
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold capitalize">{team.name}</p>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="truncate font-heading text-xl font-bold capitalize lg:text-2xl">
+          {team.name}
+        </p>
+        <p className="truncate text-sm text-muted-foreground lg:text-base">
           {team.members.length === 1 ? "1 member" : `${team.members.length} members`}
           {team.members.length > 0 && (
             <> &middot; {team.members.map((m) => m.full_name).join(", ")}</>
@@ -95,7 +88,7 @@ export function BallotRow({
             aria-label={`Move ${team.name} up to rank ${rank - 1}`}
             className="cursor-pointer text-muted-foreground"
           >
-            <ChevronUp className="size-4" />
+            <ChevronUp className="size-5 lg:size-6" />
           </Button>
           <Button
             type="button"
@@ -106,7 +99,7 @@ export function BallotRow({
             aria-label={`Move ${team.name} down to rank ${rank + 1}`}
             className="cursor-pointer text-muted-foreground"
           >
-            <ChevronDown className="size-4" />
+            <ChevronDown className="size-5 lg:size-6" />
           </Button>
         </div>
       )}
