@@ -144,19 +144,19 @@ export default function ChallengeCard({
   const submissionWindow =
     now === null ? initialWindow : resolveWindow(now, unlocksAt, endsAt);
 
-  // Shut until the clock says otherwise — a closed challenge is locked again,
-  // and drained of its color the same way.
-  const isLocked = submissionWindow !== "open";
-
-  const textColor = isLocked
-    ? "#888888"
-    : DEPARTMENT_COLORS[department] || "var(--brand-marketing)";
+  // Shut until the clock says otherwise — a closed challenge is locked again.
 
   // Only a challenge that hasn't unlocked hides its mascot: there is nothing to
   // show off yet, and a lock is the whole message. A closed one keeps the
   // mascot — it did run — and says it's over in the line underneath instead.
   const isUpcoming = submissionWindow === "upcoming";
   const isClosed = submissionWindow === "closed";
+
+  // Only an upcoming challenge is grayed out: its title is withheld and its
+  // card is a placeholder. A closed one keeps its color — it did run.
+  const textColor = isUpcoming
+    ? "#888888"
+    : DEPARTMENT_COLORS[department] || "var(--brand-marketing)";
 
   // A card that ticks open on screen was rendered without its title, since the
   // server had no reason to send one yet. Ask the server again rather than
@@ -176,20 +176,14 @@ export default function ChallengeCard({
   const unlockCountdown =
     isUpcoming && now !== null ? unlockLabel(now, unlocksAt) : null;
 
-  // The line under the mascot: an open challenge counts down to its deadline, a
-  // closed one just states that it's over. An open challenge without an
-  // `ends_at` runs indefinitely, so it gets no line at all rather than an empty
-  // one — there is no deadline to be counting towards.
-  const hasStatusLine =
-    isClosed || (submissionWindow === "open" && endsAt !== null);
-  const StatusIcon = isClosed ? Lock : Clock;
-  // "Closed" is a fact about the window, settled before the card ever renders,
-  // so unlike a countdown it doesn't have to wait for the client clock.
-  const statusLabel = isClosed
-    ? "Closed"
-    : endsAt !== null && now !== null
-      ? formatCountdown(endsAt - now)
-      : null;
+  // The line under the mascot: only an open challenge counts down to its
+  // deadline. A closed one gets no line at all — the stamp on the card already
+  // says it's over, and the mascot grows to fill the space instead. An open
+  // challenge without an `ends_at` runs indefinitely, so it gets no line
+  // either — there is no deadline to be counting towards.
+  const hasStatusLine = submissionWindow === "open" && endsAt !== null;
+  const statusLabel =
+    endsAt !== null && now !== null ? formatCountdown(endsAt - now) : null;
 
   // The server withholds an upcoming challenge's title outright rather than
   // sending one for the card to hide, so there is nothing to decide here: the
@@ -197,7 +191,7 @@ export default function ChallengeCard({
   const heading = title ?? "Coming Soon...";
 
   const cardImage =
-    (isLocked
+    (isUpcoming
       ? DEPARTMENT_CARDS_GRAY[department]
       : DEPARTMENT_CARDS[department]) || "marketing-card.svg";
 
@@ -208,10 +202,25 @@ export default function ChallengeCard({
   return (
     <div
       className={cn(
-        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat flex flex-col items-center justify-between px-6 py-8",
+        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8",
       )}
       style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
     >
+      {isClosed && (
+        // The stamp is what tells a closed card apart at a glance: it keeps
+        // the department color, just faded and tilted like ink over the card.
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        >
+          <span
+            className="-rotate-12 rounded-xl border-4 px-4 py-1.5 font-heading text-2xl md:text-3xl xl:text-4xl font-bold uppercase tracking-widest"
+            style={{ color: textColor, borderColor: textColor }}
+          >
+            Closed
+          </span>
+        </div>
+      )}
 
       <h1
         className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize mt-6"
@@ -254,25 +263,37 @@ export default function ChallengeCard({
               className="min-h-0 w-auto max-w-full flex-1 object-contain"
             />
 
-            {hasStatusLine && (
-              // `currentColor` on the wrapper is what makes both the icon and
-              // the label track the department color (grayscaled by the parent
-              // once the challenge is closed).
+            {isClosed ? (
+              // An invisible twin of the status line, so the mascot keeps the
+              // exact spot it held while the challenge was open — the stamp on
+              // the card already says the rest.
               <div
-                className="flex items-center gap-1.5"
-                style={{ color: textColor }}
+                aria-hidden
+                className="flex items-center gap-1.5 opacity-0"
               >
-                {/* Decorative: the label beside it says the same thing. */}
-                <StatusIcon
-                  className="size-4 md:size-5 xl:size-6 shrink-0"
-                  aria-hidden
-                />
-                {/* A non-breaking space holds the line's height until the clock
-                    is read, so the card doesn't reflow when it appears. */}
-                <span className="lg:text-xl font-hand font-bold">
-                  {statusLabel ?? " "}
-                </span>
+                <Clock className="size-4 md:size-5 xl:size-6 shrink-0" />
+                <span className="lg:text-xl font-hand font-bold">{" "}</span>
               </div>
+            ) : (
+              hasStatusLine && (
+                // `currentColor` on the wrapper is what makes both the icon and
+                // the label track the department color.
+                <div
+                  className="flex items-center gap-1.5"
+                  style={{ color: textColor }}
+                >
+                  {/* Decorative: the label beside it says the same thing. */}
+                  <Clock
+                    className="size-4 md:size-5 xl:size-6 shrink-0"
+                    aria-hidden
+                  />
+                  {/* A non-breaking space holds the line's height until the clock
+                      is read, so the card doesn't reflow when it appears. */}
+                  <span className="lg:text-xl font-hand font-bold">
+                    {statusLabel ?? " "}
+                  </span>
+                </div>
+              )
             )}
           </div>
         )}
