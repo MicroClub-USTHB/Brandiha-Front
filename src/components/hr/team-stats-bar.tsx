@@ -1,12 +1,10 @@
 "use client";
-import type { TeamStats } from "@/lib/api/team-types";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { cn } from "@/lib/utils";
 
 type CardDef = {
   key: RegistrationStatus;
   label: string;
-  countKey: keyof Pick<TeamStats, "accepted_teams" | "rejected_teams" | "pending_teams">;
   bg: string;
   ring: string;
 };
@@ -15,32 +13,32 @@ const CARDS: CardDef[] = [
   {
     key: "pending",
     label: "Pending",
-    countKey: "pending_teams",
     bg: "bg-warning text-warning-foreground",
     ring: "ring-warning/50",
   },
   {
     key: "accepted",
     label: "Accepted",
-    countKey: "accepted_teams",
     bg: "bg-success text-success-foreground",
     ring: "ring-success/50",
   },
   {
     key: "rejected",
     label: "Rejected",
-    countKey: "rejected_teams",
     bg: "bg-destructive text-white",
     ring: "ring-destructive/50",
   },
 ];
 
 export function TeamStatsBar({
-  stats,
+  total,
+  counts,
   filter,
   onFilterChange,
 }: {
-  stats: TeamStats;
+  total: number;
+  /** Teams per status, as `countTeamsByStatus` reads them. */
+  counts: Record<RegistrationStatus, number>;
   filter: RegistrationStatus | null;
   onFilterChange: (s: RegistrationStatus | null) => void;
 }) {
@@ -57,7 +55,7 @@ export function TeamStatsBar({
             : "bg-white/15 text-white/60 hover:bg-white/20 hover:text-white/80",
         )}
       >
-        <span className="text-3xl font-black tracking-tight">{stats.total_teams}</span>
+        <span className="text-3xl font-black tracking-tight">{total}</span>
         <span className="mt-0.5 text-xs font-bold uppercase tracking-widest">
           All teams
         </span>
@@ -76,7 +74,7 @@ export function TeamStatsBar({
           )}
         >
           <span className="text-3xl font-black tracking-tight">
-            {stats[c.countKey]}
+            {counts[c.key]}
           </span>
           <span className="mt-0.5 text-xs font-bold uppercase tracking-widest">
             {c.label}

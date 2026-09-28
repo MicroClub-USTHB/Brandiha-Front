@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { listAllRegistrations } from "@/lib/api/registrations";
-import type { RegistrationDetail, RegistrationStatus } from "@/lib/api/registration-types";
+import type { RegistrationDetail } from "@/lib/api/registration-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
 
 /**
@@ -48,10 +48,16 @@ const COLUMNS: CsvColumns<RegistrationDetail> = [
 
 export function ExportCsvButton({
   disabled,
-  filter,
+  teamIds,
 }: {
   disabled?: boolean;
-  filter?: RegistrationStatus | null;
+  /**
+   * Export only the members of these teams — the ones the board's filter is
+   * showing. Filtered here rather than by the endpoint's `status` query, which
+   * matches the backend's per-team status instead of the majority the board
+   * filters on. Omit to export everyone.
+   */
+  teamIds?: string[];
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +65,7 @@ export function ExportCsvButton({
   const exportCsv = async () => {
     setLoading(true);
     setError(null);
-    const result = await listAllRegistrations(filter ?? undefined);
+    const result = await listAllRegistrations();
     setLoading(false);
 
     if (!result.ok) {
@@ -67,7 +73,9 @@ export function ExportCsvButton({
       return;
     }
 
-    downloadCsv(toCsv(result.data, COLUMNS), datedCsvFilename("registrations"));
+    const keep = teamIds && new Set(teamIds);
+    const rows = keep ? result.data.filter((r) => keep.has(r.team_id)) : result.data;
+    downloadCsv(toCsv(rows, COLUMNS), datedCsvFilename("registrations"));
   };
 
   return (

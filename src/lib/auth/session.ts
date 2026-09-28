@@ -21,8 +21,8 @@ export { SESSION_COOKIE, type Session, type Role } from "@/lib/auth/jwt";
  *
  * Wrapped in React's `cache`, so the many guards on one page share a single
  * round-trip. Rendering `/hr` asked four times over: the dashboard layout, the
- * page's `checkAccess`, and the `requireRole` inside each of `getTeamStats` and
- * `listTeams` — four sequential requests before either piece of data was
+ * page's `checkAccess`, and the `requireRole` inside each Server Action it
+ * called — four sequential requests before either piece of data was
  * fetched. The cache is per-request, so it dedupes without ever letting one
  * user's session leak into another's render.
  *

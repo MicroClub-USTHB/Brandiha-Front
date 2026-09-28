@@ -3,7 +3,7 @@
 import { authedAction, authedJson } from "@/lib/api/authed";
 import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
-import type { Team, TeamStats } from "@/lib/api/team-types";
+import type { Team } from "@/lib/api/team-types";
 
 // Every endpoint here is `get_current_admin` on the backend.
 
@@ -18,16 +18,6 @@ export async function listTeams(
   return authedJson(["admin"], `/teams${query}`, {
     forbidden: "You're not authorized to view this.",
     fallback: "Something went wrong loading teams.",
-  });
-}
-
-/**
- * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
- */
-export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
-  return authedJson(["admin"], "/teams/stats", {
-    forbidden: "You're not authorized to view this.",
-    fallback: "Something went wrong loading stats.",
   });
 }
 
