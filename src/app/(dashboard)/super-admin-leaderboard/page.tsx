@@ -24,15 +24,17 @@ export default async function SuperAdminLeaderboard() {
   const leaderboardResponse = result.data;
   const sortedTeams = sortLeaderboardByScore(leaderboardResponse.leaderboard);
 
-  if (!sortedTeams || sortedTeams.length === 0) {
+  // The board lists accepted teams with at least one scored submission, so an
+  // empty one means nothing has been scored yet rather than a failed load.
+  if (sortedTeams.length === 0)
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-xl font-heading text-black">
-          No leaderboard available at the moment.
-        </p>
-      </div>
+      <Notice
+        icon={Trophy}
+        title="No scores yet"
+        message="Teams appear here once their submissions are scored."
+      />
     );
-  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-2 pt-8">
       <h1 className="mb-4 text-4xl lg:text-8xl font-bold font-heading text-white">Leaderboard</h1>
