@@ -219,12 +219,12 @@ export default function ChallengeCard({
         </div>
       )}
 
-      <h1
+      <h2
         className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize mt-6"
         style={{ color: textColor }}
       >
         {heading}
-      </h1>
+      </h2>
 
 
       {/* The card's one variable slot: the mascot over a status line once the
