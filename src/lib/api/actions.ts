@@ -1,14 +1,11 @@
 "use server";
 
 import { backendFetch } from "@/lib/api/fetch";
+import type { ScoreUpdate } from "@/lib/api/leaderboard-types";
 
-export type BulkScoreUpdatePayload = {
-  submission_id: string;
-  score: number;
-};
 
 export default async function bulkUpdateScoresAction(
-  payload: BulkScoreUpdatePayload[]
+  payload: ScoreUpdate[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await backendFetch("/admin/challenge-submissions", {

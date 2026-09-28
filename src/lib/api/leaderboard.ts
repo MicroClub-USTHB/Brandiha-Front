@@ -1,42 +1,10 @@
 import { unstable_rethrow } from "next/navigation";
 
 import { backendFetch } from "@/lib/api/fetch";
-
-export type PublicLeaderboardEntry = {
-  team_name: string;
-  total_score: number;
-};
-
-export type ChallengeScore = {
-  challenge_id: number;
-  challenge_title: string;
-  score: number;
-  submission_id: string;
-};
-
-export type AdminLeaderboardEntry = {
-  team_id: string;
-  team_name: string;
-  per_challenge: ChallengeScore[];
-  total_score: number;
-};
-
-export type PublicLeaderboardResponse = {
-  frozen: boolean;
-  frozen_at: string | null;
-  leaderboard: PublicLeaderboardEntry[];
-};
-
-export type AdminLeaderboardResponse = {
-  frozen: boolean;
-  frozen_at: string | null;
-  leaderboard: AdminLeaderboardEntry[];
-};
-
-export type BulkScoreUpdatePayload = {
-  submission_id: string;
-  score: number;
-};
+import type {
+  AdminLeaderboardResponse,
+  PublicLeaderboardResponse,
+} from "@/lib/api/leaderboard-types";
 
 /**
  * Uncached on purpose, which also opts `/leaderboard` out of static generation.

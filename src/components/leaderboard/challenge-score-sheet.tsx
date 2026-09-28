@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AdminLeaderboardEntry, ChallengeScore } from "@/lib/api/leaderboard";
-import bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
+import type { AdminLeaderboardEntry, ChallengeScore, ScoreUpdate } from "@/lib/api/leaderboard-types";
+import bulkUpdateScores from "@/lib/api/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -78,7 +78,7 @@ export function ChallengeScoreSheet({
     setErrorMsg(null);
 
     try {
-      const payload: BulkScoreUpdatePayload[] = [];
+      const payload: ScoreUpdate[] = [];
 
       const updatedChallenges = team.per_challenge.map((challenge) => {
         if (!challenge.submission_id) {

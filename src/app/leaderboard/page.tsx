@@ -1,9 +1,9 @@
 import { Header } from "@/components/landing/header";
-import {
-  getGlobalLeaderboard,
+import { getGlobalLeaderboard } from "@/lib/api/leaderboard";
+import type {
   PublicLeaderboardEntry,
   PublicLeaderboardResponse,
-} from "@/lib/api/leaderboard";
+} from "@/lib/api/leaderboard-types";
 import LeaderboardComponent from "@/components/leaderboard/leaderboard";
 import { Snowflake, Table2 } from "lucide-react";
 import { Notice } from "@/components/notice";

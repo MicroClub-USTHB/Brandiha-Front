@@ -1,9 +1,9 @@
 import { AccessNotice } from "@/components/auth/access-notice";
-import {
-  getAdminLeaderboard,
+import { getAdminLeaderboard } from "@/lib/api/leaderboard";
+import type {
   AdminLeaderboardEntry,
   AdminLeaderboardResponse,
-} from "@/lib/api/leaderboard";
+} from "@/lib/api/leaderboard-types";
 import { checkAccess } from "@/lib/auth/session";
 import { SuperAdminLeaderboardClient } from "@/components/leaderboard/super-admin-leaderboard-client";
 import { FreezeToggleSwitch } from "@/components/leaderboard/freeze-toggle-switch";

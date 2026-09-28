@@ -1,5 +1,5 @@
 import LeaderboardRow from "./leaderboard-row";
-import { PublicLeaderboardEntry } from "@/lib/api/leaderboard";
+import type { PublicLeaderboardEntry } from "@/lib/api/leaderboard-types";
 import { ReactNode } from "react";
 
 export type LeaderboardProps<T extends PublicLeaderboardEntry> = {

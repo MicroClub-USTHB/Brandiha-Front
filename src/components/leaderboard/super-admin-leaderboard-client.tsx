@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import LeaderboardComponent from "./leaderboard";
-import { AdminLeaderboardEntry } from "@/lib/api/leaderboard";
+import type { AdminLeaderboardEntry } from "@/lib/api/leaderboard-types";
 import { ChallengeScoreSheet } from "@/components/leaderboard/challenge-score-sheet";
 
 function sortLeaderboardByScore(data: AdminLeaderboardEntry[]): AdminLeaderboardEntry[] {
