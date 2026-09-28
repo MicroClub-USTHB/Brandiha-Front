@@ -32,7 +32,7 @@ export default async function ChallengeGrid({
     // height for itself, so the caller decides how much room there is. A route
     // with chrome above the grid — the staff dashboard's header — would
     // otherwise overflow by exactly that chrome's height.
-    <div className="flex flex-1 flex-col items-center justify-center">
+    <main className="flex flex-1 flex-col items-center justify-center">
       <h1 className="mb-4 font-heading text-4xl lg:text-8xl font-bold text-white">
         Challenges
       </h1>
@@ -81,6 +81,6 @@ export default async function ChallengeGrid({
           })}
         </div>
       )}
-    </div>
+    </main>
   );
 }
