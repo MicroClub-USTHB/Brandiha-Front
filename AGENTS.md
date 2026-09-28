@@ -111,9 +111,7 @@ src/
       teams.ts             # Team reads, bulk status, delete
       challenges.ts        # Public challenge list, submission, staff detail
       voting.ts            # Alumni ballot read + vote, Borda tally, ballot audit
-      leaderboard.ts       # Public + admin leaderboard, freeze toggle
-      actions.ts           # Bulk score update Server Action
-      freezeAction.ts      # Freeze toggle Server Action
+      leaderboard.ts       # Public + admin leaderboard, score updates, freeze toggle
       challenge-window.ts  # upcoming / open / closed, shared server and client
       *-types.ts           # Backend response shapes
     auth/

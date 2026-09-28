@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { AdminLeaderboardEntry, ChallengeScore, ScoreUpdate } from "@/lib/api/leaderboard-types";
-import bulkUpdateScores from "@/lib/api/actions";
+import { updateScores } from "@/lib/api/leaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -104,10 +104,10 @@ export function ChallengeScoreSheet({
         return;
       }
 
-      const res = await bulkUpdateScores(payload);
+      const res = await updateScores(payload);
 
-      if (!res.success) {
-        throw new Error(res.error || "Failed to update challenge scores");
+      if (!res.ok) {
+        throw new Error(res.error);
       }
 
       const updatedTeam: AdminLeaderboardEntry = {

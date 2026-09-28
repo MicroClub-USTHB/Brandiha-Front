@@ -1,9 +1,9 @@
+import { Trophy } from "lucide-react";
+
 import { AccessNotice } from "@/components/auth/access-notice";
+import { Notice } from "@/components/notice";
 import { getAdminLeaderboard } from "@/lib/api/leaderboard";
-import type {
-  AdminLeaderboardEntry,
-  AdminLeaderboardResponse,
-} from "@/lib/api/leaderboard-types";
+import type { AdminLeaderboardEntry } from "@/lib/api/leaderboard-types";
 import { checkAccess } from "@/lib/auth/session";
 import { SuperAdminLeaderboardClient } from "@/components/leaderboard/super-admin-leaderboard-client";
 import { FreezeToggleSwitch } from "@/components/leaderboard/freeze-toggle-switch";
@@ -17,7 +17,11 @@ export default async function SuperAdminLeaderboard() {
   const access = await checkAccess("super_admin");
   if (!access.ok) return <AccessNotice reason={access.reason} />;
 
-  const leaderboardResponse: AdminLeaderboardResponse = await getAdminLeaderboard();
+  const result = await getAdminLeaderboard();
+  if (!result.ok)
+    return <Notice icon={Trophy} title="Leaderboard" message={result.error} />;
+
+  const leaderboardResponse = result.data;
   const sortedTeams = sortLeaderboardByScore(leaderboardResponse.leaderboard);
 
   if (!sortedTeams || sortedTeams.length === 0) {

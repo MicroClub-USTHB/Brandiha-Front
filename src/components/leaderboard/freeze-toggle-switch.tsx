@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Snowflake } from "lucide-react";
-import { toggleLeaderboardFreezeAction } from "@/lib/api/freezeAction";
+import { toggleLeaderboardFreeze } from "@/lib/api/leaderboard";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,15 +31,15 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
     if (pendingFrozen === null) return;
     setLoading(true);
 
-    const res = await toggleLeaderboardFreezeAction();
+    const res = await toggleLeaderboardFreeze();
     setLoading(false);
 
-    if (res.success && typeof res.frozen === "boolean") {
-      setFrozen(res.frozen);
+    if (res.ok) {
+      setFrozen(res.data.frozen);
       setPendingFrozen(null);
       setOpen(false);
     } else {
-      alert(res.error || "Une erreur est survenue lors de la modification.");
+      alert(res.error);
     }
   };
 
