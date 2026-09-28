@@ -4,14 +4,12 @@ import { RegistrationFormData } from "@/lib/validators/registration-schema";
 import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
 import { splitList } from "@/lib/list-field";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
   PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
 } from "@/lib/api/registration-types";
-
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type RegistrationResult = { ok: true } | { ok: false; error: string };
 
 /** Body accepted by `POST /registrations` on the backend. */
 interface RegistrationPayload {
@@ -80,7 +78,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
  */
 export async function submitRegistration(
   data: RegistrationFormData,
-): Promise<RegistrationResult> {
+): Promise<ActionResult> {
   let response: Response;
   try {
     response = await backendFetch("/registrations", {
@@ -112,9 +110,6 @@ export async function submitRegistration(
     error: "Something went wrong on our side. Please try again in a moment.",
   };
 }
-
-/** Serializable result for admin reads — data on success, a message on failure. */
-export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
 /** Turn a fetch outcome into a user-facing error result (admin reads are authed). */
 function readError(status: number): string {

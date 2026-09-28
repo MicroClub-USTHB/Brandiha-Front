@@ -2,7 +2,7 @@
 
 import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
-import type { FetchResult } from "@/lib/api/registrations";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { Team } from "@/lib/api/team-types";
 import type { TeamStats } from "@/lib/api/team-types";
@@ -76,9 +76,6 @@ export async function updateTeamStatus(
     return { ok: false, error: "Couldn't reach the server." };
   }
 }
-
-/** Result of a mutation with no returned payload — success flag or a message. */
-export type ActionResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Server Action: soft-delete a team (Admin) via `DELETE /teams/{id}`. The

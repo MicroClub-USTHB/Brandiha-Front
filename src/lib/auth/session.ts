@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { backendFetch } from "@/lib/api/fetch";
+import type { Failure } from "@/lib/api/result";
 import {
   SESSION_COOKIE,
   type AccessDenialReason,
@@ -51,9 +52,6 @@ export const getSession = cache(async function getSession(): Promise<Session | n
   }
 });
 
-/** Denial returned by `requireRole`, shaped to short-circuit an action result. */
-export type RoleDenial = { ok: false; error: string };
-
 /**
  * Guard for role-gated server actions: resolve the session and require that it
  * carries one of `allowed`. Server actions are publicly callable endpoints, so
@@ -76,7 +74,7 @@ export type RoleDenial = { ok: false; error: string };
  * This is defence in depth and a fast, specific error message; the backend
  * re-validates the token's role on every call regardless.
  */
-export async function requireRole(...allowed: Role[]): Promise<RoleDenial | null> {
+export async function requireRole(...allowed: Role[]): Promise<Failure | null> {
   const session = await getSession();
   if (!session) return { ok: false, error: "You're not signed in." };
   if (!allowed.includes(session.role))

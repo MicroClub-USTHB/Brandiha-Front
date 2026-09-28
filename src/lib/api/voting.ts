@@ -2,8 +2,7 @@
 
 import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
-import type { FetchResult } from "@/lib/api/registrations";
-import type { ActionResult } from "@/lib/api/teams";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
   AlumniLeaderboardEntry,
   AlumniVote,

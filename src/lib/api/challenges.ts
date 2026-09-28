@@ -3,7 +3,7 @@
 import { windowFor } from "@/lib/api/challenge-window";
 import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
 import { requireRole } from "@/lib/auth/session";
-import type { FetchResult } from "@/lib/api/registrations";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
   Challenge,
   ChallengeDetail,
@@ -11,9 +11,6 @@ import type {
   PublicChallenge,
 } from "@/lib/api/challenge-types";
 import type { SubmissionFormData } from "@/lib/validators/submission-schema";
-
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type SubmitResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Server Action: the public challenge list via `GET /challenges`.
@@ -119,7 +116,7 @@ export async function getChallenge(id: number): Promise<FetchResult<ChallengeSta
 export async function submitChallenge(
   challengeId: number,
   data: SubmissionFormData,
-): Promise<SubmitResult> {
+): Promise<ActionResult> {
   let response: Response;
   try {
     response = await backendFetch(`/challenges/${challengeId}`, {
