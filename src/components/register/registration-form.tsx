@@ -21,14 +21,8 @@ import {
   RegistrationsTitle,
 } from "@/components/register/step-title";
 import { Popup } from "@/components/pop-up";
+import type { RegistrationFieldConfig } from "@/lib/registration-fields";
 import { cn } from "@/lib/utils";
-
-type FieldConfig = {
-  label: string;
-  type?: string;
-  options?: readonly string[];
-  fullWidth?: boolean;
-};
 
 const STEP_HUES = [
   "var(--brand-marketing)",
@@ -59,7 +53,7 @@ export default function RegistrationForm() {
     isSubmitting,
     submitError,
   } = useRegistrationForm();
-  const currentFields = steps[step].fields as Record<string, FieldConfig>;
+  const currentFields = steps[step].fields as Record<string, RegistrationFieldConfig>;
   const isLastStep = step === steps.length - 1;
 
   // Restore persisted answers after hydration. The first render always uses the
