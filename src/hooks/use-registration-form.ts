@@ -1,5 +1,11 @@
-import { useCallback, useState } from "react";
-import { useForm, Path, SubmitHandler, SubmitErrorHandler } from "react-hook-form";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useForm,
+  FieldPath,
+  Path,
+  SubmitHandler,
+  SubmitErrorHandler,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -15,11 +21,11 @@ import { usePopupStore } from "@/hooks/use-popup-store";
 /**
  * Persists the in-progress form (values + current step) to localStorage so a
  * page reload doesn't wipe the applicant's answers. Restored on mount by
- * `RegistrationForm`, cleared once a submission succeeds, and discarded on load
+ * `useRegistrationForm`, cleared once a submission succeeds, and discarded on load
  * once it is older than `REGISTRATION_PERSIST_TTL_MS` — see `lib/form-persistence.ts`
  * for why answers this identifying shouldn't outlive the sitting.
  */
-export const useRegistrationPersist = create<{
+const useRegistrationPersist = create<{
   savedStep: number;
   setSavedStep: (step: number) => void;
   savedValues: Partial<RegistrationFormData>;
@@ -124,6 +130,48 @@ export function useRegistrationForm() {
     [steps.length]
   );
 
+  // Restore persisted answers after hydration. The first render always uses the
+  // form defaults (matching SSR), and values are set here — post-mount — so there
+  // is no hydration mismatch to guard against.
+  const { setSavedStep, setSavedValues } = useRegistrationPersist();
+  const isHydratedRef = useRef(false);
+
+  useEffect(() => {
+    const { savedStep, savedValues } = useRegistrationPersist.getState();
+
+    for (const [key, value] of Object.entries(savedValues)) {
+      if (value !== undefined) {
+        form.setValue(key as FieldPath<RegistrationFormData>, value as never, {
+          shouldValidate: false,
+          shouldDirty: false,
+        });
+      }
+    }
+
+    if (savedStep > 0 && savedStep < steps.length) {
+      goToStep(savedStep);
+    }
+
+    isHydratedRef.current = true;
+    // Restore once, on mount only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Mirror step changes into storage (skip the initial restore).
+  useEffect(() => {
+    if (isHydratedRef.current) setSavedStep(step);
+  }, [step, setSavedStep]);
+
+  // Mirror field edits into storage (skip the initial restore).
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (isHydratedRef.current) {
+        setSavedValues(value as Partial<RegistrationFormData>);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setSavedValues]);
+
   const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
     setSubmitError(null);
     const result = await submitRegistration(data);
@@ -156,7 +204,6 @@ export function useRegistrationForm() {
     visibleFields,
     next,
     previous,
-    goToStep,
     submit,
     isSubmitting: form.formState.isSubmitting,
     submitError,

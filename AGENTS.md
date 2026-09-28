@@ -230,7 +230,7 @@ src/
 - Form wrappers (`FormInput`, `FormTextarea`, `FormSelect`, `FormCheckbox`) in
   `src/components/form.tsx` — use these instead of raw shadcn inputs.
 - Custom hook `src/hooks/use-registration-form.ts` manages step state, field
-  visibility, and validation triggers.
+  visibility, validation triggers, and saving/restoring the in-progress answers.
 - Form fields use PascalCase names (e.g. `FullName`, `Email`) to match the schema.
 - **`Tools` and `Links` are list fields.** They're free text split on commas and
   newlines by `splitList` (`src/lib/list-field.ts`) into the backend's `tools[]`

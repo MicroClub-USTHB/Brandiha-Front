@@ -1,12 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties, useEffect, useRef } from "react";
+import { CSSProperties } from "react";
 import { FieldPath } from "react-hook-form";
-import {
-  useRegistrationForm,
-  useRegistrationPersist,
-} from "@/hooks/use-registration-form";
+import { useRegistrationForm } from "@/hooks/use-registration-form";
 import {
   registrationSchema,
   RegistrationFormData,
@@ -48,55 +45,12 @@ export default function RegistrationForm() {
     visibleFields,
     next,
     previous,
-    goToStep,
     submit,
     isSubmitting,
     submitError,
   } = useRegistrationForm();
   const currentFields = steps[step].fields as Record<string, RegistrationFieldConfig>;
   const isLastStep = step === steps.length - 1;
-
-  // Restore persisted answers after hydration. The first render always uses the
-  // form defaults (matching SSR), and values are set here — post-mount — so there
-  // is no hydration mismatch to guard against.
-  const { setSavedStep, setSavedValues } = useRegistrationPersist();
-  const isHydratedRef = useRef(false);
-
-  useEffect(() => {
-    const { savedStep, savedValues } = useRegistrationPersist.getState();
-
-    for (const [key, value] of Object.entries(savedValues)) {
-      if (value !== undefined) {
-        form.setValue(key as FieldPath<RegistrationFormData>, value as never, {
-          shouldValidate: false,
-          shouldDirty: false,
-        });
-      }
-    }
-
-    if (savedStep > 0 && savedStep < steps.length) {
-      goToStep(savedStep);
-    }
-
-    isHydratedRef.current = true;
-    // Restore once, on mount only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Mirror step changes into storage (skip the initial restore).
-  useEffect(() => {
-    if (isHydratedRef.current) setSavedStep(step);
-  }, [step, setSavedStep]);
-
-  // Mirror field edits into storage (skip the initial restore).
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (isHydratedRef.current) {
-        setSavedValues(value as Partial<RegistrationFormData>);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, setSavedValues]);
 
   const hue = STEP_HUES[step % STEP_HUES.length];
   const stepStyle = {
