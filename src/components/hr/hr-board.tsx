@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { updateRegistration } from "@/lib/api/registrations";
-import { listTeams } from "@/lib/api/teams";
 import type { Team, TeamMember } from "@/lib/api/team-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
@@ -44,8 +43,15 @@ function withMove(board: Team[], move: PendingMove): Team[] {
 /** HR board: cards per team with drag-and-drop to move a member between teams. */
 export function HrBoard({ teams }: { teams: Team[] }) {
   const router = useRouter();
-  // Client-owned board; seeded from the server, then refreshed via `listTeams`.
+  // Client-owned board, so a move can show before the server confirms it.
+  // Seeded from `teams`, and reseeded whenever the server sends a fresh list —
+  // which keeps the parent's filter applied, since `teams` arrives filtered.
   const [board, setBoard] = useState<Team[]>(teams);
+  const [seed, setSeed] = useState(teams);
+  if (teams !== seed) {
+    setSeed(teams);
+    setBoard(teams);
+  }
   const [pending, setPending] = useState<PendingMove | null>(null);
   const [dragging, setDragging] = useState<{ fromTeamId: string } | null>(null);
   const [hoverTeamId, setHoverTeamId] = useState<string | null>(null);
@@ -90,13 +96,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
     setPending({ member, fromTeam, toTeam: target });
   };
 
-  const refreshBoard = async () => {
-    const res = await listTeams();
-    if (res.ok) {
-      setBoard(res.data);
-      router.refresh();
-    }
-  };
+  // Re-render the page for fresh teams; they come back through `teams` above.
+  const refreshBoard = () => router.refresh();
 
   const confirmMove = async () => {
     if (!pending) return;
