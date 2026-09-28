@@ -1,11 +1,6 @@
+import { STATUS_META } from "@/components/hr/status-meta";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { cn } from "@/lib/utils";
-
-const STATUS_STYLES: Record<RegistrationStatus, string> = {
-  accepted: "bg-success/15 text-success",
-  rejected: "bg-destructive/15 text-destructive",
-  pending: "bg-warning/15 text-warning",
-};
 
 /** Small pill showing a registration/team status. Presentational (no hooks). */
 export function StatusBadge({ status }: { status: RegistrationStatus }) {
@@ -13,7 +8,7 @@ export function StatusBadge({ status }: { status: RegistrationStatus }) {
     <span
       className={cn(
         "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
-        STATUS_STYLES[status],
+        STATUS_META[status].badge,
       )}
     >
       {status}

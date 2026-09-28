@@ -6,6 +6,7 @@ import { deleteTeam, updateTeamStatus } from "@/lib/api/teams";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { TeamMember } from "@/lib/api/team-types";
 import { canDeleteTeam } from "@/lib/team-status";
+import { STATUS_META } from "@/components/hr/status-meta";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,13 +21,6 @@ import { cn } from "@/lib/utils";
 
 const BTN_BASE =
   "flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50";
-
-/** Verb shown for each target status. */
-const VERB: Record<RegistrationStatus, string> = {
-  rejected: "Decline",
-  pending: "Reset",
-  accepted: "Accept",
-};
 
 /** Decline / Reset / Accept footer that bulk-sets a team's member statuses. */
 export function TeamActions({
@@ -154,7 +148,7 @@ export function TeamActions({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirming ? `${VERB[confirming]} team?` : ""}
+              {confirming ? `${STATUS_META[confirming].verb} team?` : ""}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirming && (
