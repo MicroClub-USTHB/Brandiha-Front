@@ -1,11 +1,11 @@
 "use server";
 
-import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
-import { requireRole } from "@/lib/auth/session";
+import { authedAction, authedJson } from "@/lib/api/authed";
 import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
-import type { Team } from "@/lib/api/team-types";
-import type { TeamStats } from "@/lib/api/team-types";
+import type { Team, TeamStats } from "@/lib/api/team-types";
+
+// Every endpoint here is `get_current_admin` on the backend.
 
 /**
  * Server Action: fetch all teams with their members (Admin). Optionally filter
@@ -14,39 +14,21 @@ import type { TeamStats } from "@/lib/api/team-types";
 export async function listTeams(
   status?: RegistrationStatus,
 ): Promise<FetchResult<Team[]>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
   const query = status ? `?status=${status}` : "";
-  try {
-    const res = await backendFetch(`/teams${query}`, { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to view this." };
-    if (!res.ok) return { ok: false, error: "Something went wrong loading teams." };
-    return { ok: true, data: (await res.json()) as Team[] };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["admin"], `/teams${query}`, {
+    forbidden: "You're not authorized to view this.",
+    fallback: "Something went wrong loading teams.",
+  });
 }
 
 /**
  * Server Action: fetch team statistics (Admin) via `GET /teams/stats`.
  */
 export async function getTeamStats(): Promise<FetchResult<TeamStats>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch("/teams/stats", { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to view this." };
-    if (!res.ok) return { ok: false, error: "Something went loading stats." };
-    return { ok: true, data: (await res.json()) as TeamStats };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["admin"], "/teams/stats", {
+    forbidden: "You're not authorized to view this.",
+    fallback: "Something went wrong loading stats.",
+  });
 }
 
 /**
@@ -57,24 +39,16 @@ export async function updateTeamStatus(
   id: string,
   status: RegistrationStatus,
 ): Promise<FetchResult<Team>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch(`/teams/${id}`, {
-      auth: true,
-      method: "PATCH",
-      body: JSON.stringify({ status }),
-    });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to do this." };
-    if (res.status === 404) return { ok: false, error: "Team not found." };
-    if (!res.ok) return { ok: false, error: "Something went wrong updating the team." };
-    return { ok: true, data: (await res.json()) as Team };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(
+    ["admin"],
+    `/teams/${id}`,
+    {
+      forbidden: "You're not authorized to do this.",
+      byStatus: { 404: "Team not found." },
+      fallback: "Something went wrong updating the team.",
+    },
+    { method: "PATCH", body: JSON.stringify({ status }) },
+  );
 }
 
 /**
@@ -85,26 +59,17 @@ export async function updateTeamStatus(
  * disables the button in that case.
  */
 export async function deleteTeam(id: string): Promise<ActionResult> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch(`/teams/${id}`, {
-      auth: true,
-      method: "DELETE",
-    });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to do this." };
-    if (res.status === 404) return { ok: false, error: "Team not found." };
-    if (res.status === 400)
-      return {
-        ok: false,
-        error: "This team still has pending or accepted members, so it can't be deleted.",
-      };
-    if (!res.ok) return { ok: false, error: "Something went wrong deleting the team." };
-    return { ok: true };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedAction(
+    ["admin"],
+    `/teams/${id}`,
+    {
+      forbidden: "You're not authorized to do this.",
+      byStatus: {
+        400: "This team still has pending or accepted members, so it can't be deleted.",
+        404: "Team not found.",
+      },
+      fallback: "Something went wrong deleting the team.",
+    },
+    { method: "DELETE" },
+  );
 }

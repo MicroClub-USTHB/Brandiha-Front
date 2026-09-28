@@ -103,6 +103,8 @@ src/
   lib/
     api/
       fetch.ts             # backendFetch — the ONE way to call the backend
+      authed.ts            # authedJson / authedAction — role check + authed call + error copy
+      result.ts            # FetchResult / ActionResult — what every Server Action returns
       base-url.ts          # API_BASE_URL (no server-only: the proxy shares it)
       auth.ts              # loginStaff / logout Server Actions
       registrations.ts     # Registration submit + admin reads/updates
@@ -184,6 +186,12 @@ src/
 - **Server Actions return serializable results, never throw across the
   boundary** — `{ ok: true, data }` / `{ ok: false, error }`. The error string is
   user-facing copy, so map each status the backend documents to its own message.
+  The shapes live in `lib/api/result.ts`.
+- **Role-gated actions are built on `authedJson` / `authedAction`**
+  (`src/lib/api/authed.ts`): pass the roles, the path, and the copy for each
+  status, and they do the `requireRole` check, the authed call, and the error
+  mapping. That module is deliberately not `"use server"` — it takes an
+  arbitrary path, so exporting it as an action would expose every route.
 - `API Documentation.md` is the backend contract. Mirror it exactly; when the UI
   and the contract disagree, the contract wins.
 
