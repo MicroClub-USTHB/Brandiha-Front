@@ -444,6 +444,16 @@
   }
 }
 
+/* The torn-paper card behind forms, rows, and team cards, stretched to fill
+   its box. Sets the image only, so don't pair it with another `bg-*` colour
+   through `cn()` — tailwind-merge files both under background colour and
+   keeps just one. */
+@utility bg-paper {
+  background-image: url("/paper.svg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
 @utility splash-mask {
   -webkit-mask: url("/stepper-splash.svg") center / contain no-repeat;
   mask: url("/stepper-splash.svg") center / contain no-repeat;

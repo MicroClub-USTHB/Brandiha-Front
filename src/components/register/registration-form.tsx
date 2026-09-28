@@ -121,13 +121,8 @@ export default function RegistrationForm() {
 
       <form
         onSubmit={submit}
-        style={{
-          ...stepStyle,
-          backgroundImage: "url('/paper.svg')",
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-        }}
-        className="reg-form grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-transparent px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans"
+        style={stepStyle}
+        className="reg-form grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-paper px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans"
       >
         {/* Scoped to `.reg-form` so these overrides don't leak to labels/inputs
             elsewhere in the app. Rendered once, not per field. */}

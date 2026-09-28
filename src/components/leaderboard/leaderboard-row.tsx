@@ -40,12 +40,7 @@ export default function LeaderboardRow({
   return (
     <div>
       <div
-        className="w-90 h-15 lg:w-250 lg:h-15 2xl:w-290 2xl:h-25 py-2 px-4 flex items-center justify-between mb-2"
-        style={{
-          backgroundImage: "url('/paper.svg')",
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-        }}
+        className="bg-paper w-90 h-15 lg:w-250 lg:h-15 2xl:w-290 2xl:h-25 py-2 px-4 flex items-center justify-between mb-2"
       >
         <div className="flex flex-row items-center justify-start gap-4">
           {rank === 1 && (

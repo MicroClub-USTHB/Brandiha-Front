@@ -166,14 +166,9 @@ export function HrBoard({ teams }: { teams: Team[] }) {
                 else cardEls.delete(team.id);
               }}
               className={cn(
-                "flex flex-col rounded-xl p-6 shadow-sm transition-colors",
+                "bg-paper flex flex-col rounded-xl p-6 shadow-sm transition-colors",
                 isTarget ? "ring-2 ring-primary/40" : "",
               )}
-              style={{
-                backgroundImage: "url('/paper.svg')",
-                backgroundSize: "100% 100%",
-                backgroundRepeat: "no-repeat",
-              }}
             >
               <header className="mb-3 flex items-start justify-between gap-2">
                 <div className="min-w-0">

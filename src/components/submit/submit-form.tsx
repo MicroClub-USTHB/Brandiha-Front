@@ -75,12 +75,7 @@ export default function SubmitForm({
     <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-4 overflow-visible">
       <form
         onSubmit={form.handleSubmit(onValid)}
-        style={{
-          backgroundImage: "url('/paper.svg')",
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-        }}
-        className="submit-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] overflow-visible border-0 bg-transparent px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans"
+        className="submit-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] overflow-visible border-0 bg-paper px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans"
       >
         {/* Scoped to `.submit-form` so the hand font on inputs doesn't leak elsewhere. */}
         <style jsx global>{`
