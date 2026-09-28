@@ -6,9 +6,12 @@ import { backendFetch } from "@/lib/api/fetch";
 import { splitList } from "@/lib/list-field";
 import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
+  AvailabilityAnswer,
+  Department,
   PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
+  TShirtSize,
 } from "@/lib/api/registration-types";
 
 /** Body accepted by `POST /registrations` on the backend. */
@@ -18,7 +21,7 @@ interface RegistrationPayload {
   phone_number: string;
   discord_id: string;
   team_name: string;
-  department: "marketing" | "communication" | "design" | "multimedia";
+  department: Department;
   knowledge_about_brandiha: string;
   participated_before: boolean;
   previous_competitions: string | null;
@@ -28,10 +31,10 @@ interface RegistrationPayload {
   other_links: string[];
   motivation: string;
   food_allergies: string | null;
-  available_during_event: "yes" | "no" | "other";
+  available_during_event: AvailabilityAnswer;
   availability_note: string | null;
   okay_with_photos: boolean;
-  t_shirt_size: "S" | "M" | "L" | "XL" | "XXL";
+  t_shirt_size: TShirtSize;
   additional_notes: string | null;
 }
 
@@ -50,7 +53,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     discord_id: data.DiscordId.trim(),
     team_name: data.TeamName.trim(),
     // "Your Role" is the department track (lowercased to match the backend enum).
-    department: data.Role.toLowerCase() as RegistrationPayload["department"],
+    department: data.Role.toLowerCase() as Department,
     knowledge_about_brandiha: data.Knowledge.trim(),
     participated_before: data.HackathonExperience,
     previous_competitions: nullable(data.PreviousHackathons),
@@ -60,10 +63,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     other_links: splitList(data.Links),
     motivation: data.Motivation.trim(),
     food_allergies: nullable(data.FoodAllergies),
-    available_during_event: data.Availability.toLowerCase() as
-      | "yes"
-      | "no"
-      | "other",
+    available_during_event: data.Availability.toLowerCase() as AvailabilityAnswer,
     availability_note: nullable(data.AvailabilityMessage),
     okay_with_photos: data.PhotoConsent,
     t_shirt_size: data.TShirtSize,
