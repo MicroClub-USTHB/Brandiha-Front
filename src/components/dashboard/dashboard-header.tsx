@@ -3,13 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 import { type Role } from "@/lib/auth/jwt";
 import { ThemePicker } from "@/components/theme-picker";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/use-is-client";
 
 const NAV_LINKS: Partial<Record<Role, { href: string; label: string }[]>> = {
   admin: [
@@ -39,9 +39,6 @@ function getActiveEffectLogo(theme?: string) {
       return "/nav-logo.svg";
   }
 }
-
-const useIsClient = () =>
-  useSyncExternalStore(() => () => {}, () => true, () => false);
 
 /** Top bar shared across the staff dashboard. */
 export function DashboardHeader({

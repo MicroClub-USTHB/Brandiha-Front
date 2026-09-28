@@ -100,6 +100,7 @@ src/
   hooks/
     use-registration-form.tsx  # Multi-step form logic (react-hook-form + Zod)
     use-graffiti-cursor.ts     # Pointer tracking for the graffiti cursor
+    use-is-client.ts           # false until mounted — gate client-only values (e.g. the theme)
   lib/
     api/
       fetch.ts             # backendFetch — the ONE way to call the backend

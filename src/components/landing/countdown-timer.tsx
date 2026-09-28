@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/use-is-client";
 
 function getTimeLeft(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());

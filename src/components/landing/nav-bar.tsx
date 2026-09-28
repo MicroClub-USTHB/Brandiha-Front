@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/use-is-client";
 
 const links = [
   { href: "/", label: "Home" },
@@ -28,8 +29,6 @@ function getActiveEffectImage(theme?: string) {
       return "/activeLink-Default.svg";
   }
 }
-
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 
 /** Distance from the viewport top at which a section is considered "active". */
 const ACTIVE_THRESHOLD = 120;

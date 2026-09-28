@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -11,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { THEMES } from "@/lib/themes";
-
-const emptySubscribe = () => () => {};
+import { useIsClient } from "@/hooks/use-is-client";
 
 function getThemeHand(theme: string) {
   switch (theme) {
@@ -32,7 +30,7 @@ function getThemeHand(theme: string) {
 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
-  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isClient = useIsClient();
   const resolved = isClient ? theme : undefined;
   const activeEffectHand = getThemeHand(resolved ?? "chameleon");
   const active = THEMES.find((t) => t.value === (resolved ?? "chameleon"));

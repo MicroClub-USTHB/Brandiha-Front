@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
-
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+import { useIsClient } from "@/hooks/use-is-client";
 
 function getTimerBackground(theme?: string) {
   switch (theme) {

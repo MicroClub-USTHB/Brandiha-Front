@@ -1,12 +1,11 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useSyncExternalStore, type SVGProps } from "react";
+import { type SVGProps } from "react";
 import { useTheme } from "next-themes";
 import { Mail, MapPin } from "lucide-react";
 import { Gekko } from "@/components/gekko";
-
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+import { useIsClient } from "@/hooks/use-is-client";
 
 function getActiveEffectLogo(theme?: string) {
   switch (theme) {

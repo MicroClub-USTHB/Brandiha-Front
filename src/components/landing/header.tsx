@@ -1,12 +1,10 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import { ThemePicker } from "../theme-picker";
 import { NavBar } from "./nav-bar";
 import { useTheme } from "next-themes";
-
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
+import { useIsClient } from "@/hooks/use-is-client";
 
 function getActiveEffectButton(theme?: string) {
   switch (theme) {
