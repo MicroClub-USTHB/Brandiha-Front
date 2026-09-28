@@ -10,12 +10,16 @@ export type PublicLeaderboardEntry = {
   total_score: number;
 };
 
-/** One challenge's score within an `AdminLeaderboardEntry`. */
+/**
+ * One challenge's score within an `AdminLeaderboardEntry`. `submission_id` is
+ * null when the team never submitted, and `score` is null until a submission
+ * is scored.
+ */
 export type ChallengeScore = {
   challenge_id: number;
   challenge_title: string;
-  score: number;
-  submission_id: string;
+  score: number | null;
+  submission_id: string | null;
 };
 
 /** One row of `GET /admin/leaderboard`, with the per-challenge breakdown. */

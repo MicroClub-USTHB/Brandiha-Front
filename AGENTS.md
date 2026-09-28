@@ -124,6 +124,7 @@ src/
     team-status.ts         # Majority team status + the delete rule
     leaderboard-order.ts   # byScore — leaderboard rank order
     challenge-id.ts        # parseChallengeId — the [challenge-id] route segment
+    score-draft.ts         # Score sheet input text <-> score (empty never saves as 0)
     csv.ts                 # CSV encoding (quoting + formula-injection guard)
     list-field.ts          # splitList — comma/newline free text to a list
     form-persistence.ts    # Expiry rule for the saved registration form
