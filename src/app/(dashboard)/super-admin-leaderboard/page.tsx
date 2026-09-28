@@ -34,11 +34,7 @@ export default async function SuperAdminLeaderboard() {
 
       <FreezeToggleSwitch initialFrozen={leaderboardResponse.frozen} />
 
-      <SuperAdminLeaderboardClient
-        initialLeaderboard={leaderboardResponse.leaderboard}
-        isFrozen={leaderboardResponse.frozen}
-        frozenAt={leaderboardResponse.frozen_at}
-      />
+      <SuperAdminLeaderboardClient initialLeaderboard={leaderboardResponse.leaderboard} />
     </div>
   );
 }

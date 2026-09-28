@@ -8,8 +8,6 @@ import { byScore } from "@/lib/leaderboard-order";
 
 interface SuperAdminLeaderboardClientProps {
   initialLeaderboard: AdminLeaderboardEntry[];
-  isFrozen?: boolean;
-  frozenAt?: string | null;
 }
 
 export function SuperAdminLeaderboardClient({
