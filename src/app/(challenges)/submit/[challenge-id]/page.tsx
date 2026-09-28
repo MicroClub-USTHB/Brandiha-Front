@@ -3,7 +3,6 @@ import { Lock } from "lucide-react";
 import SubmitForm from "@/components/submit/submit-form";
 import { getChallenge } from "@/lib/api/challenges";
 import { Header } from "@/components/landing/header";
-import { cn } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ "challenge-id": string }>;
@@ -28,19 +27,15 @@ function Notice({
 }) {
   return (
     <div
-      className={cn(
-        "mx-auto flex w-full max-w-md flex-col items-center gap-3 px-4 text-center font-sans",
-      )}
+      className="mx-auto flex w-full max-w-md flex-col items-center gap-3 px-4 text-center font-sans"
     >
-      <Icon className={cn("size-10 text-muted-foreground")} aria-hidden />
+      <Icon className="size-10 text-muted-foreground" aria-hidden />
       <h1
-        className={cn(
-          "font-heading text-2xl font-extrabold uppercase tracking-wide text-foreground",
-        )}
+        className="font-heading text-2xl font-extrabold uppercase tracking-wide text-foreground"
       >
         {title}
       </h1>
-      <p className={cn("text-muted-foreground")}>{message}</p>
+      <p className="text-muted-foreground">{message}</p>
     </div>
   );
 }

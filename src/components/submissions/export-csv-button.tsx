@@ -3,7 +3,6 @@
 import { Download } from "lucide-react";
 import type { ChallengeSubmission } from "@/lib/api/challenge-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
-import { cn } from "@/lib/utils";
 
 /**
  * CSV columns: [header, accessor]. Order defines the column order in the file.
@@ -54,11 +53,9 @@ export function ExportCsvButton({
         )
       }
       disabled={submissions.length === 0}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-card-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60",
-      )}
+      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-card-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <Download className={cn("size-4")} />
+      <Download className="size-4" />
       Export to CSV
     </button>
   );

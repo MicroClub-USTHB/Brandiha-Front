@@ -89,20 +89,18 @@ export function Popup() {
 
   return (
     <div
-      className={cn("fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm")}
+      className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm"
       onClick={closePopup}
     >
       <div
-        className={cn("relative w-full max-w-md sm:max-w-3xl")}
+        className="relative w-full max-w-md sm:max-w-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* The frame is a background stretched to the content box, so it grows
             with the content instead of being scaled by width (which left it far
             too short for the text on mobile). */}
         <div
-          className={cn(
-            "relative flex flex-col items-center justify-center gap-4 sm:gap-5 px-[13%] py-12 sm:py-16 text-center drop-shadow-2xl",
-          )}
+          className="relative flex flex-col items-center justify-center gap-4 sm:gap-5 px-[13%] py-12 sm:py-16 text-center drop-shadow-2xl"
           style={{
             backgroundImage: `url('${config.imageSrc}')`,
             backgroundSize: "100% 100%",
@@ -112,32 +110,32 @@ export function Popup() {
           <button
             onClick={closePopup}
             aria-label="Close"
-            className={cn("absolute right-[8%] top-[9%] text-white hover:text-white/80 transition-colors")}
+            className="absolute right-[8%] top-[9%] text-white hover:text-white/80 transition-colors"
           >
-            <X className={cn("size-5 sm:size-6 stroke-[3]")} />
+            <X className="size-5 sm:size-6 stroke-[3]" />
           </button>
 
           {/* Perfect circle icon with glow and thin vector inside */}
           <div className={cn("flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full shrink-0", config.iconBg, config.glowColor)}>
-            <Icon className={cn("w-7 h-7 sm:w-8 sm:h-8 stroke-[1.25] text-black")} />
+            <Icon className="w-7 h-7 sm:w-8 sm:h-8 stroke-[1.25] text-black" />
           </div>
 
-          <div className={cn("flex flex-col items-center gap-2 w-full")}>
-            <h2 className={cn("font-heading text-xl sm:text-3xl font-extrabold uppercase tracking-wide text-[#38bdf8] drop-shadow-sm")}>
+          <div className="flex flex-col items-center gap-2 w-full">
+            <h2 className="font-heading text-xl sm:text-3xl font-extrabold uppercase tracking-wide text-[#38bdf8] drop-shadow-sm">
               {title || config.defaultTitle}
             </h2>
-            <p className={cn("font-hand text-xs sm:text-base font-bold tracking-wider uppercase text-white/90")}>
+            <p className="font-hand text-xs sm:text-base font-bold tracking-wider uppercase text-white/90">
               {description || config.defaultDesc}
             </p>
           </div>
 
-          <div className={cn("flex items-center justify-center gap-4 sm:gap-12 w-full mt-2 sm:mt-6")}>
+          <div className="flex items-center justify-center gap-4 sm:gap-12 w-full mt-2 sm:mt-6">
             {config.showSecondary && (
               <ActionButton
                 variant="secondary"
                 type="button"
                 onClick={closePopup}
-                className={cn("h-10 sm:h-12 -rotate-1 px-5 sm:px-7 text-xs sm:text-sm")}
+                className="h-10 sm:h-12 -rotate-1 px-5 sm:px-7 text-xs sm:text-sm"
               >
                 {config.secondaryBtnText}
               </ActionButton>
@@ -147,7 +145,7 @@ export function Popup() {
               variant="primary"
               type="button"
               onClick={handleHomeClick}
-              className={cn("h-10 sm:h-12 -rotate-1 px-6 sm:px-10 text-xs sm:text-sm tracking-wider")}
+              className="h-10 sm:h-12 -rotate-1 px-6 sm:px-10 text-xs sm:text-sm tracking-wider"
             >
               {config.primaryBtnText}
             </ActionButton>

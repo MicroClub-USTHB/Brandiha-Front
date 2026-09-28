@@ -4,7 +4,6 @@ import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Clock, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
 
@@ -201,9 +200,7 @@ export default function ChallengeCard({
 
   return (
     <div
-      className={cn(
-        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8",
-      )}
+      className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8"
       style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
     >
       {isClosed && (

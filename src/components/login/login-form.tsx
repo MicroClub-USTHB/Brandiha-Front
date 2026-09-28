@@ -11,13 +11,12 @@ import { ActionButton } from "@/components/action-button";
 import { loginSchema, LoginFormData } from "@/lib/validators/login-schema";
 import { loginStaff } from "@/lib/api/auth";
 import { HOME_BY_ROLE } from "@/lib/auth/home";
-import { cn } from "@/lib/utils";
 
 const LOGIN_PATH = "/login";
 
 function LoginTitle() {
   return (
-    <h2 className={cn("text-center text-[clamp(1.75rem,min(4.2vw,6vh),3.75rem)] font-extrabold uppercase tracking-wide font-heading text-foreground")}>
+    <h2 className="text-center text-[clamp(1.75rem,min(4.2vw,6vh),3.75rem)] font-extrabold uppercase tracking-wide font-heading text-foreground">
       Login
     </h2>
   );
@@ -60,7 +59,7 @@ export default function LoginForm() {
   const isSubmitting = form.formState.isSubmitting;
 
   return (
-    <div className={cn("relative mx-auto flex w-full max-w-md flex-col items-center px-4 overflow-visible")}>
+    <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-4 overflow-visible">
       <form
         onSubmit={onSubmit}
         style={{
@@ -68,7 +67,7 @@ export default function LoginForm() {
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
         }}
-        className={cn("login-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] overflow-visible border-0 bg-transparent px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans")}
+        className="login-form flex w-full flex-col gap-[clamp(1.5rem,4vh,2.5rem)] overflow-visible border-0 bg-transparent px-[clamp(1.5rem,7vw,3.5rem)] pt-[clamp(2rem,6vh,4rem)] pb-[clamp(2.5rem,7vh,5rem)] text-card-foreground font-sans"
       >
         {/* Scoped to `.login-form` so the hand font on inputs doesn't leak elsewhere. */}
         <style jsx global>{`
@@ -82,20 +81,20 @@ export default function LoginForm() {
           }
         `}</style>
 
-        <div className={cn("flex flex-col items-center gap-[clamp(0.75rem,2vh,1.5rem)]")}>
-          <div className={cn("relative w-[clamp(7rem,18vh,11rem)] h-[clamp(7rem,18vh,11rem)]")}>
+        <div className="flex flex-col items-center gap-[clamp(0.75rem,2vh,1.5rem)]">
+          <div className="relative w-[clamp(7rem,18vh,11rem)] h-[clamp(7rem,18vh,11rem)]">
             <Image
               src="/chameleon-logo.png"
               alt="Chameleon logo"
               width={256}
               height={256}
-              className={cn("w-full h-full object-contain pointer-events-none")}
+              className="w-full h-full object-contain pointer-events-none"
             />
           </div>
           <LoginTitle />
         </div>
 
-        <div className={cn("flex flex-col gap-[clamp(1rem,3vh,1.5rem)]")}>
+        <div className="flex flex-col gap-[clamp(1rem,3vh,1.5rem)]">
           <FormInput
             control={form.control}
             name="Email"
@@ -117,7 +116,7 @@ export default function LoginForm() {
         {submitError && (
           <p
             role="alert"
-            className={cn("text-center text-base font-semibold text-destructive font-sans")}
+            className="text-center text-base font-semibold text-destructive font-sans"
           >
             {submitError}
           </p>
@@ -128,10 +127,10 @@ export default function LoginForm() {
           splash
           type="submit"
           disabled={isSubmitting}
-          className={cn("h-14 w-full mt-[clamp(1rem,3vh,2rem)]")}
+          className="h-14 w-full mt-[clamp(1rem,3vh,2rem)]"
         >
           Login
-          <ArrowRight className={cn("size-5 stroke-[2.5]")} />
+          <ArrowRight className="size-5 stroke-[2.5]" />
         </ActionButton>
       </form>
     </div>
