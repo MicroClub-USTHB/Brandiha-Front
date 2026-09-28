@@ -30,6 +30,12 @@ export default function SubmitForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  // The confirm dialog closes the moment "Submit entry" is clicked, while the
+  // request is still in flight — and `formState.isSubmitting` is already false
+  // by then, since the form's own submit only opened the dialog. Without this
+  // the Submit button came back to life mid-request and could send the entry
+  // twice.
+  const [sending, setSending] = useState(false);
 
   const form = useForm<SubmissionFormData>({
     resolver: zodResolver(submissionSchema),
@@ -44,9 +50,12 @@ export default function SubmitForm({
   };
 
   const confirmSubmit = async () => {
+    if (sending) return;
     const data = form.getValues();
     setSubmitError(null);
+    setSending(true);
     const result = await submitChallenge(challengeId, data);
+    setSending(false);
     if (!result.ok) {
       setSubmitError(result.error);
       setShowConfirm(false);
@@ -56,7 +65,7 @@ export default function SubmitForm({
     setShowConfirm(false);
   };
 
-  const isSubmitting = form.formState.isSubmitting;
+  const isSubmitting = form.formState.isSubmitting || sending;
 
   return (
     <PaperFormCard
