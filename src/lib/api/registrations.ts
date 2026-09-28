@@ -124,12 +124,11 @@ const ADMIN_COPY: ErrorCopy = {
 
 /**
  * Server Action: fetch every registration's full details (Admin), following the
- * pagination on `GET /registrations` to the end. Used to export all rows at once.
- * Optionally filter by team status.
+ * pagination on `GET /registrations` to the end. Used to export all rows at once;
+ * the export narrows them to the board's filter itself, for the same reason
+ * `listTeams` takes no status.
  */
-export async function listAllRegistrations(
-  status?: RegistrationStatus,
-): Promise<FetchResult<RegistrationDetail[]>> {
+export async function listAllRegistrations(): Promise<FetchResult<RegistrationDetail[]>> {
   const limit = 100;
   const all: RegistrationDetail[] = [];
 
@@ -137,7 +136,6 @@ export async function listAllRegistrations(
   // is one `/auth/me` round-trip for the whole walk.
   for (let page = 1, pages = 1; page <= pages; page++) {
     const query = new URLSearchParams({ page: String(page), limit: String(limit) });
-    if (status) query.set("status", status);
 
     const result = await authedJson<PaginatedRegistrations>(
       ["admin"],

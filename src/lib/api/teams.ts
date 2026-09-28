@@ -8,14 +8,13 @@ import type { Team } from "@/lib/api/team-types";
 // Every endpoint here is `get_current_admin` on the backend.
 
 /**
- * Server Action: fetch all teams with their members (Admin). Optionally filter
- * by team status. The bearer token is attached by `backendFetch` from the session.
+ * Server Action: fetch all teams with their members (Admin). Unfiltered on
+ * purpose: the board filters by the members' majority status (`teamStatus`),
+ * which the endpoint's `?status=` — the backend's own per-team status — doesn't
+ * match.
  */
-export async function listTeams(
-  status?: RegistrationStatus,
-): Promise<FetchResult<Team[]>> {
-  const query = status ? `?status=${status}` : "";
-  return authedJson(["admin"], `/teams${query}`, {
+export async function listTeams(): Promise<FetchResult<Team[]>> {
+  return authedJson(["admin"], "/teams", {
     forbidden: "You're not authorized to view this.",
     fallback: "Something went wrong loading teams.",
   });
