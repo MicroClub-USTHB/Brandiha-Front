@@ -61,11 +61,12 @@ export function HrBoard({ teams }: { teams: Team[] }) {
   // Set while confirming so the dialog's close handler doesn't revert the move.
   const confirmingRef = useRef(false);
 
-  const cardEls = useState(() => new Map<string, HTMLElement>())[0];
+  // Each team card's element, for hit-testing a drop. Read only in handlers.
+  const cardEls = useRef(new Map<string, HTMLElement>());
 
   const teamAtPoint = (point: Point): Team | null => {
     for (const t of board) {
-      const el = cardEls.get(t.id);
+      const el = cardEls.current.get(t.id);
       if (!el) continue;
       const r = el.getBoundingClientRect();
       if (
@@ -163,8 +164,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
             <section
               key={team.id}
               ref={(el) => {
-                if (el) cardEls.set(team.id, el);
-                else cardEls.delete(team.id);
+                if (el) cardEls.current.set(team.id, el);
+                else cardEls.current.delete(team.id);
               }}
               className={cn(
                 "bg-paper flex flex-col rounded-xl p-6 shadow-sm transition-colors",
