@@ -1,7 +1,10 @@
+import { Users } from "lucide-react";
+
 import { checkAccess } from "@/lib/auth/session";
 import { listTeams } from "@/lib/api/teams";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { HrPageClient } from "@/components/hr/hr-page-client";
+import { Notice } from "@/components/notice";
 
 /** HR view: one card per team, with drag-and-drop to move members between teams. */
 export default async function HrPage() {
@@ -11,13 +14,7 @@ export default async function HrPage() {
 
   const teamsResult = await listTeams();
 
-  if (!teamsResult.ok) {
-    return (
-      <main className="mx-auto max-w-6xl p-6">
-        <p className="font-sans text-destructive">{teamsResult.error}</p>
-      </main>
-    );
-  }
+  if (!teamsResult.ok) return <Notice icon={Users} title="Teams" message={teamsResult.error} />;
 
   return (
     <main className="mx-auto max-w-6xl p-6 font-sans">

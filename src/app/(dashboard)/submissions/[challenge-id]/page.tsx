@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Inbox } from "lucide-react";
 import type { Department } from "@/lib/api/registration-types";
 import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
 import { parseChallengeId } from "@/lib/challenge-id";
 import { AccessNotice } from "@/components/auth/access-notice";
+import { Notice, NoticeLink } from "@/components/notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
 import { ExportCsvButton } from "@/components/submissions/export-csv-button";
 
@@ -33,19 +35,12 @@ export default async function SubmissionsPage(props: Props) {
   if (challengeId === null) notFound();
 
   const result = await getChallengeDetail(challengeId);
-  if (!result.ok) {
+  if (!result.ok)
     return (
-      <main className="mx-auto max-w-4xl p-6 font-sans">
-        <p className="text-destructive">{result.error}</p>
-        <Link
-          href="/submissions"
-          className="mt-4 inline-block text-sm text-primary underline underline-offset-2"
-        >
-          &larr; All challenges
-        </Link>
-      </main>
+      <Notice icon={Inbox} title="Submissions" message={result.error}>
+        <NoticeLink href="/submissions">&larr; All challenges</NoticeLink>
+      </Notice>
     );
-  }
 
   const { challenge, submissions } = result.data;
 
