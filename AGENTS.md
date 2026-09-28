@@ -98,7 +98,7 @@ src/
     theme-picker.tsx       # Theme picker UI
     theme-provider.tsx     # "use client" boundary for next-themes
   hooks/
-    use-registration-form.tsx  # Multi-step form logic (react-hook-form + Zod)
+    use-registration-form.ts   # Multi-step form logic (react-hook-form + Zod)
     use-graffiti-cursor.ts     # Pointer tracking for the graffiti cursor
     use-is-client.ts           # false until mounted — gate client-only values (e.g. the theme)
   lib/
@@ -225,7 +225,7 @@ src/
   conditional validation (AvailabilityMessage required when Availability === "Other").
 - Form wrappers (`FormInput`, `FormTextarea`, `FormSelect`, `FormCheckbox`) in
   `src/components/form.tsx` — use these instead of raw shadcn inputs.
-- Custom hook `src/hooks/use-registration-form.tsx` manages step state, field
+- Custom hook `src/hooks/use-registration-form.ts` manages step state, field
   visibility, and validation triggers.
 - Form fields use PascalCase names (e.g. `FullName`, `Email`) to match the schema.
 - **`Tools` and `Links` are list fields.** They're free text split on commas and
