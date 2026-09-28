@@ -3,15 +3,9 @@ import { Trophy } from "lucide-react";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { Notice } from "@/components/notice";
 import { getAdminLeaderboard } from "@/lib/api/leaderboard";
-import type { AdminLeaderboardEntry } from "@/lib/api/leaderboard-types";
 import { checkAccess } from "@/lib/auth/session";
 import { SuperAdminLeaderboardClient } from "@/components/leaderboard/super-admin-leaderboard-client";
 import { FreezeToggleSwitch } from "@/components/leaderboard/freeze-toggle-switch";
-export function sortLeaderboardByScore(
-  data: AdminLeaderboardEntry[],
-): AdminLeaderboardEntry[] {
-  return [...data].sort((a, b) => b.total_score - a.total_score);
-}
 
 export default async function SuperAdminLeaderboard() {
   const access = await checkAccess("super_admin");
@@ -22,11 +16,10 @@ export default async function SuperAdminLeaderboard() {
     return <Notice icon={Trophy} title="Leaderboard" message={result.error} />;
 
   const leaderboardResponse = result.data;
-  const sortedTeams = sortLeaderboardByScore(leaderboardResponse.leaderboard);
 
   // The board lists accepted teams with at least one scored submission, so an
   // empty one means nothing has been scored yet rather than a failed load.
-  if (sortedTeams.length === 0)
+  if (leaderboardResponse.leaderboard.length === 0)
     return (
       <Notice
         icon={Trophy}
@@ -42,7 +35,7 @@ export default async function SuperAdminLeaderboard() {
       <FreezeToggleSwitch initialFrozen={leaderboardResponse.frozen} />
 
       <SuperAdminLeaderboardClient
-        initialLeaderboard={sortedTeams}
+        initialLeaderboard={leaderboardResponse.leaderboard}
         isFrozen={leaderboardResponse.frozen}
         frozenAt={leaderboardResponse.frozen_at}
       />

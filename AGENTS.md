@@ -122,6 +122,7 @@ src/
       home.ts              # HOME_BY_ROLE — where each role lands after login
     validators/            # Zod schemas (registration, login, submission)
     team-status.ts         # Majority team status + the delete rule
+    leaderboard-order.ts   # byScore — leaderboard rank order
     csv.ts                 # CSV encoding (quoting + formula-injection guard)
     list-field.ts          # splitList — comma/newline free text to a list
     form-persistence.ts    # Expiry rule for the saved registration form
