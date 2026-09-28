@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { type Role } from "@/lib/auth/jwt";
 import { ThemePicker } from "@/components/theme-picker";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS: Partial<Record<Role, { href: string; label: string }[]>> = {
   admin: [
@@ -82,9 +83,10 @@ export function DashboardHeader({
                   <Link
                     key={href}
                     href={href}
-                    className={`font-hand text-[28px] transition-colors hover:text-white ${
-                      isActive ? "text-white" : "text-white/70"
-                    }`}
+                    className={cn(
+                      "font-hand text-[28px] transition-colors hover:text-white",
+                      isActive ? "text-white" : "text-white/70",
+                    )}
                   >
                     {label}
                   </Link>

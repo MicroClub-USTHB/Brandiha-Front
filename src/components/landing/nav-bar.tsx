@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Home" },
@@ -97,9 +98,10 @@ export function NavBar() {
             key={href}
             href={href}
             onClick={() => isLanding && handleClick(href)}
-            className={`relative font-hand text-[28px] text-white/70 hover:text-white ${
-              isActive ? "text-white" : ""
-            }`}
+            className={cn(
+              "relative font-hand text-[28px] text-white/70 hover:text-white",
+              isActive && "text-white",
+            )}
           >
             {label}
             {isClient && isActive && (

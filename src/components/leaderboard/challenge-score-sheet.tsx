@@ -5,6 +5,7 @@ import type { AdminLeaderboardEntry, ChallengeScore } from "@/lib/api/leaderboar
 import bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -166,9 +167,10 @@ export function ChallengeScoreSheet({
                 return (
                   <article
                     key={challenge.challenge_id}
-                    className={`rounded-xl border border-border p-4 shadow-sm ${
-                      hasSubmission ? "bg-card" : "bg-muted/40 opacity-75"
-                    }`}
+                    className={cn(
+                      "rounded-xl border border-border p-4 shadow-sm",
+                      hasSubmission ? "bg-card" : "bg-muted/40 opacity-75",
+                    )}
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">

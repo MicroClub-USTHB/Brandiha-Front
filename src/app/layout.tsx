@@ -8,6 +8,7 @@ import { SiteBackground } from "@/components/site-background";
 import { GraffitiCursor } from "@/components/cursor/graffiti-cursor";
 import { SplashScreen } from "@/components/splash-screen";
 import { DEFAULT_THEME, THEME_VALUES } from "@/lib/themes";
+import { cn } from "@/lib/utils";
 
 const seekuw = localFont({
   src: "./fonts/SEEKUW.otf",
@@ -67,7 +68,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${montserrat.variable} ${patrickHand.variable} ${seekuw.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        montserrat.variable,
+        patrickHand.variable,
+        seekuw.variable,
+        geistMono.variable,
+        "h-full antialiased",
+      )}
     >
       <body className="relative min-h-full flex flex-col overflow-x-hidden">
         <SiteBackground />
