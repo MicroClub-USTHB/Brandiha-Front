@@ -26,6 +26,7 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [pendingFrozen, setPendingFrozen] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleToggle = async () => {
     if (pendingFrozen === null) return;
@@ -34,17 +35,15 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
     const res = await toggleLeaderboardFreeze();
     setLoading(false);
 
-    if (res.ok) {
-      setFrozen(res.data.frozen);
-      setPendingFrozen(null);
-      setOpen(false);
-    } else {
-      alert(res.error);
-    }
+    setPendingFrozen(null);
+    setOpen(false);
+    if (res.ok) setFrozen(res.data.frozen);
+    else setError(res.error);
   };
 
   const requestToggle = (nextFrozen: boolean) => {
     if (loading) return;
+    setError(null);
     setPendingFrozen(nextFrozen);
     setOpen(true);
   };
@@ -70,6 +69,11 @@ export function FreezeToggleSwitch({ initialFrozen }: FreezeToggleSwitchProps) {
           {loading && <span className="text-xs text-neutral-400">(Updating...)</span>}
         </Label>
       </div>
+      {error && (
+        <p role="alert" className="text-sm font-semibold text-destructive">
+          {error}
+        </p>
+      )}
 
       <AlertDialogContent>
         <AlertDialogHeader>
