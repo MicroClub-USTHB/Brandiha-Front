@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, RotateCcw, Trash2, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { deleteTeam, updateTeamStatus } from "@/lib/api/teams";
+import type { ActionResult } from "@/lib/api/result";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
 import type { TeamMember } from "@/lib/api/team-types";
 import { canDeleteTeam } from "@/lib/team-status";
@@ -18,6 +19,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+
+/** Button order in the footer. */
+const ACTIONS: RegistrationStatus[] = ["rejected", "pending", "accepted"];
 
 const BTN_BASE =
   "flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50";
@@ -44,21 +48,13 @@ export function TeamActions({
 
   const canDelete = canDeleteTeam(members);
 
-  const run = (status: RegistrationStatus) => {
+  /** Close both dialogs, run `action`, then refresh the board or show why not. */
+  const perform = (action: () => Promise<ActionResult>) => {
     setConfirming(null);
-    setError(null);
-    startTransition(async () => {
-      const res = await updateTeamStatus(teamId, status);
-      if (res.ok) await onDone();
-      else setError(res.error);
-    });
-  };
-
-  const runDelete = () => {
     setConfirmingDelete(false);
     setError(null);
     startTransition(async () => {
-      const res = await deleteTeam(teamId);
+      const res = await action();
       if (res.ok) await onDone();
       else setError(res.error);
     });
@@ -67,33 +63,21 @@ export function TeamActions({
   return (
     <div className="mt-3 border-t border-border pt-3">
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setConfirming("rejected")}
-          disabled={pending || currentStatus === "rejected"}
-          className={cn(BTN_BASE, "bg-destructive/10 text-destructive hover:bg-destructive/20")}
-        >
-          <X className="size-3.5 stroke-[2.5]" />
-          Decline
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirming("pending")}
-          disabled={pending || currentStatus === "pending"}
-          className={cn(BTN_BASE, "bg-muted text-muted-foreground hover:bg-muted/70")}
-        >
-          <RotateCcw className="size-3.5 stroke-[2.5]" />
-          Reset
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirming("accepted")}
-          disabled={pending || currentStatus === "accepted"}
-          className={cn(BTN_BASE, "bg-success/10 text-success hover:bg-success/20")}
-        >
-          <Check className="size-3.5 stroke-[2.5]" />
-          Accept
-        </button>
+        {ACTIONS.map((status) => {
+          const { verb, icon: Icon, action } = STATUS_META[status];
+          return (
+            <button
+              key={status}
+              type="button"
+              onClick={() => setConfirming(status)}
+              disabled={pending || currentStatus === status}
+              className={cn(BTN_BASE, action)}
+            >
+              <Icon className="size-3.5 stroke-[2.5]" />
+              {verb}
+            </button>
+          );
+        })}
       </div>
 
       <button
@@ -132,7 +116,7 @@ export function TeamActions({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={runDelete}>
+            <AlertDialogAction variant="destructive" onClick={() => perform(() => deleteTeam(teamId))}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -162,7 +146,7 @@ export function TeamActions({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirming && run(confirming)}>
+            <AlertDialogAction onClick={() => confirming && perform(() => updateTeamStatus(teamId, confirming))}>
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
