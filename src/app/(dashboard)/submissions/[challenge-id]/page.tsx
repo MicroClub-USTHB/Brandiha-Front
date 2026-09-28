@@ -4,6 +4,7 @@ import type { Department } from "@/lib/api/registration-types";
 import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
+import { parseChallengeId } from "@/lib/challenge-id";
 import { AccessNotice } from "@/components/auth/access-notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
 import { ExportCsvButton } from "@/components/submissions/export-csv-button";
@@ -18,13 +19,6 @@ const DEPARTMENT_LABEL: Record<Department, string> = {
 type Props = {
   params: Promise<{ "challenge-id": string }>;
 };
-
-/** Challenge ids are SERIAL integers on the backend, not uuids. */
-function parseChallengeId(raw: string): number | null {
-  if (!/^\d+$/.test(raw)) return null;
-  const id = Number(raw);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
 
 /** Every submission against one challenge, for staff review. */
 export default async function SubmissionsPage(props: Props) {

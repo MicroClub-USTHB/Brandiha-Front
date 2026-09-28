@@ -2,18 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import { Lock } from "lucide-react";
 import SubmitForm from "@/components/submit/submit-form";
 import { getChallenge } from "@/lib/api/challenges";
+import { parseChallengeId } from "@/lib/challenge-id";
 import { Header } from "@/components/landing/header";
 
 type Props = {
   params: Promise<{ "challenge-id": string }>;
 };
-
-/** Challenge ids are SERIAL integers on the backend, not uuids. */
-function parseChallengeId(raw: string): number | null {
-  if (!/^\d+$/.test(raw)) return null;
-  const id = Number(raw);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
 
 /** Stands in for the form when there's nothing to submit to (or not yet). */
 function Notice({
