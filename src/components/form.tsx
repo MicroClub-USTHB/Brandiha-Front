@@ -29,6 +29,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+
+/**
+ * Every form in the app sits on the paper card and writes in the hand font, so
+ * the wrappers carry it themselves rather than each form restyling its fields.
+ * A caller's `className` still wins, via `cn()`.
+ */
+const HAND_LABEL =
+  "font-hand text-[clamp(1rem,2.5vh,1.35rem)] leading-none font-bold tracking-wide text-foreground";
+const HAND_CONTROL = "font-hand";
 
 type FormControlProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -93,7 +103,7 @@ function FormField<
       name={name}
       render={({ field, fieldState }) => {
         const labelElement = (
-          <FieldLabel htmlFor={field.name} className={hideLabel ? "sr-only" : undefined}>
+          <FieldLabel htmlFor={field.name} className={cn(HAND_LABEL, hideLabel && "sr-only")}>
             <span className="text-md">
               {label}
               {required && (
@@ -181,7 +191,7 @@ export const FormInput: FormControlFunction<{
           }
           icon={icon}
           required={props.required}
-          className={className}
+          className={cn(HAND_CONTROL, className)}
           disabled={disabled}
           onChangeCapture={onChangeCapture}
           {...field}
@@ -200,7 +210,7 @@ export const FormTextarea: FormControlFunction<
           placeholder ?? (typeof props.label === "string" ? props.label : undefined)
         }
         required={props.required}
-        className={className}
+        className={cn(HAND_CONTROL, className)}
         {...field}
       />
     )}
@@ -255,8 +265,7 @@ export const FormSelect: FormControlFunction<{
 
 export const FormCheckbox: FormControlFunction = (props) => (
   // The horizontal Field top-aligns the box with the label block (`items-start`)
-  // for multi-line labels; a single-line checkbox reads better centered. The
-  // matching label bottom-margin reset lives in the `.reg-form` global styles.
+  // for multi-line labels; a single-line checkbox reads better centered.
   <FormField {...props} horizontal controlFirst fieldClassName="!items-center">
     {({ onChange, value, ...field }) => (
       <Checkbox {...field} checked={value} onCheckedChange={onChange} />

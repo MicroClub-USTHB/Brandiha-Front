@@ -122,29 +122,8 @@ export default function RegistrationForm() {
       <form
         onSubmit={submit}
         style={stepStyle}
-        className="reg-form grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-paper px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans"
+        className="grid w-full grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-[clamp(1.5rem,5vh,4rem)] border-0 bg-paper px-[clamp(1rem,4vw,5rem)] pt-[clamp(1.5rem,6vh,4.5rem)] pb-[clamp(1.5rem,6vh,5.5rem)] text-card-foreground font-sans"
       >
-        {/* Scoped to `.reg-form` so these overrides don't leak to labels/inputs
-            elsewhere in the app. Rendered once, not per field. */}
-        <style jsx global>{`
-          .reg-form label {
-            font-family: var(--font-hand) !important;
-            font-size: clamp(1rem, 2.5vh, 1.35rem) !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.025em !important;
-            color: var(--foreground) !important;
-            margin-bottom: 0.35rem !important;
-          }
-          .reg-form :is(input, textarea, select, [data-slot="control"]) {
-            font-family: var(--font-hand) !important;
-          }
-          /* Checkbox labels sit beside the box, not above an input, so the
-             stacking margin above would throw off vertical centering. */
-          .reg-form [data-orientation="horizontal"] label {
-            margin-bottom: 0 !important;
-          }
-        `}</style>
-
         <div className="flex flex-col items-center">
           <StepTitle />
         </div>
