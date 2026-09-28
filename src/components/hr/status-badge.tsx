@@ -1,18 +1,19 @@
+import type { RegistrationStatus } from "@/lib/api/registration-types";
 import { cn } from "@/lib/utils";
 
-const STATUS_STYLES: Record<string, string> = {
+const STATUS_STYLES: Record<RegistrationStatus, string> = {
   accepted: "bg-success/15 text-success",
   rejected: "bg-destructive/15 text-destructive",
   pending: "bg-warning/15 text-warning",
 };
 
 /** Small pill showing a registration/team status. Presentational (no hooks). */
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status }: { status: RegistrationStatus }) {
   return (
     <span
       className={cn(
         "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
-        STATUS_STYLES[status] ?? "bg-muted text-muted-foreground",
+        STATUS_STYLES[status],
       )}
     >
       {status}
