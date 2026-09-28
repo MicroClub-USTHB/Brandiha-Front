@@ -3,28 +3,8 @@
 import { useRouter } from "next/navigation";
 import { X, Check, AlertTriangle, XCircle } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
-import { create } from "zustand";
+import { usePopupStore, type PopupVariant } from "@/hooks/use-popup-store";
 import { cn } from "@/lib/utils";
-
-export type PopupVariant = "success" | "error" | "warning";
-
-interface PopupStore {
-  isOpen: boolean;
-  variant: PopupVariant;
-  title?: string;
-  description?: string;
-  openPopup: (variant?: PopupVariant, title?: string, description?: string) => void;
-  closePopup: () => void;
-}
-
-export const usePopupStore = create<PopupStore>((set) => ({
-  isOpen: false,
-  variant: "success",
-  title: undefined,
-  description: undefined,
-  openPopup: (variant = "success", title, description) => set({ isOpen: true, variant, title, description }),
-  closePopup: () => set({ isOpen: false }),
-}));
 
 interface PopupVariantConfig {
   imageSrc: string;

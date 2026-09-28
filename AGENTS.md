@@ -92,7 +92,7 @@ src/
     cursor/                # Graffiti cursor, trail, splatter
     notice.tsx             # Shared full-page notice (404, error, access denial)
     form.tsx               # FormInput, FormTextarea, FormSelect, FormCheckbox wrappers
-    pop-up.tsx             # Popup + zustand store for success/error/warning
+    pop-up.tsx             # Popup for success/error/warning (store in hooks/use-popup-store.ts)
     site-background.tsx    # Paint wall + decorations, behind every page
     splash-screen.tsx      # One-per-session intro animation
     theme-picker.tsx       # Theme picker UI
@@ -101,6 +101,7 @@ src/
     use-registration-form.ts   # Multi-step form logic (react-hook-form + Zod)
     use-graffiti-cursor.ts     # Pointer tracking for the graffiti cursor
     use-is-client.ts           # false until mounted — gate client-only values (e.g. the theme)
+    use-popup-store.ts         # zustand store behind <Popup />
   lib/
     api/
       fetch.ts             # backendFetch — the ONE way to call the backend

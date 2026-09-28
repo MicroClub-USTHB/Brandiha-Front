@@ -10,7 +10,7 @@ import {
   REGISTRATION_PERSIST_KEY,
 } from "@/lib/form-persistence";
 import { submitRegistration } from "@/lib/api/registrations";
-import { usePopupStore } from "@/components/pop-up";
+import { usePopupStore } from "@/hooks/use-popup-store";
 
 /**
  * Persists the in-progress form (values + current step) to localStorage so a
