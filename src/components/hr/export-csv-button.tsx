@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ExportButton } from "@/components/export-button";
 import { listAllRegistrations } from "@/lib/api/registrations";
 import type { RegistrationDetail } from "@/lib/api/registration-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
@@ -81,25 +80,7 @@ export function ExportCsvButton({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={exportCsv}
-        disabled={disabled || loading}
-        className="bg-card px-4 font-semibold text-card-foreground"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Exporting…
-          </>
-        ) : (
-          <>
-            <Download className="size-4" />
-            Export to CSV
-          </>
-        )}
-      </Button>
+      <ExportButton onClick={exportCsv} disabled={disabled} loading={loading} />
       {error && <span className="text-xs text-destructive">{error}</span>}
     </div>
   );

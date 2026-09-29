@@ -92,6 +92,7 @@ src/
     cursor/                # Graffiti cursor, trail, splatter
     notice.tsx             # Shared full-page notice (404, error, access denial)
     form.tsx               # FormInput, FormTextarea, FormSelect, FormCheckbox wrappers
+    export-button.tsx      # "Export to CSV" button shared by the HR and submissions exports
     pop-up.tsx             # Popup for success/error/warning (store in hooks/use-popup-store.ts)
     site-header.tsx        # Top bar shell (logo, theme picker, paint drip) + SiteNav for both headers
     theme-art/             # Theme-coloured art: one shared SVG in public/theme-art, coloured by CSS

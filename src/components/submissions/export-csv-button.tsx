@@ -1,7 +1,6 @@
 "use client";
 
-import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ExportButton } from "@/components/export-button";
 import type { ChallengeSubmission } from "@/lib/api/challenge-types";
 import { datedCsvFilename, downloadCsv, toCsv, type CsvColumns } from "@/lib/csv";
 
@@ -45,9 +44,7 @@ export function ExportCsvButton({
   challengeTitle: string;
 }) {
   return (
-    <Button
-      type="button"
-      variant="outline"
+    <ExportButton
       onClick={() =>
         downloadCsv(
           toCsv(submissions, COLUMNS),
@@ -55,10 +52,6 @@ export function ExportCsvButton({
         )
       }
       disabled={submissions.length === 0}
-      className="bg-card px-4 font-semibold text-card-foreground"
-    >
-      <Download className="size-4" />
-      Export to CSV
-    </Button>
+    />
   );
 }
