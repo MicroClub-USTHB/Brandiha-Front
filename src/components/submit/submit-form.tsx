@@ -54,8 +54,15 @@ export default function SubmitForm({
     const data = form.getValues();
     setSubmitError(null);
     setSending(true);
-    const result = await submitChallenge(challengeId, data);
-    setSending(false);
+    // The action returns its errors rather than throwing, but the call itself
+    // can still reject (the network drops, the deployment changes under the
+    // page). Without the catch and finally, that left Submit disabled for good.
+    const result = await submitChallenge(challengeId, data)
+      .catch(() => ({
+        ok: false as const,
+        error: "Couldn't reach the server. Please try again in a moment.",
+      }))
+      .finally(() => setSending(false));
     if (!result.ok) {
       setSubmitError(result.error);
       setShowConfirm(false);
