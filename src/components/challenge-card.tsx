@@ -154,14 +154,23 @@ export default function ChallengeCard({
   // placeholder stands in whenever the title is absent.
   const heading = title ?? "Coming Soon...";
 
-  const { card, cardUpcoming, mascot } = DEPARTMENTS[department];
-  const cardImage = isUpcoming ? cardUpcoming : card;
+  const { card, mascot } = DEPARTMENTS[department];
 
   return (
     <div
-      className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8"
-      style={{ backgroundImage: `url('${cardImage}')` }}
+      className="w-45 md:w-65 2xl:w-85 aspect-square relative isolate flex flex-col items-center justify-between px-6 py-8"
     >
+      {/* The card art's accents take the same colour as the text — the
+          department's, or grey while upcoming — so one file per department
+          covers both. Fitted and centred, like the `bg-contain` it replaces. */}
+      <svg
+        viewBox="0 0 217 202"
+        fill="none"
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 size-full"
+      >
+        <use href={`${card}#art`} style={{ fill: textColor }} />
+      </svg>
       {isClosed && (
         // The stamp is what tells a closed card apart at a glance: it keeps
         // the department color, just faded and tilted like ink over the card.

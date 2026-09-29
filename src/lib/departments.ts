@@ -12,10 +12,8 @@ export const DEPARTMENTS: Record<
   {
     label: string;
     color: string;
-    /** Challenge card background once the challenge has unlocked. */
+    /** Challenge card art; its accents take whatever colour the card sets. */
     card: string;
-    /** The same card, greyed out, while the challenge is still upcoming. */
-    cardUpcoming: string;
     mascot: string;
   }
 > = {
@@ -23,28 +21,24 @@ export const DEPARTMENTS: Record<
     label: "Marketing",
     color: "var(--brand-marketing)",
     card: "/challenge-cards/marketing-card.svg",
-    cardUpcoming: "/challenge-cards/marketing-card-gray.svg",
     mascot: "/department-mascots/marketing-mascot.png",
   },
   communication: {
     label: "Communication",
     color: "var(--brand-communication)",
     card: "/challenge-cards/communication-card.svg",
-    cardUpcoming: "/challenge-cards/communication-card-gray.svg",
     mascot: "/department-mascots/communication-mascot.png",
   },
   multimedia: {
     label: "Multimedia",
     color: "var(--brand-multimedia)",
     card: "/challenge-cards/multimedia-card.svg",
-    cardUpcoming: "/challenge-cards/multimedia-card-gray.svg",
     mascot: "/department-mascots/multimedia-mascot.png",
   },
   design: {
     label: "Design",
     color: "var(--brand-design)",
     card: "/challenge-cards/design-card.svg",
-    cardUpcoming: "/challenge-cards/design-card-gray.svg",
     mascot: "/department-mascots/design-mascot.png",
   },
 };
