@@ -7,10 +7,29 @@ import { authedAction, authedJson } from "@/lib/api/authed";
 import { backendFetch } from "@/lib/api/fetch";
 import type {
   AdminLeaderboardResponse,
+  PublicLeaderboardEntry,
   PublicLeaderboardResponse,
   ScoreUpdate,
 } from "@/lib/api/leaderboard-types";
 import type { ActionResult, FetchResult } from "@/lib/api/result";
+
+type Board<Entry> = {
+  frozen: boolean;
+  frozen_at: string | null;
+  leaderboard: Entry[];
+};
+
+/**
+ * Both boards read the same way when the body is missing a field: empty and
+ * unfrozen, rather than crashing the page.
+ */
+function withBoardDefaults<Entry>(board: Partial<Board<Entry>>): Board<Entry> {
+  return {
+    frozen: board.frozen ?? false,
+    frozen_at: board.frozen_at ?? null,
+    leaderboard: board.leaderboard ?? [],
+  };
+}
 
 /**
  * Uncached on purpose, which also opts `/leaderboard` out of static generation.
@@ -29,17 +48,7 @@ export async function getGlobalLeaderboard(): Promise<PublicLeaderboardResponse>
       throw new Error(`http Error: ${response.status}`);
     }
 
-    const data: PublicLeaderboardResponse = await response.json();
-    
-    if (!data.leaderboard) {
-      return {
-        frozen: data.frozen ?? false,
-        frozen_at: data.frozen_at ?? null,
-        leaderboard: [],
-      };
-    }
-
-    return data;
+    return withBoardDefaults<PublicLeaderboardEntry>(await response.json());
   } catch (error) {
     // Next signals "this route can't be static" by throwing, and a bare catch
     // here swallows that signal along with real failures. Hand it back before
@@ -60,18 +69,7 @@ export async function getAdminLeaderboard(): Promise<FetchResult<AdminLeaderboar
     fallback: "Something went wrong loading the leaderboard.",
   });
   if (!result.ok) return result;
-
-  // Same normalisation as the public board: a body missing any of these reads
-  // as an empty, unfrozen board rather than crashing the page.
-  const { frozen, frozen_at, leaderboard } = result.data;
-  return {
-    ok: true,
-    data: {
-      frozen: frozen ?? false,
-      frozen_at: frozen_at ?? null,
-      leaderboard: leaderboard ?? [],
-    },
-  };
+  return { ok: true, data: withBoardDefaults(result.data) };
 }
 
 /**
