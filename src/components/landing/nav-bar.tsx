@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { SiteNav, SiteNavLink } from "@/components/site-header";
 import { NavUnderline } from "@/components/theme-art/nav-underline";
 
 const links = [
@@ -68,26 +67,24 @@ export function NavBar() {
   const shouldShow = isLanding ? active : null;
 
   return (
-    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
+    <SiteNav>
       {links.map(({ href, label }) => {
         const isActive = shouldShow === href;
         return (
-          <Link
+          <SiteNavLink
             key={href}
             href={href}
+            active={isActive}
             onClick={() => isLanding && handleClick(href)}
-            className={cn(
-              "relative font-hand text-[28px] text-white/70 hover:text-white",
-              isActive && "text-white",
-            )}
+            className="relative"
           >
             {label}
             {isActive && (
               <NavUnderline className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2" />
             )}
-          </Link>
+          </SiteNavLink>
         );
       })}
-    </nav>
+    </SiteNav>
   );
 }

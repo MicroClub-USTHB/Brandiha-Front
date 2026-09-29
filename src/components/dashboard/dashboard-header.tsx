@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { type Role } from "@/lib/auth/jwt";
 import { UserMenu } from "@/components/dashboard/user-menu";
-import { SiteHeader } from "@/components/site-header";
-import { cn } from "@/lib/utils";
+import { SiteHeader, SiteNav, SiteNavLink } from "@/components/site-header";
 
 const NAV_LINKS: Partial<Record<Role, { href: string; label: string }[]>> = {
   admin: [
@@ -39,23 +37,17 @@ export function DashboardHeader({
       position="sticky"
       nav={
         links && (
-          <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
-            {links.map(({ href, label }) => {
-              const isActive = pathname === href || pathname.startsWith(`${href}/`);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "font-hand text-[28px] transition-colors hover:text-white",
-                    isActive ? "text-white" : "text-white/70",
-                  )}
-                >
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
+          <SiteNav>
+            {links.map(({ href, label }) => (
+              <SiteNavLink
+                key={href}
+                href={href}
+                active={pathname === href || pathname.startsWith(`${href}/`)}
+              >
+                {label}
+              </SiteNavLink>
+            ))}
+          </SiteNav>
         )
       }
       actions={

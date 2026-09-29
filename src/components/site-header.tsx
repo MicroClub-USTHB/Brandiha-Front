@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -52,5 +52,30 @@ export function SiteHeader({
         className="absolute top-[99%] left-0 w-44 sm:w-[337px] h-auto"
       />
     </header>
+  );
+}
+
+/** The row of links passed to `SiteHeader` as its `nav`. */
+export function SiteNav({ children }: { children: ReactNode }) {
+  return (
+    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">{children}</nav>
+  );
+}
+
+/** One `SiteNav` link, lit up while `active`. */
+export function SiteNavLink({
+  active,
+  className,
+  ...props
+}: ComponentProps<typeof Link> & { active: boolean }) {
+  return (
+    <Link
+      {...props}
+      className={cn(
+        "font-hand text-[28px] text-white/70 transition-colors hover:text-white",
+        active && "text-white",
+        className,
+      )}
+    />
   );
 }
