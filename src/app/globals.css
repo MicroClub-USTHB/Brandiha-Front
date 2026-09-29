@@ -28,6 +28,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-popup-title: var(--popup-title);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
@@ -81,6 +83,13 @@
   --success-foreground: var(--white);
   --warning: oklch(0.681 0.162 75.834);
   --warning-foreground: var(--white);
+  --destructive-foreground: var(--white);
+
+  /* Also theme-independent: the popup's title, which sits on its own painted
+     frame rather than the page, and the grey of a challenge card that hasn't
+     unlocked yet. */
+  --popup-title: oklch(0.7535 0.139 232.66); /* #38BDF8 */
+  --challenge-locked: oklch(0.6268 0 0); /* #888888 */
 
   --background: var(--white);
   --foreground: var(--black);
@@ -142,6 +151,23 @@
   --gekko-2: #c42e67;
   --gekko-3: #2684d4;
   --gekko-4: #19d5be;
+
+  /* The wordmark's letters are white here rather than the (near-white) solid
+     --primary; every other theme leaves this unset and uses --primary. */
+  --logo-letters: white;
+}
+
+/* Only chameleon defines the --gekko-n stops and --logo-letters. Every other
+   theme resets them, so a [data-theme] nested inside a chameleon page — the
+   theme picker's per-theme previews — falls back to its own --primary instead
+   of inheriting chameleon's. `initial` makes a custom property invalid, which
+   is what triggers a var() fallback. */
+[data-theme]:not([data-theme="chameleon"]) {
+  --gekko-1: initial;
+  --gekko-2: initial;
+  --gekko-3: initial;
+  --gekko-4: initial;
+  --logo-letters: initial;
 }
 
 /* Paint the gradient over any primary background (buttons, badges, …). The
@@ -442,6 +468,16 @@
   .graffiti-trail {
     display: none;
   }
+}
+
+/* The torn-paper card behind forms, rows, and team cards, stretched to fill
+   its box. Sets the image only, so don't pair it with another `bg-*` colour
+   through `cn()` — tailwind-merge files both under background colour and
+   keeps just one. */
+@utility bg-paper {
+  background-image: url("/paper.svg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
 @utility splash-mask {

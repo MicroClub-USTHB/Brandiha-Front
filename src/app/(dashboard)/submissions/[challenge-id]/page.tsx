@@ -1,30 +1,19 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import type { Department } from "@/lib/api/registration-types";
+import { Inbox } from "lucide-react";
 import { checkAccess } from "@/lib/auth/session";
 import { getChallengeDetail } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
+import { parseChallengeId } from "@/lib/challenge-id";
+import { DEPARTMENTS } from "@/lib/departments";
 import { AccessNotice } from "@/components/auth/access-notice";
+import { Notice, NoticeLink } from "@/components/notice";
 import { SubmissionsTable } from "@/components/submissions/submissions-table";
 import { ExportCsvButton } from "@/components/submissions/export-csv-button";
-
-const DEPARTMENT_LABEL: Record<Department, string> = {
-  marketing: "Marketing",
-  communication: "Communication",
-  multimedia: "Multimedia",
-  design: "Design",
-};
 
 type Props = {
   params: Promise<{ "challenge-id": string }>;
 };
-
-/** Challenge ids are SERIAL integers on the backend, not uuids. */
-function parseChallengeId(raw: string): number | null {
-  if (!/^\d+$/.test(raw)) return null;
-  const id = Number(raw);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
 
 /** Every submission against one challenge, for staff review. */
 export default async function SubmissionsPage(props: Props) {
@@ -39,21 +28,15 @@ export default async function SubmissionsPage(props: Props) {
   if (challengeId === null) notFound();
 
   const result = await getChallengeDetail(challengeId);
-  if (!result.ok) {
+  if (!result.ok)
     return (
-      <main className="mx-auto max-w-4xl p-6 font-sans">
-        <p className="text-destructive">{result.error}</p>
-        <Link
-          href="/submissions"
-          className="mt-4 inline-block text-sm text-primary underline underline-offset-2"
-        >
-          &larr; All challenges
-        </Link>
-      </main>
+      <Notice icon={Inbox} title="Submissions" message={result.error}>
+        <NoticeLink href="/submissions">&larr; All challenges</NoticeLink>
+      </Notice>
     );
-  }
 
   const { challenge, submissions } = result.data;
+  const department = DEPARTMENTS[challenge.department];
 
   // An upcoming challenge bounces back to the picker, the same way `/submit`
   // turns one away: there is nothing to review yet, and its title is still under
@@ -84,9 +67,9 @@ export default async function SubmissionsPage(props: Props) {
             </h1>
             <span
               className="rounded-full px-3 py-0.5 text-xs font-bold uppercase leading-none tracking-wide text-black"
-              style={{ backgroundColor: `var(--brand-${challenge.department})` }}
+              style={{ backgroundColor: department.color }}
             >
-              {DEPARTMENT_LABEL[challenge.department]}
+              {department.label}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">

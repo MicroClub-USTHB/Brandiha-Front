@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { updateRegistration } from "@/lib/api/registrations";
-import { listTeams } from "@/lib/api/teams";
 import type { Team, TeamMember } from "@/lib/api/team-types";
 import { StatusBadge } from "@/components/hr/status-badge";
 import { TeamActions } from "@/components/hr/team-actions";
@@ -44,8 +43,15 @@ function withMove(board: Team[], move: PendingMove): Team[] {
 /** HR board: cards per team with drag-and-drop to move a member between teams. */
 export function HrBoard({ teams }: { teams: Team[] }) {
   const router = useRouter();
-  // Client-owned board; seeded from the server, then refreshed via `listTeams`.
+  // Client-owned board, so a move can show before the server confirms it.
+  // Seeded from `teams`, and reseeded whenever the server sends a fresh list —
+  // which keeps the parent's filter applied, since `teams` arrives filtered.
   const [board, setBoard] = useState<Team[]>(teams);
+  const [seed, setSeed] = useState(teams);
+  if (teams !== seed) {
+    setSeed(teams);
+    setBoard(teams);
+  }
   const [pending, setPending] = useState<PendingMove | null>(null);
   const [dragging, setDragging] = useState<{ fromTeamId: string } | null>(null);
   const [hoverTeamId, setHoverTeamId] = useState<string | null>(null);
@@ -55,11 +61,12 @@ export function HrBoard({ teams }: { teams: Team[] }) {
   // Set while confirming so the dialog's close handler doesn't revert the move.
   const confirmingRef = useRef(false);
 
-  const cardEls = useState(() => new Map<string, HTMLElement>())[0];
+  // Each team card's element, for hit-testing a drop. Read only in handlers.
+  const cardEls = useRef(new Map<string, HTMLElement>());
 
   const teamAtPoint = (point: Point): Team | null => {
     for (const t of board) {
-      const el = cardEls.get(t.id);
+      const el = cardEls.current.get(t.id);
       if (!el) continue;
       const r = el.getBoundingClientRect();
       if (
@@ -90,13 +97,8 @@ export function HrBoard({ teams }: { teams: Team[] }) {
     setPending({ member, fromTeam, toTeam: target });
   };
 
-  const refreshBoard = async () => {
-    const res = await listTeams();
-    if (res.ok) {
-      setBoard(res.data);
-      router.refresh();
-    }
-  };
+  // Re-render the page for fresh teams; they come back through `teams` above.
+  const refreshBoard = () => router.refresh();
 
   const confirmMove = async () => {
     if (!pending) return;
@@ -162,18 +164,13 @@ export function HrBoard({ teams }: { teams: Team[] }) {
             <section
               key={team.id}
               ref={(el) => {
-                if (el) cardEls.set(team.id, el);
-                else cardEls.delete(team.id);
+                if (el) cardEls.current.set(team.id, el);
+                else cardEls.current.delete(team.id);
               }}
               className={cn(
-                "flex flex-col rounded-xl p-6 shadow-sm transition-colors",
+                "bg-paper flex flex-col rounded-xl p-6 shadow-sm transition-colors",
                 isTarget ? "ring-2 ring-primary/40" : "",
               )}
-              style={{
-                backgroundImage: "url('/paper.svg')",
-                backgroundSize: "100% 100%",
-                backgroundRepeat: "no-repeat",
-              }}
             >
               <header className="mb-3 flex items-start justify-between gap-2">
                 <div className="min-w-0">

@@ -1,9 +1,9 @@
 "use server";
 
 import { windowFor } from "@/lib/api/challenge-window";
-import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
-import { requireRole } from "@/lib/auth/session";
-import type { FetchResult } from "@/lib/api/registrations";
+import { authedJson } from "@/lib/api/authed";
+import { backendFetch } from "@/lib/api/fetch";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
   Challenge,
   ChallengeDetail,
@@ -11,9 +11,6 @@ import type {
   PublicChallenge,
 } from "@/lib/api/challenge-types";
 import type { SubmissionFormData } from "@/lib/validators/submission-schema";
-
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type SubmitResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Server Action: the public challenge list via `GET /challenges`.
@@ -119,7 +116,7 @@ export async function getChallenge(id: number): Promise<FetchResult<ChallengeSta
 export async function submitChallenge(
   challengeId: number,
   data: SubmissionFormData,
-): Promise<SubmitResult> {
+): Promise<ActionResult> {
   let response: Response;
   try {
     response = await backendFetch(`/challenges/${challengeId}`, {
@@ -180,18 +177,9 @@ export async function submitChallenge(
 export async function getChallengeDetail(
   id: number,
 ): Promise<FetchResult<ChallengeDetail>> {
-  const denied = await requireRole("admin", "super_admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch(`/challenges/${id}`, { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to view this." };
-    if (res.status === 404) return { ok: false, error: "That challenge doesn't exist." };
-    if (!res.ok) return { ok: false, error: "Something went wrong loading this challenge." };
-    return { ok: true, data: (await res.json()) as ChallengeDetail };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["admin", "super_admin"], `/challenges/${id}`, {
+    forbidden: "You're not authorized to view this.",
+    byStatus: { 404: "That challenge doesn't exist." },
+    fallback: "Something went wrong loading this challenge.",
+  });
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, useState } from "react";
-import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 import { cn } from "@/lib/utils";
+import { TimerFrame } from "@/components/theme-art/timer-frame";
 
 function getTimeLeft(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -21,26 +20,8 @@ interface CountdownTimerProps {
   className?: string;
 }
 
-function getTimerBackground(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/timer-Design.svg";
-    case "multimedia":
-      return "/timer-Multimedia.svg";
-    case "communication":
-      return "/timer-Communication.svg";
-    case "marketing":
-      return "/timer-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/timer-Default.svg";
-  }
-}
-
 export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
   const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const { theme } = useTheme();
-  const isClient = useIsClient();
 
   useEffect(() => {
     const id = setInterval(() => setTime(getTimeLeft(targetDate)), 1000);
@@ -54,21 +35,16 @@ export function CountdownTimer({ targetDate, className }: CountdownTimerProps) {
     { label: "Seconds", value: time.seconds },
   ];
 
-  const timerBackground = getTimerBackground(isClient ? theme : undefined);
-
   return (
     <div
       className={cn(
         "relative z-10 overflow-hidden min-w-[30svw] max-w-[80svw] px-8 py-3 grid grid-cols-4 text-white gap-5",
         className,
       )}
-
-      style={{
-        backgroundImage: `url('${timerBackground}')`,
-        backgroundSize: "100%",
-        backgroundRepeat: "no-repeat",
-      }}
     >
+      {/* Full width, natural height, pinned top-left — what the old
+          `background-size: 100%` did. */}
+      <TimerFrame className="pointer-events-none absolute left-0 top-0 -z-10 h-auto w-full" />
       {units.map((unit) =>
         <div
           key={unit.label}

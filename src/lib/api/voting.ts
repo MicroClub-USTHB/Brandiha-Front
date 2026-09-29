@@ -1,9 +1,7 @@
 "use server";
 
-import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
-import { requireRole } from "@/lib/auth/session";
-import type { FetchResult } from "@/lib/api/registrations";
-import type { ActionResult } from "@/lib/api/teams";
+import { authedAction, authedJson } from "@/lib/api/authed";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
   AlumniLeaderboardEntry,
   AlumniVote,
@@ -18,19 +16,10 @@ import type {
  * tallied result (`/alumni/leaderboard`) and is rejected here.
  */
 export async function getVotingStatus(): Promise<FetchResult<VotingStatus>> {
-  const denied = await requireRole("alumni");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch("/alumni/voting", { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to vote." };
-    if (!res.ok) return { ok: false, error: "Something went wrong loading the ballot." };
-    return { ok: true, data: (await res.json()) as VotingStatus };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["alumni"], "/alumni/voting", {
+    forbidden: "You're not authorized to vote.",
+    fallback: "Something went wrong loading the ballot.",
+  });
 }
 
 /**
@@ -45,33 +34,19 @@ export async function getVotingStatus(): Promise<FetchResult<VotingStatus>> {
  * nothing to retry.
  */
 export async function submitVote(rankedTeamIds: string[]): Promise<ActionResult> {
-  const denied = await requireRole("alumni");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch("/alumni/voting", {
-      auth: true,
-      method: "POST",
-      body: JSON.stringify({ ranked_team_ids: rankedTeamIds }),
-    });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to vote." };
-    if (res.status === 409)
-      return {
-        ok: false,
-        error: "Your vote is already recorded, and it can't be changed.",
-      };
-    if (res.status === 400)
-      return {
-        ok: false,
-        error: "The list of teams changed while you were ranking. Reload and try again.",
-      };
-    if (!res.ok) return { ok: false, error: "Something went wrong submitting your vote." };
-    return { ok: true };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedAction(
+    ["alumni"],
+    "/alumni/voting",
+    {
+      forbidden: "You're not authorized to vote.",
+      byStatus: {
+        400: "The list of teams changed while you were ranking. Reload and try again.",
+        409: "Your vote is already recorded, and it can't be changed.",
+      },
+      fallback: "Something went wrong submitting your vote.",
+    },
+    { method: "POST", body: JSON.stringify({ ranked_team_ids: rankedTeamIds }) },
+  );
 }
 
 /**
@@ -83,20 +58,10 @@ export async function submitVote(rankedTeamIds: string[]): Promise<ActionResult>
  * ballot.
  */
 export async function getAlumniLeaderboard(): Promise<FetchResult<AlumniLeaderboardEntry[]>> {
-  const denied = await requireRole("super_admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch("/alumni/leaderboard", { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to see the vote leaderboard." };
-    if (!res.ok)
-      return { ok: false, error: "Something went wrong loading the vote leaderboard." };
-    return { ok: true, data: (await res.json()) as AlumniLeaderboardEntry[] };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["super_admin"], "/alumni/leaderboard", {
+    forbidden: "You're not authorized to see the vote leaderboard.",
+    fallback: "Something went wrong loading the vote leaderboard.",
+  });
 }
 
 /**
@@ -105,17 +70,8 @@ export async function getAlumniLeaderboard(): Promise<FetchResult<AlumniLeaderbo
  * order. `super_admin` alone, as above.
  */
 export async function getAlumniVotes(): Promise<FetchResult<AlumniVote[]>> {
-  const denied = await requireRole("super_admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch("/alumni/votes", { auth: true });
-    if (res.status === 401 || res.status === 403)
-      return { ok: false, error: "You're not authorized to see the vote results." };
-    if (!res.ok) return { ok: false, error: "Something went wrong loading the vote results." };
-    return { ok: true, data: (await res.json()) as AlumniVote[] };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["super_admin"], "/alumni/votes", {
+    forbidden: "You're not authorized to see the vote results.",
+    fallback: "Something went wrong loading the vote results.",
+  });
 }

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { CSSProperties, ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 /** Gradient fill used to accent parts of a step title. */
 const GRADIENT_STYLE: CSSProperties = {
@@ -12,7 +11,7 @@ const GRADIENT_STYLE: CSSProperties = {
 /** Shared heading shell so every step title has the same size/weight/spacing. */
 function TitleShell({ children }: { children: ReactNode }) {
   return (
-    <h2 className={cn("text-center text-[clamp(1.75rem,min(4.2vw,6vh),3.75rem)] font-extrabold uppercase tracking-wide font-heading")}>
+    <h2 className="text-center text-[clamp(1.75rem,min(4.2vw,6vh),3.75rem)] font-extrabold uppercase tracking-wide font-heading">
       {children}
     </h2>
   );
@@ -32,7 +31,7 @@ export function RegistrationsTitle() {
   return (
     <TitleShell>
       <Accent>Brandiha</Accent>{" "}
-      <span className={cn("relative text-foreground tracking-[0.1em]")}>
+      <span className="relative text-foreground tracking-[0.1em]">
         Registrations
         {/* Anchored to the word: tweak alignment via the absolute offsets below. */}
         <Image
@@ -41,7 +40,7 @@ export function RegistrationsTitle() {
           width={300}
           height={50}
           aria-hidden
-          className={cn("pointer-events-none absolute left-0 top-full w-full object-contain")}
+          className="pointer-events-none absolute left-0 top-full w-full object-contain"
         />
       </span>
     </TitleShell>

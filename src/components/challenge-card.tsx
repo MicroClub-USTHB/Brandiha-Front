@@ -4,19 +4,12 @@ import { useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Clock, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
-
-export enum Department {
-  MARKETING = "marketing",
-  COMMUNICATION = "communication",
-  MULTIMEDIA = "multimedia",
-  DESIGN = "design",
-}
+import type { Department } from "@/lib/api/registration-types";
+import { DEPARTMENTS } from "@/lib/departments";
 
 interface ChallengeCardProps {
-  id?: number;
   department: Department;
   title?: string;
   unlocks_at?: Date | string;
@@ -28,35 +21,6 @@ interface ChallengeCardProps {
    */
   initialWindow: ChallengeWindow;
 }
-
-const DEPARTMENT_COLORS: Record<Department, string> = {
-  [Department.MARKETING]: "var(--brand-marketing)",
-  [Department.COMMUNICATION]: "var(--brand-communication)",
-  [Department.MULTIMEDIA]: "var(--brand-multimedia)",
-  [Department.DESIGN]: "var(--brand-design)",
-};
-
-const DEPARTMENT_CARDS: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-card.svg",
-  [Department.COMMUNICATION]: "communication-card.svg",
-  [Department.MULTIMEDIA]: "multimedia-card.svg",
-  [Department.DESIGN]: "design-card.svg",
-};
-
-const DEPARTMENT_CARDS_GRAY: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-card-gray.svg",
-  [Department.COMMUNICATION]: "communication-card-gray.svg",
-  [Department.MULTIMEDIA]: "multimedia-card-gray.svg",
-  [Department.DESIGN]: "design-card-gray.svg",
-};
-
-const DEPARTMENT_MASCOTS: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-mascot.png",
-  [Department.COMMUNICATION]: "communication-mascot.png",
-  [Department.MULTIMEDIA]: "multimedia-mascot.png",
-  [Department.DESIGN]: "design-mascot.png",
-};
-
 
 /** Time left, as `1d 2h 3m 4s` — to the unlock when locked, the deadline when open. */
 function formatCountdown(remaining: number) {
@@ -155,8 +119,8 @@ export default function ChallengeCard({
   // Only an upcoming challenge is grayed out: its title is withheld and its
   // card is a placeholder. A closed one keeps its color — it did run.
   const textColor = isUpcoming
-    ? "#888888"
-    : DEPARTMENT_COLORS[department] || "var(--brand-marketing)";
+    ? "var(--challenge-locked)"
+    : DEPARTMENTS[department].color;
 
   // A card that ticks open on screen was rendered without its title, since the
   // server had no reason to send one yet. Ask the server again rather than
@@ -190,22 +154,23 @@ export default function ChallengeCard({
   // placeholder stands in whenever the title is absent.
   const heading = title ?? "Coming Soon...";
 
-  const cardImage =
-    (isUpcoming
-      ? DEPARTMENT_CARDS_GRAY[department]
-      : DEPARTMENT_CARDS[department]) || "marketing-card.svg";
-
-  const mascot =
-    DEPARTMENT_MASCOTS[department] ||
-    "marketing-mascot.png";
+  const { card, mascot } = DEPARTMENTS[department];
 
   return (
     <div
-      className={cn(
-        "w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8",
-      )}
-      style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
+      className="w-45 md:w-65 2xl:w-85 aspect-square relative isolate flex flex-col items-center justify-between px-6 py-8"
     >
+      {/* The card art's accents take the same colour as the text — the
+          department's, or grey while upcoming — so one file per department
+          covers both. Fitted and centred, like the `bg-contain` it replaces. */}
+      <svg
+        viewBox="0 0 217 202"
+        fill="none"
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 size-full"
+      >
+        <use href={`${card}#art`} style={{ fill: textColor }} />
+      </svg>
       {isClosed && (
         // The stamp is what tells a closed card apart at a glance: it keeps
         // the department color, just faded and tilted like ink over the card.
@@ -222,12 +187,12 @@ export default function ChallengeCard({
         </div>
       )}
 
-      <h1
+      <h2
         className="text-xl md:text-2xl xl:text-3xl font-heading font-bold text-center capitalize mt-6"
         style={{ color: textColor }}
       >
         {heading}
-      </h1>
+      </h2>
 
 
       {/* The card's one variable slot: the mascot over a status line once the
@@ -253,7 +218,7 @@ export default function ChallengeCard({
         ) : (
           <div className="flex h-full min-h-0 flex-col items-center justify-center gap-1">
             <Image
-              src={`/department-mascots/${mascot}`}
+              src={mascot}
               alt={`${department} mascot`}
               width={292}
               height={283}

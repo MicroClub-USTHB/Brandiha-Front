@@ -36,12 +36,7 @@ export function BallotRow({
         cursor: "grabbing",
         boxShadow: "0 12px 28px rgba(0, 0, 0, 0.25)",
       }}
-      className="flex items-center gap-4 rounded-xl px-6 py-5 lg:px-8 lg:py-6"
-      style={{
-        backgroundImage: "url('/paper.svg')",
-        backgroundSize: "100% 100%",
-        backgroundRepeat: "no-repeat",
-      }}
+      className="bg-paper flex items-center gap-4 rounded-xl px-6 py-5 lg:px-8 lg:py-6"
     >
       {!readOnly && (
         <button

@@ -24,9 +24,8 @@ const vercelToolbar = isProductionDeploy
  * ever called from the server (Server Actions and Server Components), never
  * from the browser — so `connect-src 'self'` is enough.
  *
- * `style-src` has to keep `'unsafe-inline'`: the registration and login forms
- * use styled-jsx, and several components set `style={{ … }}` for background
- * images and per-step theme variables.
+ * `style-src` has to keep `'unsafe-inline'`: several components set
+ * `style={{ … }}` for background images, masks, and per-step theme variables.
  *
  * `script-src` keeps `'unsafe-inline'` too, which is the honest limit of this
  * policy — Next's hydration bootstrap is inline, and nonce-ing it means routing

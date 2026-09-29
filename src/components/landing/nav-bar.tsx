@@ -1,34 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
+import { useEffect, useRef, useState } from "react";
+import { SiteNav, SiteNavLink } from "@/components/site-header";
+import { NavUnderline } from "@/components/theme-art/nav-underline";
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/#agenda", label: "Agenda" },
   { href: "/#faq", label: "FAQ" },
 ];
-
-function getActiveEffectImage(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/activeLink-Design.svg";
-    case "multimedia":
-      return "/activeLink-Multi.svg";
-    case "communication":
-      return "/activeLink-Comm.svg";
-    case "marketing":
-      return "/activeLink-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/activeLink-Default.svg";
-  }
-}
-
-const useIsClient = () => useSyncExternalStore(() => () => {}, () => true, () => false);
 
 /** Distance from the viewport top at which a section is considered "active". */
 const ACTIVE_THRESHOLD = 120;
@@ -38,9 +19,6 @@ export function NavBar() {
   const isLanding = pathname === "/";
   const [active, setActive] = useState<string | null>("/");
   const lockRef = useRef(false);
-  const { theme } = useTheme();
-  const isClient = useIsClient();
-  const activeImage = getActiveEffectImage(theme);
 
   useEffect(() => {
     if (!isLanding) return;
@@ -89,32 +67,24 @@ export function NavBar() {
   const shouldShow = isLanding ? active : null;
 
   return (
-    <nav className="flex h-14.75 w-auto items-center justify-center gap-8">
+    <SiteNav>
       {links.map(({ href, label }) => {
         const isActive = shouldShow === href;
         return (
-          <Link
+          <SiteNavLink
             key={href}
             href={href}
+            active={isActive}
             onClick={() => isLanding && handleClick(href)}
-            className={`relative font-hand text-[28px] text-white/70 hover:text-white ${
-              isActive ? "text-white" : ""
-            }`}
+            className="relative"
           >
             {label}
-            {isClient && isActive && (
-              <Image
-                src={activeImage}
-                alt=""
-                width={72}
-                height={16}
-                draggable={false}
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2"
-              />
+            {isActive && (
+              <NavUnderline className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2" />
             )}
-          </Link>
+          </SiteNavLink>
         );
       })}
-    </nav>
+    </SiteNav>
   );
 }

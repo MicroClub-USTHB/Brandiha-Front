@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -11,30 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { THEMES } from "@/lib/themes";
-
-const emptySubscribe = () => () => {};
-
-function getThemeHand(theme: string) {
-  switch (theme) {
-    case "design":
-      return "/hand-design.svg";
-    case "multimedia":
-      return "/hand-multi.svg";
-    case "communication":
-      return "/hand-comm.svg";
-    case "marketing":
-      return "/hand-marketing.svg";
-    case "chameleon":
-    default:
-      return "/hand-default.svg";
-  }
-}
+import { useIsClient } from "@/hooks/use-is-client";
+import { ThemeHand } from "@/components/theme-art/theme-hand";
 
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
-  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isClient = useIsClient();
   const resolved = isClient ? theme : undefined;
-  const activeEffectHand = getThemeHand(resolved ?? "chameleon");
   const active = THEMES.find((t) => t.value === (resolved ?? "chameleon"));
 
   return (
@@ -42,15 +23,11 @@ export function ThemePicker() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
+          aria-label="Choose a theme"
           className="relative h-15 w-25 rounded-full p-2 outline-none"
         >
-          <Image
-            src={activeEffectHand}
-            alt="Profile"
-            width={100}
-            height={60}
-            className="h-full w-full object-contain"
-          />
+          {/* Follows the page's theme through CSS, so it's right on first paint. */}
+          <ThemeHand className="h-full w-full" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -67,14 +44,10 @@ export function ThemePicker() {
               value={t.value}
               className="gap-3 pr-2"
             >
-              <Image
-                src={getThemeHand(t.value)}
-                alt=""
-                aria-hidden="true"
-                width={28}
-                height={18}
-                className="h-5 w-8 shrink-0 object-contain"
-              />
+              {/* Each preview wears its own theme, whatever the page's is. */}
+              <span data-theme={t.value} className="contents">
+                <ThemeHand className="h-5 w-8 shrink-0" />
+              </span>
               {t.label}
             </DropdownMenuRadioItem>
           ))}

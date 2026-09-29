@@ -2,17 +2,12 @@
 
 import { useMemo, useState } from "react";
 import LeaderboardComponent from "./leaderboard";
-import { AdminLeaderboardEntry } from "@/lib/api/leaderboard";
+import type { AdminLeaderboardEntry } from "@/lib/api/leaderboard-types";
 import { ChallengeScoreSheet } from "@/components/leaderboard/challenge-score-sheet";
-
-function sortLeaderboardByScore(data: AdminLeaderboardEntry[]): AdminLeaderboardEntry[] {
-  return [...data].sort((a, b) => b.total_score - a.total_score);
-}
+import { byScore } from "@/lib/leaderboard-order";
 
 interface SuperAdminLeaderboardClientProps {
   initialLeaderboard: AdminLeaderboardEntry[];
-  isFrozen?: boolean;
-  frozenAt?: string | null;
 }
 
 export function SuperAdminLeaderboardClient({
@@ -20,7 +15,7 @@ export function SuperAdminLeaderboardClient({
 }: SuperAdminLeaderboardClientProps) {
   const [teams, setTeams] = useState(initialLeaderboard);
 
-  const sortedTeams = useMemo(() => sortLeaderboardByScore(teams), [teams]);
+  const sortedTeams = useMemo(() => byScore(teams), [teams]);
 
   const handleSaveSuccess = (updatedTeam: AdminLeaderboardEntry) => {
     setTeams((current) =>
