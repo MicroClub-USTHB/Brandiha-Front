@@ -45,7 +45,7 @@ export function TeamStatsBar({
           className={cn(
             "cursor-pointer flex flex-col justify-center rounded-xl p-5 shadow-sm transition-all hover:shadow-md text-left",
             filter === status
-              ? cn(STATUS_META[status].card, "ring-2")
+              ? cn(STATUS_META[status].cardClass, "ring-2")
               : "bg-white/15 text-white/60 hover:bg-white/20 hover:text-white/80",
           )}
         >

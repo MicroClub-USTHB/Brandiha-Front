@@ -64,14 +64,14 @@ export function TeamActions({
     <div className="mt-3 border-t border-border pt-3">
       <div className="flex gap-2">
         {ACTIONS.map((status) => {
-          const { verb, icon: Icon, action } = STATUS_META[status];
+          const { verb, icon: Icon, actionClass } = STATUS_META[status];
           return (
             <button
               key={status}
               type="button"
               onClick={() => setConfirming(status)}
               disabled={pending || currentStatus === status}
-              className={cn(BTN_BASE, action)}
+              className={cn(BTN_BASE, actionClass)}
             >
               <Icon className="size-3.5 stroke-[2.5]" />
               {verb}
@@ -139,7 +139,7 @@ export function TeamActions({
                 <>
                   This sets{" "}
                   <span className="font-semibold text-foreground">all members</span>{" "}
-                  of &ldquo;{teamName}&rdquo; to &ldquo;{confirming}&rdquo;.
+                  of &ldquo;{teamName}&rdquo; to &ldquo;{STATUS_META[confirming].label}&rdquo;.
                 </>
               )}
             </AlertDialogDescription>
