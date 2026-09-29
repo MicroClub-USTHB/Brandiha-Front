@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getPublicChallenges } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
-import ChallengeCard, { Department } from "@/components/challenge-card";
+import ChallengeCard from "@/components/challenge-card";
 
 /**
  * The challenge picker shared by `/submit` and `/submissions`: same list, same
@@ -51,7 +51,7 @@ export default async function ChallengeGrid({
 
             const card = (
               <ChallengeCard
-                department={challenge.department as Department}
+                department={challenge.department}
                 // Null for an upcoming challenge — the fetch withholds it, so
                 // the real title isn't in this page's payload to begin with.
                 title={challenge.title ?? undefined}

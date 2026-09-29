@@ -131,6 +131,7 @@ src/
     form-persistence.ts    # Expiry rule for the saved registration form
     registration-fields.ts # Step/field definitions for the registration form
     themes.ts              # Theme list (single source of truth)
+    departments.ts         # Per-department label, brand colour, card art, mascot
     agenda-data.ts         # Landing agenda content
     faq-data.ts            # Landing FAQ content
     utils.ts               # cn() helper

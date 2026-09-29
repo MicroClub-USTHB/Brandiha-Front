@@ -6,16 +6,10 @@ import { useRouter } from "next/navigation";
 import { Clock, Lock } from "lucide-react";
 import { resolveWindow, toTime } from "@/lib/api/challenge-window";
 import type { ChallengeWindow } from "@/lib/api/challenge-types";
-
-export enum Department {
-  MARKETING = "marketing",
-  COMMUNICATION = "communication",
-  MULTIMEDIA = "multimedia",
-  DESIGN = "design",
-}
+import type { Department } from "@/lib/api/registration-types";
+import { DEPARTMENTS } from "@/lib/departments";
 
 interface ChallengeCardProps {
-  id?: number;
   department: Department;
   title?: string;
   unlocks_at?: Date | string;
@@ -27,35 +21,6 @@ interface ChallengeCardProps {
    */
   initialWindow: ChallengeWindow;
 }
-
-const DEPARTMENT_COLORS: Record<Department, string> = {
-  [Department.MARKETING]: "var(--brand-marketing)",
-  [Department.COMMUNICATION]: "var(--brand-communication)",
-  [Department.MULTIMEDIA]: "var(--brand-multimedia)",
-  [Department.DESIGN]: "var(--brand-design)",
-};
-
-const DEPARTMENT_CARDS: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-card.svg",
-  [Department.COMMUNICATION]: "communication-card.svg",
-  [Department.MULTIMEDIA]: "multimedia-card.svg",
-  [Department.DESIGN]: "design-card.svg",
-};
-
-const DEPARTMENT_CARDS_GRAY: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-card-gray.svg",
-  [Department.COMMUNICATION]: "communication-card-gray.svg",
-  [Department.MULTIMEDIA]: "multimedia-card-gray.svg",
-  [Department.DESIGN]: "design-card-gray.svg",
-};
-
-const DEPARTMENT_MASCOTS: Record<Department, string> = {
-  [Department.MARKETING]: "marketing-mascot.png",
-  [Department.COMMUNICATION]: "communication-mascot.png",
-  [Department.MULTIMEDIA]: "multimedia-mascot.png",
-  [Department.DESIGN]: "design-mascot.png",
-};
-
 
 /** Time left, as `1d 2h 3m 4s` — to the unlock when locked, the deadline when open. */
 function formatCountdown(remaining: number) {
@@ -155,7 +120,7 @@ export default function ChallengeCard({
   // card is a placeholder. A closed one keeps its color — it did run.
   const textColor = isUpcoming
     ? "#888888"
-    : DEPARTMENT_COLORS[department] || "var(--brand-marketing)";
+    : DEPARTMENTS[department].color;
 
   // A card that ticks open on screen was rendered without its title, since the
   // server had no reason to send one yet. Ask the server again rather than
@@ -189,19 +154,13 @@ export default function ChallengeCard({
   // placeholder stands in whenever the title is absent.
   const heading = title ?? "Coming Soon...";
 
-  const cardImage =
-    (isUpcoming
-      ? DEPARTMENT_CARDS_GRAY[department]
-      : DEPARTMENT_CARDS[department]) || "marketing-card.svg";
-
-  const mascot =
-    DEPARTMENT_MASCOTS[department] ||
-    "marketing-mascot.png";
+  const { card, cardUpcoming, mascot } = DEPARTMENTS[department];
+  const cardImage = isUpcoming ? cardUpcoming : card;
 
   return (
     <div
       className="w-45 md:w-65 2xl:w-85 aspect-square bg-contain bg-center bg-no-repeat relative flex flex-col items-center justify-between px-6 py-8"
-      style={{ backgroundImage: `url('/challenge-cards/${cardImage}')` }}
+      style={{ backgroundImage: `url('${cardImage}')` }}
     >
       {isClosed && (
         // The stamp is what tells a closed card apart at a glance: it keeps
@@ -250,7 +209,7 @@ export default function ChallengeCard({
         ) : (
           <div className="flex h-full min-h-0 flex-col items-center justify-center gap-1">
             <Image
-              src={`/department-mascots/${mascot}`}
+              src={mascot}
               alt={`${department} mascot`}
               width={292}
               height={283}
