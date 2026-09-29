@@ -144,6 +144,18 @@
   --gekko-4: #19d5be;
 }
 
+/* Only chameleon defines the --gekko-n stops. Every other theme resets them, so
+   a [data-theme] nested inside a chameleon page — the theme picker's per-theme
+   previews — falls back to its own --primary instead of inheriting the
+   gradient. `initial` makes a custom property invalid, which is what triggers
+   a var() fallback. */
+[data-theme]:not([data-theme="chameleon"]) {
+  --gekko-1: initial;
+  --gekko-2: initial;
+  --gekko-3: initial;
+  --gekko-4: initial;
+}
+
 /* Paint the gradient over any primary background (buttons, badges, …). The
    solid --primary stays underneath, so hover:bg-primary/xx and non-background
    primary uses still resolve to a colour. */

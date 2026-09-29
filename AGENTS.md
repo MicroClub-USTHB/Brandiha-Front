@@ -94,6 +94,7 @@ src/
     form.tsx               # FormInput, FormTextarea, FormSelect, FormCheckbox wrappers
     pop-up.tsx             # Popup for success/error/warning (store in hooks/use-popup-store.ts)
     site-header.tsx        # Top bar shell (logo, theme picker, paint drip) for both headers
+    theme-art/             # Theme-coloured art: one shared SVG in public/theme-art, coloured by CSS
     site-background.tsx    # Paint wall + decorations, behind every page
     splash-screen.tsx      # One-per-session intro animation
     theme-picker.tsx       # Theme picker UI

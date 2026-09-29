@@ -1,34 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
-import { useIsClient } from "@/hooks/use-is-client";
+import { NavUnderline } from "@/components/theme-art/nav-underline";
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/#agenda", label: "Agenda" },
   { href: "/#faq", label: "FAQ" },
 ];
-
-function getActiveEffectImage(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/activeLink-Design.svg";
-    case "multimedia":
-      return "/activeLink-Multi.svg";
-    case "communication":
-      return "/activeLink-Comm.svg";
-    case "marketing":
-      return "/activeLink-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/activeLink-Default.svg";
-  }
-}
 
 /** Distance from the viewport top at which a section is considered "active". */
 const ACTIVE_THRESHOLD = 120;
@@ -38,9 +20,6 @@ export function NavBar() {
   const isLanding = pathname === "/";
   const [active, setActive] = useState<string | null>("/");
   const lockRef = useRef(false);
-  const { theme } = useTheme();
-  const isClient = useIsClient();
-  const activeImage = getActiveEffectImage(theme);
 
   useEffect(() => {
     if (!isLanding) return;
@@ -103,15 +82,8 @@ export function NavBar() {
             )}
           >
             {label}
-            {isClient && isActive && (
-              <Image
-                src={activeImage}
-                alt=""
-                width={72}
-                height={16}
-                draggable={false}
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2"
-              />
+            {isActive && (
+              <NavUnderline className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2" />
             )}
           </Link>
         );
