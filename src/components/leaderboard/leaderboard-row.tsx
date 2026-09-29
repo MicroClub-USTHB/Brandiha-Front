@@ -1,24 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useTheme } from "next-themes";
-import { useIsClient } from "@/hooks/use-is-client";
-
-function getTimerBackground(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/timer-Design.svg";
-    case "multimedia":
-      return "/timer-Multimedia.svg";
-    case "communication":
-      return "/timer-Communication.svg";
-    case "marketing":
-      return "/timer-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/timer-Default.svg";
-  }
-}
+import { TimerFrame } from "@/components/theme-art/timer-frame";
 
 /** The top three get a medal in place of their rank number. */
 const MEDALS: Partial<Record<number, { src: string; alt: string }>> = {
@@ -40,16 +23,14 @@ export default function LeaderboardRow({
   score,
   actions,
 }: LeaderboardRowProps) {
-  const { theme } = useTheme();
-  const isClient = useIsClient();
-  const timerBg = getTimerBackground(isClient ? theme : undefined);
   const medal = MEDALS[rank];
 
   const scoreBadge = (
     <div
-      className="h-full w-20 lg:w-40 2xl:w-60 2xl:h-35 text-center text-black bg-contain bg-center bg-no-repeat flex items-center justify-center"
-      style={{ backgroundImage: `url('${timerBg}')` }}
+      className="relative isolate h-full w-20 lg:w-40 2xl:w-60 2xl:h-35 text-center text-black flex items-center justify-center"
     >
+      {/* Fitted and centred, like the `bg-contain bg-center` it replaces. */}
+      <TimerFrame className="pointer-events-none absolute inset-0 -z-10 size-full" />
       <span className="text-xl lg:text-4xl 2xl:text-7xl font-heading text-white font-bold">
         {score}
       </span>
