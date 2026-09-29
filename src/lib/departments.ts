@@ -15,6 +15,12 @@ export const DEPARTMENTS: Record<
     /** Challenge card art; its accents take whatever colour the card sets. */
     card: string;
     mascot: string;
+    /**
+     * The side view that walks the registration stepper's connector out of
+     * this department's step. Design's step is last, with no connector after
+     * it, so it has none.
+     */
+    sideMascot?: string;
   }
 > = {
   marketing: {
@@ -22,18 +28,21 @@ export const DEPARTMENTS: Record<
     color: "var(--brand-marketing)",
     card: "/challenge-cards/marketing-card.svg",
     mascot: "/department-mascots/marketing-mascot.png",
+    sideMascot: "/mascot-marketing-side.png",
   },
   communication: {
     label: "Communication",
     color: "var(--brand-communication)",
     card: "/challenge-cards/communication-card.svg",
     mascot: "/department-mascots/communication-mascot.png",
+    sideMascot: "/mascot-communication-side.png",
   },
   multimedia: {
     label: "Multimedia",
     color: "var(--brand-multimedia)",
     card: "/challenge-cards/multimedia-card.svg",
     mascot: "/department-mascots/multimedia-mascot.png",
+    sideMascot: "/mascot-multimedia-side.png",
   },
   design: {
     label: "Design",
