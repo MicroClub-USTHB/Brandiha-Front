@@ -28,6 +28,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-popup-title: var(--popup-title);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
@@ -81,6 +83,13 @@
   --success-foreground: var(--white);
   --warning: oklch(0.681 0.162 75.834);
   --warning-foreground: var(--white);
+  --destructive-foreground: var(--white);
+
+  /* Also theme-independent: the popup's title, which sits on its own painted
+     frame rather than the page, and the grey of a challenge card that hasn't
+     unlocked yet. */
+  --popup-title: oklch(0.7535 0.139 232.66); /* #38BDF8 */
+  --challenge-locked: oklch(0.6268 0 0); /* #888888 */
 
   --background: var(--white);
   --foreground: var(--black);

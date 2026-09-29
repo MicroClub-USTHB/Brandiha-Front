@@ -43,7 +43,7 @@ export const STATUS_META: Record<
     verb: "Decline",
     icon: X,
     badge: "bg-destructive/15 text-destructive",
-    card: "bg-destructive text-white ring-destructive/50",
+    card: "bg-destructive text-destructive-foreground ring-destructive/50",
     action: "bg-destructive/10 text-destructive hover:bg-destructive/20",
   },
 };

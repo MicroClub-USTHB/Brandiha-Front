@@ -119,7 +119,7 @@ export default function ChallengeCard({
   // Only an upcoming challenge is grayed out: its title is withheld and its
   // card is a placeholder. A closed one keeps its color — it did run.
   const textColor = isUpcoming
-    ? "#888888"
+    ? "var(--challenge-locked)"
     : DEPARTMENTS[department].color;
 
   // A card that ticks open on screen was rendered without its title, since the

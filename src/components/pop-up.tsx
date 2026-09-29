@@ -101,7 +101,7 @@ export function Popup() {
           </div>
 
           <div className="flex flex-col items-center gap-2 w-full">
-            <h2 className="font-heading text-xl sm:text-3xl font-extrabold uppercase tracking-wide text-[#38bdf8] drop-shadow-sm">
+            <h2 className="font-heading text-xl sm:text-3xl font-extrabold uppercase tracking-wide text-popup-title drop-shadow-sm">
               {title || config.defaultTitle}
             </h2>
             <p className="font-hand text-xs sm:text-base font-bold tracking-wider uppercase text-white/90">
