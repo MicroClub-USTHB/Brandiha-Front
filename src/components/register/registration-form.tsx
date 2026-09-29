@@ -18,15 +18,14 @@ import {
   RegistrationsTitle,
 } from "@/components/register/step-title";
 import { Popup } from "@/components/pop-up";
+import { DEPARTMENTS } from "@/lib/departments";
 import type { RegistrationFieldConfig } from "@/lib/registration-fields";
 import { cn } from "@/lib/utils";
 
-const STEP_HUES = [
-  "var(--brand-marketing)",
-  "var(--brand-communication)",
-  "var(--brand-multimedia)",
-  "var(--brand-design)",
-];
+/** Each step takes a department's brand colour, in this order. */
+const STEP_HUES = (["marketing", "communication", "multimedia", "design"] as const).map(
+  (department) => DEPARTMENTS[department].color,
+);
 
 /** The title component to render for each step. */
 const STEP_TITLES = [
