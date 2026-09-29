@@ -1,29 +1,10 @@
-"use client";
-
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 
+import { BrandLogo } from "@/components/theme-art/brand-logo";
 import { ThemePicker } from "@/components/theme-picker";
-import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/lib/utils";
-
-function getActiveEffectLogo(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/activeLogo-Design.svg";
-    case "multimedia":
-      return "/activeLogo-Multimedia.svg";
-    case "communication":
-      return "/activeLogo-Communication.svg";
-    case "marketing":
-      return "/activeLogo-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/nav-logo.svg";
-  }
-}
 
 /**
  * The black top bar every page wears: theme-aware logo on the left, `nav` in
@@ -43,10 +24,6 @@ export function SiteHeader({
   nav?: ReactNode;
   actions?: ReactNode;
 }) {
-  const { theme } = useTheme();
-  const isClient = useIsClient();
-  const logo = getActiveEffectLogo(isClient ? theme : undefined);
-
   return (
     <header
       className={cn(
@@ -56,15 +33,7 @@ export function SiteHeader({
     >
       <div className="mx-auto flex h-24 items-center px-4 sm:px-6 lg:px-8">
         <Link href="/">
-          <Image
-            src={logo}
-            alt="Brandiha"
-            width={253}
-            height={62}
-            draggable={false}
-            className="h-12 w-auto"
-            priority
-          />
+          <BrandLogo className="h-12 w-auto" />
         </Link>
 
         <div className="hidden md:flex flex-1 items-center justify-center">{nav}</div>

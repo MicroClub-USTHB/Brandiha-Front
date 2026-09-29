@@ -1,27 +1,8 @@
-"use client";
-import Image from "next/image";
 import Link from "next/link";
 import { type SVGProps } from "react";
-import { useTheme } from "next-themes";
 import { Mail, MapPin } from "lucide-react";
 import { Gekko } from "@/components/gekko";
-import { useIsClient } from "@/hooks/use-is-client";
-
-function getActiveEffectLogo(theme?: string) {
-  switch (theme) {
-    case "design":
-      return "/activeLogo-Design.svg";
-    case "multimedia":
-      return "/activeLogo-Multimedia.svg";
-    case "communication":
-      return "/activeLogo-Communication.svg";
-    case "marketing":
-      return "/activeLogo-Marketing.svg";
-    case "chameleon":
-    default:
-      return "/nav-logo.svg";
-  }
-}
+import { BrandLogo } from "@/components/theme-art/brand-logo";
 
 function InstagramIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -66,9 +47,6 @@ const socialLinks = [
 ] as const;
 
 export function Footer() {
-  const { theme } = useTheme();
-  const isClient = useIsClient();
-  const activeLogo = getActiveEffectLogo(isClient ? theme : undefined);
   return (
     <footer className="relative overflow-hidden bg-black">
       <Gekko className="absolute left-[4%] bottom-[10%] h-[clamp(80px,12vh,150px)] w-auto opacity-[0.15] pointer-events-none select-none -rotate-[2deg]" />
@@ -80,14 +58,7 @@ export function Footer() {
               href="/"
               className="transition-transform duration-300 ease-out hover:scale-[1.03]"
             >
-              <Image
-                src={activeLogo}
-                alt="Brandiha"
-                width={1280}
-                height={313}
-                draggable={false}
-                className="w-[clamp(160px,40vw,180px)] sm:w-[clamp(170px,30vw,200px)] lg:w-[clamp(180px,18vw,230px)] h-auto"
-              />
+              <BrandLogo className="w-[clamp(160px,40vw,180px)] sm:w-[clamp(170px,30vw,200px)] lg:w-[clamp(180px,18vw,230px)] h-auto" />
             </Link>
 
             <div className="flex flex-col items-center gap-4 sm:gap-6 lg:items-start">
