@@ -1,45 +1,40 @@
+import { Trophy } from "lucide-react";
+
 import { AccessNotice } from "@/components/auth/access-notice";
-import {
-  getAdminLeaderboard,
-  AdminLeaderboardEntry,
-  AdminLeaderboardResponse,
-} from "@/lib/api/leaderboard";
+import { Notice } from "@/components/notice";
+import { getAdminLeaderboard } from "@/lib/api/leaderboard";
 import { checkAccess } from "@/lib/auth/session";
 import { SuperAdminLeaderboardClient } from "@/components/leaderboard/super-admin-leaderboard-client";
 import { FreezeToggleSwitch } from "@/components/leaderboard/freeze-toggle-switch";
-export function sortLeaderboardByScore(
-  data: AdminLeaderboardEntry[],
-): AdminLeaderboardEntry[] {
-  return [...data].sort((a, b) => b.total_score - a.total_score);
-}
 
 export default async function SuperAdminLeaderboard() {
   const access = await checkAccess("super_admin");
   if (!access.ok) return <AccessNotice reason={access.reason} />;
 
-  const leaderboardResponse: AdminLeaderboardResponse = await getAdminLeaderboard();
-  const sortedTeams = sortLeaderboardByScore(leaderboardResponse.leaderboard);
+  const result = await getAdminLeaderboard();
+  if (!result.ok)
+    return <Notice icon={Trophy} title="Leaderboard" message={result.error} />;
 
-  if (!sortedTeams || sortedTeams.length === 0) {
+  const leaderboardResponse = result.data;
+
+  // The board lists accepted teams with at least one scored submission, so an
+  // empty one means nothing has been scored yet rather than a failed load.
+  if (leaderboardResponse.leaderboard.length === 0)
     return (
-      <div className="flex items-center justify-center py-8">
-        <p className="text-xl font-heading text-black">
-          No leaderboard available at the moment.
-        </p>
-      </div>
+      <Notice
+        icon={Trophy}
+        title="No scores yet"
+        message="Teams appear here once their submissions are scored."
+      />
     );
-  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-start gap-2 pt-8">
       <h1 className="mb-4 text-4xl lg:text-8xl font-bold font-heading text-white">Leaderboard</h1>
 
       <FreezeToggleSwitch initialFrozen={leaderboardResponse.frozen} />
 
-      <SuperAdminLeaderboardClient
-        initialLeaderboard={sortedTeams}
-        isFrozen={leaderboardResponse.frozen}
-        frozenAt={leaderboardResponse.frozen_at}
-      />
+      <SuperAdminLeaderboardClient initialLeaderboard={leaderboardResponse.leaderboard} />
     </div>
   );
 }

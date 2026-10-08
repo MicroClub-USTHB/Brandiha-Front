@@ -1,17 +1,18 @@
 "use server";
 
 import { RegistrationFormData } from "@/lib/validators/registration-schema";
-import { backendFetch, UnauthenticatedError } from "@/lib/api/fetch";
-import { requireRole } from "@/lib/auth/session";
+import { authedJson, type ErrorCopy } from "@/lib/api/authed";
+import { backendFetch } from "@/lib/api/fetch";
 import { splitList } from "@/lib/list-field";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 import type {
+  AvailabilityAnswer,
+  Department,
   PaginatedRegistrations,
   RegistrationDetail,
   RegistrationStatus,
+  TShirtSize,
 } from "@/lib/api/registration-types";
-
-/** Result returned to the client — errors are serialized, never thrown across the boundary. */
-export type RegistrationResult = { ok: true } | { ok: false; error: string };
 
 /** Body accepted by `POST /registrations` on the backend. */
 interface RegistrationPayload {
@@ -20,7 +21,7 @@ interface RegistrationPayload {
   phone_number: string;
   discord_id: string;
   team_name: string;
-  department: "marketing" | "communication" | "design" | "multimedia";
+  department: Department;
   knowledge_about_brandiha: string;
   participated_before: boolean;
   previous_competitions: string | null;
@@ -30,10 +31,10 @@ interface RegistrationPayload {
   other_links: string[];
   motivation: string;
   food_allergies: string | null;
-  available_during_event: "yes" | "no" | "other";
+  available_during_event: AvailabilityAnswer;
   availability_note: string | null;
   okay_with_photos: boolean;
-  t_shirt_size: "S" | "M" | "L" | "XL" | "XXL";
+  t_shirt_size: TShirtSize;
   additional_notes: string | null;
 }
 
@@ -52,7 +53,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     discord_id: data.DiscordId.trim(),
     team_name: data.TeamName.trim(),
     // "Your Role" is the department track (lowercased to match the backend enum).
-    department: data.Role.toLowerCase() as RegistrationPayload["department"],
+    department: data.Role.toLowerCase() as Department,
     knowledge_about_brandiha: data.Knowledge.trim(),
     participated_before: data.HackathonExperience,
     previous_competitions: nullable(data.PreviousHackathons),
@@ -62,10 +63,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
     other_links: splitList(data.Links),
     motivation: data.Motivation.trim(),
     food_allergies: nullable(data.FoodAllergies),
-    available_during_event: data.Availability.toLowerCase() as
-      | "yes"
-      | "no"
-      | "other",
+    available_during_event: data.Availability.toLowerCase() as AvailabilityAnswer,
     availability_note: nullable(data.AvailabilityMessage),
     okay_with_photos: data.PhotoConsent,
     t_shirt_size: data.TShirtSize,
@@ -80,7 +78,7 @@ function toPayload(data: RegistrationFormData): RegistrationPayload {
  */
 export async function submitRegistration(
   data: RegistrationFormData,
-): Promise<RegistrationResult> {
+): Promise<ActionResult> {
   let response: Response;
   try {
     response = await backendFetch("/registrations", {
@@ -113,67 +111,51 @@ export async function submitRegistration(
   };
 }
 
-/** Serializable result for admin reads — data on success, a message on failure. */
-export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
-
-/** Turn a fetch outcome into a user-facing error result (admin reads are authed). */
-function readError(status: number): string {
-  if (status === 401 || status === 403) return "You're not authorized to view this.";
-  if (status === 404) return "Not found.";
-  return "Something went wrong loading the data.";
-}
+/**
+ * Copy for the admin endpoints below, all `get_current_admin` on the backend.
+ * One set for all three: they fail the same ways, and none of them documents a
+ * status of its own.
+ */
+const ADMIN_COPY: ErrorCopy = {
+  forbidden: "You're not authorized to view this.",
+  byStatus: { 404: "Not found." },
+  fallback: "Something went wrong loading the data.",
+};
 
 /**
  * Server Action: fetch every registration's full details (Admin), following the
- * pagination on `GET /registrations` to the end. Used to export all rows at once.
- * Optionally filter by team status.
+ * pagination on `GET /registrations` to the end. Used to export all rows at once;
+ * the export narrows them to the board's filter itself, for the same reason
+ * `listTeams` takes no status.
  */
-export async function listAllRegistrations(
-  status?: RegistrationStatus,
-): Promise<FetchResult<RegistrationDetail[]>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
+export async function listAllRegistrations(): Promise<FetchResult<RegistrationDetail[]>> {
   const limit = 100;
   const all: RegistrationDetail[] = [];
 
-  try {
-    let page = 1;
-    let pages = 1;
-    do {
-      const q = status
-        ? `/registrations?page=${page}&limit=${limit}&status=${status}`
-        : `/registrations?page=${page}&limit=${limit}`;
-      const res = await backendFetch(q, { auth: true });
-      if (!res.ok) return { ok: false, error: readError(res.status) };
-      const body = (await res.json()) as PaginatedRegistrations;
-      all.push(...body.data);
-      pages = body.pages;
-      page += 1;
-    } while (page <= pages);
+  // Each page re-checks the role, but `getSession` is request-cached, so that
+  // is one `/auth/me` round-trip for the whole walk.
+  for (let page = 1, pages = 1; page <= pages; page++) {
+    const query = new URLSearchParams({ page: String(page), limit: String(limit) });
 
-    return { ok: true, data: all };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
+    const result = await authedJson<PaginatedRegistrations>(
+      ["admin"],
+      `/registrations?${query}`,
+      ADMIN_COPY,
+    );
+    if (!result.ok) return result;
+
+    all.push(...result.data.data);
+    pages = result.data.pages;
   }
+
+  return { ok: true, data: all };
 }
 
 /** Server Action: fetch a single registration's full details (Admin). */
 export async function getRegistration(
   id: string,
 ): Promise<FetchResult<RegistrationDetail>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch(`/registrations/${id}`, { auth: true });
-    if (!res.ok) return { ok: false, error: readError(res.status) };
-    return { ok: true, data: (await res.json()) as RegistrationDetail };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["admin"], `/registrations/${id}`, ADMIN_COPY);
 }
 
 /** Fields accepted by `PATCH /registrations/{id}`. */
@@ -192,19 +174,8 @@ export async function updateRegistration(
   id: string,
   patch: RegistrationPatch,
 ): Promise<FetchResult<RegistrationDetail>> {
-  const denied = await requireRole("admin");
-  if (denied) return denied;
-
-  try {
-    const res = await backendFetch(`/registrations/${id}`, {
-      auth: true,
-      method: "PATCH",
-      body: JSON.stringify(patch),
-    });
-    if (!res.ok) return { ok: false, error: readError(res.status) };
-    return { ok: true, data: (await res.json()) as RegistrationDetail };
-  } catch (e) {
-    if (e instanceof UnauthenticatedError) return { ok: false, error: "You're not signed in." };
-    return { ok: false, error: "Couldn't reach the server." };
-  }
+  return authedJson(["admin"], `/registrations/${id}`, ADMIN_COPY, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
 }

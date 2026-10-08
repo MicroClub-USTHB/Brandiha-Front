@@ -21,7 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { ChallengeSubmission } from "@/lib/api/challenge-types";
-import { cn } from "@/lib/utils";
 
 const TIMESTAMP = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
@@ -46,11 +45,11 @@ function SortableHeader({
       size="sm"
       // Pulled left so the label lines up with the plain headers and the cells
       // below, despite the button's own padding.
-      className={cn("-ml-2.5")}
+      className="-ml-2.5"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
     >
       {children}
-      <ArrowUpDown className={cn("size-3.5")} aria-hidden />
+      <ArrowUpDown className="size-3.5" aria-hidden />
     </Button>
   );
 }
@@ -64,7 +63,7 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
     accessorKey: "team_name",
     header: ({ column }) => <SortableHeader column={column}>Team</SortableHeader>,
     cell: ({ row }) => (
-      <span className={cn("block w-40 truncate font-medium")}>{row.original.team_name}</span>
+      <span className="block w-40 truncate font-medium">{row.original.team_name}</span>
     ),
   },
   {
@@ -76,12 +75,10 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
         href={row.original.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={cn(
-          "inline-flex w-full items-center gap-1.5 text-primary underline underline-offset-2 hover:no-underline",
-        )}
+        className="inline-flex w-full items-center gap-1.5 text-primary underline underline-offset-2 hover:no-underline"
       >
-        <span className={cn("truncate")}>{row.original.link}</span>
-        <ExternalLink className={cn("size-3.5 shrink-0")} aria-hidden />
+        <span className="truncate">{row.original.link}</span>
+        <ExternalLink className="size-3.5 shrink-0" aria-hidden />
       </a>
     ),
   },
@@ -93,7 +90,7 @@ const columns: ColumnDef<ChallengeSubmission>[] = [
     cell: ({ row }) => (
       <time
         dateTime={row.original.submitted_at}
-        className={cn("block w-56 tabular-nums text-muted-foreground")}
+        className="block w-56 tabular-nums text-muted-foreground"
       >
         {TIMESTAMP.format(new Date(row.original.submitted_at))}
       </time>
@@ -146,7 +143,7 @@ export function SubmissionsTable({ data }: { data: ChallengeSubmission[] }) {
           <TableRow>
             <TableCell
               colSpan={columns.length}
-              className={cn("h-24 text-center text-muted-foreground")}
+              className="h-24 text-center text-muted-foreground"
             >
               No submissions yet.
             </TableCell>

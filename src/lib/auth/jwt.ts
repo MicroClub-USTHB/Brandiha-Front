@@ -56,7 +56,8 @@ export function isTokenPair(value: unknown): value is TokenPair {
  * and the backend gates registrations and teams on `admin` alone. Guard with
  * `requireRole()` by naming every role that may pass, never by seniority.
  */
-export type Role = "admin" | "super_admin" | "alumni";
+export const ROLES = ["admin", "super_admin", "alumni"] as const;
+export type Role = (typeof ROLES)[number];
 
 /**
  * Why a page-level access check failed — selects which notice renders in the
@@ -90,7 +91,7 @@ export interface MeResponse {
 
 /** Narrow the token's `role` claim, which is untrusted JSON like any other. */
 function isRole(value: unknown): value is Role {
-  return value === "admin" || value === "super_admin" || value === "alumni";
+  return (ROLES as readonly unknown[]).includes(value);
 }
 
 /**

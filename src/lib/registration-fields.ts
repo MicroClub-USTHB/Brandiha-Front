@@ -1,3 +1,15 @@
+/** How a field renders; plain text input when absent. */
+export type RegistrationFieldType = "email" | "select" | "textarea" | "boolean";
+
+/** One field's config within a registration step. */
+export interface RegistrationFieldConfig {
+  label: string;
+  type?: RegistrationFieldType;
+  options?: readonly string[];
+  /** Span both columns. Textareas and checkboxes always do. */
+  fullWidth?: boolean;
+}
+
 export const REGISTRATION_STEPS = [
   {
     fields: {
@@ -50,6 +62,6 @@ export const REGISTRATION_STEPS = [
       AdditionalInfo: { label: "Anything to add?", type: "textarea" },
     },
   },
-] as const;
+] as const satisfies readonly { fields: Record<string, RegistrationFieldConfig> }[];
 
 export type RegistrationField = keyof (typeof REGISTRATION_STEPS)[number]["fields"];

@@ -92,26 +92,31 @@ src/
     cursor/                # Graffiti cursor, trail, splatter
     notice.tsx             # Shared full-page notice (404, error, access denial)
     form.tsx               # FormInput, FormTextarea, FormSelect, FormCheckbox wrappers
-    pop-up.tsx             # Popup + zustand store for success/error/warning
+    export-button.tsx      # "Export to CSV" button shared by the HR and submissions exports
+    pop-up.tsx             # Popup for success/error/warning (store in hooks/use-popup-store.ts)
+    site-header.tsx        # Top bar shell (logo, theme picker, paint drip) + SiteNav for both headers
+    theme-art/             # Theme-coloured art: one shared SVG in public/theme-art, coloured by CSS
     site-background.tsx    # Paint wall + decorations, behind every page
     splash-screen.tsx      # One-per-session intro animation
     theme-picker.tsx       # Theme picker UI
     theme-provider.tsx     # "use client" boundary for next-themes
   hooks/
-    use-registration-form.tsx  # Multi-step form logic (react-hook-form + Zod)
+    use-registration-form.ts   # Multi-step form logic (react-hook-form + Zod)
     use-graffiti-cursor.ts     # Pointer tracking for the graffiti cursor
+    use-is-client.ts           # false until mounted — gate client-only values (e.g. the theme)
+    use-popup-store.ts         # zustand store behind <Popup />
   lib/
     api/
       fetch.ts             # backendFetch — the ONE way to call the backend
+      authed.ts            # authedJson / authedAction — role check + authed call + error copy
+      result.ts            # FetchResult / ActionResult — what every Server Action returns
       base-url.ts          # API_BASE_URL (no server-only: the proxy shares it)
       auth.ts              # loginStaff / logout Server Actions
       registrations.ts     # Registration submit + admin reads/updates
       teams.ts             # Team reads, bulk status, delete
       challenges.ts        # Public challenge list, submission, staff detail
       voting.ts            # Alumni ballot read + vote, Borda tally, ballot audit
-      leaderboard.ts       # Public + admin leaderboard, freeze toggle
-      actions.ts           # Bulk score update Server Action
-      freezeAction.ts      # Freeze toggle Server Action
+      leaderboard.ts       # Public + admin leaderboard, score updates, freeze toggle
       challenge-window.ts  # upcoming / open / closed, shared server and client
       *-types.ts           # Backend response shapes
     auth/
@@ -121,11 +126,15 @@ src/
       home.ts              # HOME_BY_ROLE — where each role lands after login
     validators/            # Zod schemas (registration, login, submission)
     team-status.ts         # Majority team status + the delete rule
+    leaderboard-order.ts   # byScore — leaderboard rank order
+    challenge-id.ts        # parseChallengeId — the [challenge-id] route segment
+    score-draft.ts         # Score sheet input text <-> score (empty never saves as 0)
     csv.ts                 # CSV encoding (quoting + formula-injection guard)
     list-field.ts          # splitList — comma/newline free text to a list
     form-persistence.ts    # Expiry rule for the saved registration form
     registration-fields.ts # Step/field definitions for the registration form
     themes.ts              # Theme list (single source of truth)
+    departments.ts         # Per-department label, brand colour, card art, mascot
     agenda-data.ts         # Landing agenda content
     faq-data.ts            # Landing FAQ content
     utils.ts               # cn() helper
@@ -184,6 +193,12 @@ src/
 - **Server Actions return serializable results, never throw across the
   boundary** — `{ ok: true, data }` / `{ ok: false, error }`. The error string is
   user-facing copy, so map each status the backend documents to its own message.
+  The shapes live in `lib/api/result.ts`.
+- **Role-gated actions are built on `authedJson` / `authedAction`**
+  (`src/lib/api/authed.ts`): pass the roles, the path, and the copy for each
+  status, and they do the `requireRole` check, the authed call, and the error
+  mapping. That module is deliberately not `"use server"` — it takes an
+  arbitrary path, so exporting it as an action would expose every route.
 - `API Documentation.md` is the backend contract. Mirror it exactly; when the UI
   and the contract disagree, the contract wins.
 
@@ -218,8 +233,8 @@ src/
   conditional validation (AvailabilityMessage required when Availability === "Other").
 - Form wrappers (`FormInput`, `FormTextarea`, `FormSelect`, `FormCheckbox`) in
   `src/components/form.tsx` — use these instead of raw shadcn inputs.
-- Custom hook `src/hooks/use-registration-form.tsx` manages step state, field
-  visibility, and validation triggers.
+- Custom hook `src/hooks/use-registration-form.ts` manages step state, field
+  visibility, validation triggers, and saving/restoring the in-progress answers.
 - Form fields use PascalCase names (e.g. `FullName`, `Email`) to match the schema.
 - **`Tools` and `Links` are list fields.** They're free text split on commas and
   newlines by `splitList` (`src/lib/list-field.ts`) into the backend's `tools[]`

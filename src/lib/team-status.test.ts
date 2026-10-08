@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { canDeleteTeam, teamStatus } from "@/lib/team-status";
+import { canDeleteTeam, countTeamsByStatus, teamStatus } from "@/lib/team-status";
 import type { RegistrationStatus } from "@/lib/api/registration-types";
-import type { TeamMember } from "@/lib/api/team-types";
+import type { Team, TeamMember } from "@/lib/api/team-types";
 
 /** A member is only ever inspected for its status here. */
 function members(...statuses: RegistrationStatus[]): TeamMember[] {
@@ -63,5 +63,37 @@ describe("canDeleteTeam", () => {
     const mixed = members("rejected", "rejected", "rejected", "accepted", "accepted");
     expect(teamStatus(mixed)).toBe("rejected");
     expect(canDeleteTeam(mixed)).toBe(false);
+  });
+});
+
+describe("countTeamsByStatus", () => {
+  /** A team is only ever inspected for its members here. */
+  function team(...statuses: RegistrationStatus[]): Team {
+    return {
+      id: statuses.join("-"),
+      created_at: "",
+      updated_at: "",
+      name: "team",
+      secret_code: "code",
+      // The backend's own status, deliberately at odds with the members, so a
+      // count that read it instead of the majority would fail.
+      status: "rejected",
+      members: members(...statuses),
+    };
+  }
+
+  it("counts each team under its majority status", () => {
+    expect(
+      countTeamsByStatus([
+        team("accepted", "accepted", "pending"),
+        team("accepted"),
+        team("pending", "pending", "rejected"),
+        team(),
+      ]),
+    ).toEqual({ accepted: 2, pending: 2, rejected: 0 });
+  });
+
+  it("counts nothing for no teams", () => {
+    expect(countTeamsByStatus([])).toEqual({ accepted: 0, pending: 0, rejected: 0 });
   });
 });

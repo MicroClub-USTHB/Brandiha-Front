@@ -1,42 +1,35 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 
+import { authedAction, authedJson } from "@/lib/api/authed";
 import { backendFetch } from "@/lib/api/fetch";
+import type {
+  AdminLeaderboardResponse,
+  PublicLeaderboardEntry,
+  PublicLeaderboardResponse,
+  ScoreUpdate,
+} from "@/lib/api/leaderboard-types";
+import type { ActionResult, FetchResult } from "@/lib/api/result";
 
-export type PublicLeaderboardEntry = {
-  team_name: string;
-  total_score: number;
-};
-
-export type ChallengeScore = {
-  challenge_id: number;
-  challenge_title: string;
-  score: number;
-  submission_id: string;
-};
-
-export type AdminLeaderboardEntry = {
-  team_id: string;
-  team_name: string;
-  per_challenge: ChallengeScore[];
-  total_score: number;
-};
-
-export type PublicLeaderboardResponse = {
+type Board<Entry> = {
   frozen: boolean;
   frozen_at: string | null;
-  leaderboard: PublicLeaderboardEntry[];
+  leaderboard: Entry[];
 };
 
-export type AdminLeaderboardResponse = {
-  frozen: boolean;
-  frozen_at: string | null;
-  leaderboard: AdminLeaderboardEntry[];
-};
-
-export type BulkScoreUpdatePayload = {
-  submission_id: string;
-  score: number;
-};
+/**
+ * Both boards read the same way when the body is missing a field: empty and
+ * unfrozen, rather than crashing the page.
+ */
+function withBoardDefaults<Entry>(board: Partial<Board<Entry>>): Board<Entry> {
+  return {
+    frozen: board.frozen ?? false,
+    frozen_at: board.frozen_at ?? null,
+    leaderboard: board.leaderboard ?? [],
+  };
+}
 
 /**
  * Uncached on purpose, which also opts `/leaderboard` out of static generation.
@@ -55,17 +48,7 @@ export async function getGlobalLeaderboard(): Promise<PublicLeaderboardResponse>
       throw new Error(`http Error: ${response.status}`);
     }
 
-    const data: PublicLeaderboardResponse = await response.json();
-    
-    if (!data.leaderboard) {
-      return {
-        frozen: data.frozen ?? false,
-        frozen_at: data.frozen_at ?? null,
-        leaderboard: [],
-      };
-    }
-
-    return data;
+    return withBoardDefaults<PublicLeaderboardEntry>(await response.json());
   } catch (error) {
     // Next signals "this route can't be static" by throwing, and a bare catch
     // here swallows that signal along with real failures. Hand it back before
@@ -76,30 +59,54 @@ export async function getGlobalLeaderboard(): Promise<PublicLeaderboardResponse>
   }
 }
 
-export async function getAdminLeaderboard(): Promise<AdminLeaderboardResponse> {
-  const res = await backendFetch("/admin/leaderboard", { auth: true });
-  if (!res.ok) throw new Error("Error retrieving the admin leaderboard");
+// The admin board, scoring, and the freeze are all `get_current_super_admin`
+// on the backend.
 
-  const data: AdminLeaderboardResponse = await res.json();
-  if (!data.leaderboard) {
-    return {
-      frozen: data.frozen ?? false,
-      frozen_at: data.frozen_at ?? null,
-      leaderboard: [],
-    };
-  }
-
-  return data;
+/** Server Action: every team with its per-challenge scores (Super Admin). */
+export async function getAdminLeaderboard(): Promise<FetchResult<AdminLeaderboardResponse>> {
+  const result = await authedJson<AdminLeaderboardResponse>(["super_admin"], "/admin/leaderboard", {
+    forbidden: "You're not authorized to see the leaderboard.",
+    fallback: "Something went wrong loading the leaderboard.",
+  });
+  if (!result.ok) return result;
+  return { ok: true, data: withBoardDefaults(result.data) };
 }
 
-export async function toggleLeaderboardFreezeApi(): Promise<{ frozen: boolean }> {
-  const res = await backendFetch("/admin/freeze", {
-    auth: true,
-    method: "POST",
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to toggle freeze state: ${res.status}`);
-  }
+/**
+ * Server Action: score or rescore submissions in one request via
+ * `PATCH /admin/challenge-submissions` (Super Admin).
+ */
+export async function updateScores(scores: ScoreUpdate[]): Promise<ActionResult> {
+  return authedAction(
+    ["super_admin"],
+    "/admin/challenge-submissions",
+    {
+      forbidden: "You're not authorized to change scores.",
+      byStatus: { 422: "Some scores were rejected. Scores must be 0 or more." },
+      fallback: "Something went wrong saving the scores.",
+    },
+    { method: "PATCH", body: JSON.stringify(scores) },
+  );
+}
 
-  return res.json();
+/**
+ * Server Action: freeze or unfreeze the leaderboard (Super Admin). Returns the
+ * state it landed in, and refreshes both boards so neither shows the old one.
+ */
+export async function toggleLeaderboardFreeze(): Promise<FetchResult<{ frozen: boolean }>> {
+  const result = await authedJson<{ frozen: boolean }>(
+    ["super_admin"],
+    "/admin/freeze",
+    {
+      forbidden: "You're not authorized to freeze the leaderboard.",
+      fallback: "Something went wrong changing the leaderboard freeze.",
+    },
+    { method: "POST" },
+  );
+
+  if (result.ok) {
+    revalidatePath("/super-admin-leaderboard");
+    revalidatePath("/leaderboard");
+  }
+  return result;
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AdminLeaderboardEntry, ChallengeScore } from "@/lib/api/leaderboard";
-import bulkUpdateScores, { BulkScoreUpdatePayload } from "@/lib/api/actions";
+import type { AdminLeaderboardEntry, ChallengeScore, ScoreUpdate } from "@/lib/api/leaderboard-types";
+import { updateScores } from "@/lib/api/leaderboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { draftToScore, scoreToDraft } from "@/lib/score-draft";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -29,15 +31,12 @@ type ScoreDrafts = Record<number, string>;
 
 function buildDrafts(perChallenge: ChallengeScore[]): ScoreDrafts {
   return Object.fromEntries(
-    perChallenge.map((challenge) => [challenge.challenge_id, String(challenge.score)]),
+    perChallenge.map((challenge) => [challenge.challenge_id, scoreToDraft(challenge.score)]),
   );
 }
 
 function computeTotal(drafts: ScoreDrafts) {
-  return Object.values(drafts).reduce((sum, value) => {
-    const parsed = Number(value);
-    return sum + (Number.isFinite(parsed) && parsed >= 0 ? parsed : 0);
-  }, 0);
+  return Object.values(drafts).reduce((sum, draft) => sum + (draftToScore(draft, null) ?? 0), 0);
 }
 
 export function ChallengeScoreSheet({
@@ -62,10 +61,12 @@ export function ChallengeScoreSheet({
 
   const currentTotal = useMemo(() => computeTotal(drafts), [drafts]);
 
+  // Dirty only when saving would change a score, so a draft that reads the same
+  // (or is invalid and would be ignored) doesn't enable Save.
   const isDirty = team.per_challenge.some(
     (challenge) =>
       Boolean(challenge.submission_id) &&
-      String(challenge.score) !== drafts[challenge.challenge_id],
+      draftToScore(drafts[challenge.challenge_id] ?? "", challenge.score) !== challenge.score,
   );
 
   const updateScore = (challengeId: number, value: string) => {
@@ -77,18 +78,17 @@ export function ChallengeScoreSheet({
     setErrorMsg(null);
 
     try {
-      const payload: BulkScoreUpdatePayload[] = [];
+      const payload: ScoreUpdate[] = [];
 
       const updatedChallenges = team.per_challenge.map((challenge) => {
         if (!challenge.submission_id) {
           return challenge;
         }
 
-        const rawDraft = drafts[challenge.challenge_id];
-        const parsed = Number(rawDraft);
-        const newScore = Number.isFinite(parsed) && parsed >= 0 ? parsed : challenge.score;
+        const newScore = draftToScore(drafts[challenge.challenge_id] ?? "", challenge.score);
 
-        if (challenge.score !== newScore) {
+        // Null only when it was already null: nothing to send.
+        if (newScore !== null && newScore !== challenge.score) {
           payload.push({
             submission_id: challenge.submission_id,
             score: newScore,
@@ -103,16 +103,16 @@ export function ChallengeScoreSheet({
         return;
       }
 
-      const res = await bulkUpdateScores(payload);
+      const res = await updateScores(payload);
 
-      if (!res.success) {
-        throw new Error(res.error || "Failed to update challenge scores");
+      if (!res.ok) {
+        throw new Error(res.error);
       }
 
       const updatedTeam: AdminLeaderboardEntry = {
         ...team,
         per_challenge: updatedChallenges,
-        total_score: updatedChallenges.reduce((sum, c) => sum + c.score, 0),
+        total_score: updatedChallenges.reduce((sum, c) => sum + (c.score ?? 0), 0),
       };
 
       onSaveSuccess(updatedTeam);
@@ -166,9 +166,10 @@ export function ChallengeScoreSheet({
                 return (
                   <article
                     key={challenge.challenge_id}
-                    className={`rounded-xl border border-border p-4 shadow-sm ${
-                      hasSubmission ? "bg-card" : "bg-muted/40 opacity-75"
-                    }`}
+                    className={cn(
+                      "rounded-xl border border-border p-4 shadow-sm",
+                      hasSubmission ? "bg-card" : "bg-muted/40 opacity-75",
+                    )}
                   >
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -183,7 +184,7 @@ export function ChallengeScoreSheet({
                         </p>
                       </div>
                       <div className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                        Score: {challenge.score}
+                        Score: {challenge.score ?? "—"}
                       </div>
                     </div>
 
@@ -194,9 +195,9 @@ export function ChallengeScoreSheet({
                         min="0"
                         step="1"
                         disabled={loading || !hasSubmission}
-                        value={drafts[challenge.challenge_id] ?? String(challenge.score)}
+                        value={drafts[challenge.challenge_id] ?? scoreToDraft(challenge.score)}
                         onChange={(e) => updateScore(challenge.challenge_id, e.target.value)}
-                        placeholder={!hasSubmission ? "No submission available" : undefined}
+                        placeholder={hasSubmission ? "Not scored" : "No submission available"}
                       />
                     </label>
                     {!hasSubmission && (

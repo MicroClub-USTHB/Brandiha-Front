@@ -7,6 +7,7 @@ import {
 
 import { Section } from "@/components/landing/section";
 import { faqItems } from "@/lib/faq-data";
+import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 
@@ -66,14 +67,14 @@ export function Faq() {
               <AccordionItem
                 key={item.value}
                 value={item.value}
-                className={`relative rounded-lg border-2 border-white/30 bg-black/40 backdrop-blur-sm px-6 text-white transition-colors ${item.borderColor}`}
+                className={cn("relative rounded-lg border-2 border-white/30 bg-black/40 backdrop-blur-sm px-6 text-white transition-colors", item.borderColor)}
               >
                 <AccordionTrigger className="absolute inset-0 z-10 h-full w-full opacity-0 cursor-pointer hover:no-underline" />
 
                 <div className="pointer-events-none flex w-full items-center justify-between gap-4 py-4">
                   <div className="flex min-w-0 flex-1 items-center gap-6 text-left">
                     <span
-                      className={`shrink-0 font-montserrat text-3xl font-bold uppercase md:text-4xl ${item.color}`}
+                      className={cn("shrink-0 font-montserrat text-3xl font-bold uppercase md:text-4xl", item.color)}
                     >
                       {numberPrefix}.
                     </span>
@@ -88,12 +89,12 @@ export function Faq() {
                   </div>
 
                   <ChevronDown
-                    className={`h-8 w-8 shrink-0 stroke-[2] transition-transform duration-200 [details[open]_&]:rotate-180 [[data-state=open]_&]:rotate-180 ${item.color}`}
+                    className={cn("h-8 w-8 shrink-0 stroke-[2] transition-transform duration-200 [details[open]_&]:rotate-180 [[data-state=open]_&]:rotate-180", item.color)}
                   />
                 </div>
 
                 <AccordionContent className="flex pb-6 font-hand text-xl text-white/80 md:text-2xl">
-                  <div className={`flex shrink-0 items-start pr-6 ${item.iconOffset}`}>
+                  <div className={cn("flex shrink-0 items-start pr-6", item.iconOffset)}>
                     <div className="relative mt-1 h-10 w-10 shrink-0">
                       <Image
                         src={item.icon}

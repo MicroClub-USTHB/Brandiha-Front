@@ -1,5 +1,5 @@
 import type { RegistrationStatus } from "@/lib/api/registration-types";
-import type { TeamMember } from "@/lib/api/team-types";
+import type { Team, TeamMember } from "@/lib/api/team-types";
 
 /**
  * What the HR board means by a team's status and what it may do with one.
@@ -27,6 +27,18 @@ export function teamStatus(members: TeamMember[]): RegistrationStatus {
     (s) => counts[s] === max,
   );
   return leaders.length === 1 ? leaders[0] : "pending";
+}
+
+/**
+ * How many teams sit under each status, by `teamStatus` — so the board's stat
+ * cards count the same thing its badges show and its filter selects. The
+ * backend's `/teams/stats` counts its own per-team `status` instead, and the
+ * two disagree whenever that status isn't the majority.
+ */
+export function countTeamsByStatus(teams: Team[]): Record<RegistrationStatus, number> {
+  const counts: Record<RegistrationStatus, number> = { pending: 0, accepted: 0, rejected: 0 };
+  for (const t of teams) counts[teamStatus(t.members)]++;
+  return counts;
 }
 
 /**

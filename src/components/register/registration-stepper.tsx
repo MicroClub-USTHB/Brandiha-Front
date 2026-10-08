@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
+import type { Department } from "@/lib/api/registration-types";
+import { DEPARTMENTS } from "@/lib/departments";
 import { cn } from "@/lib/utils";
 
 type RegistrationStepperProps = {
@@ -7,20 +9,12 @@ type RegistrationStepperProps = {
   current: number;
 };
 
-/** One fixed brand hue per step, in visual order (orange → blue → pink → teal). */
-const STEP_COLORS = [
-  "bg-brand-marketing",
-  "bg-brand-communication",
-  "bg-brand-multimedia",
-  "bg-brand-design",
-];
-
-/** The side-view mascot that walks each connector, matching the left step's pillar. */
-const STEP_MASCOTS = [
-  "/mascot-marketing-side.png",
-  "/mascot-communication-side.png",
-  "/mascot-multimedia-side.png",
-];
+/**
+ * One department per step, in visual order (orange → blue → pink → teal). Each
+ * step takes its department's brand colour, and the connector after it its
+ * side-view mascot.
+ */
+const STEP_DEPARTMENTS: Department[] = ["marketing", "communication", "multimedia", "design"];
 
 export function RegistrationStepper({ count, current }: RegistrationStepperProps) {
   return (
@@ -29,7 +23,8 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
         const label = String(index + 1).padStart(2, "0");
         const reached = index <= current;
         const isComplete = index < current;
-        const color = STEP_COLORS[index % STEP_COLORS.length];
+        const { color, sideMascot } =
+          DEPARTMENTS[STEP_DEPARTMENTS[index % STEP_DEPARTMENTS.length]];
 
         return (
           <li
@@ -45,7 +40,8 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
                 // (drips pull it down), so push the whole splash down to seat
                 // the blob under the centered label; drips spill below the track.
                 <span
-                  className={cn("absolute inset-0 translate-y-3 splash-mask", color)}
+                  className="absolute inset-0 translate-y-3 splash-mask"
+                  style={{ backgroundColor: color }}
                   aria-hidden
                 />
               ) : (
@@ -80,16 +76,16 @@ export function RegistrationStepper({ count, current }: RegistrationStepperProps
                   <span
                     className={cn(
                       "block h-full rounded-full transition-[width] duration-300",
-                      color,
                       isComplete ? "w-full" : index === current ? "w-1/2" : "w-0"
                     )}
+                    style={{ backgroundColor: color }}
                   />
                 </span>
 
                 {/* mascot walks at the head of the fill toward the next step */}
-                {index <= current && (
+                {index <= current && sideMascot && (
                   <Image
-                    src={STEP_MASCOTS[index % STEP_MASCOTS.length]}
+                    src={sideMascot}
                     alt=""
                     width={68}
                     height={60}

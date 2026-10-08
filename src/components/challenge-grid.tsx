@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getPublicChallenges } from "@/lib/api/challenges";
 import { windowFor } from "@/lib/api/challenge-window";
-import ChallengeCard, { Department } from "@/components/challenge-card";
+import ChallengeCard from "@/components/challenge-card";
 
 /**
  * The challenge picker shared by `/submit` and `/submissions`: same list, same
@@ -32,7 +32,7 @@ export default async function ChallengeGrid({
     // height for itself, so the caller decides how much room there is. A route
     // with chrome above the grid — the staff dashboard's header — would
     // otherwise overflow by exactly that chrome's height.
-    <div className="flex flex-1 flex-col items-center justify-center">
+    <main className="flex flex-1 flex-col items-center justify-center">
       <h1 className="mb-4 font-heading text-4xl lg:text-8xl font-bold text-white">
         Challenges
       </h1>
@@ -51,7 +51,7 @@ export default async function ChallengeGrid({
 
             const card = (
               <ChallengeCard
-                department={challenge.department as Department}
+                department={challenge.department}
                 // Null for an upcoming challenge — the fetch withholds it, so
                 // the real title isn't in this page's payload to begin with.
                 title={challenge.title ?? undefined}
@@ -81,6 +81,6 @@ export default async function ChallengeGrid({
           })}
         </div>
       )}
-    </div>
+    </main>
   );
 }
